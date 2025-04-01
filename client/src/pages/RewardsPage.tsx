@@ -5,6 +5,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { useLocation } from "wouter";
 import RewardsCard from "@/components/loyalty/RewardsCard";
+import { useLoyalty } from "@/hooks/useLoyalty";
 
 const RewardsPage = () => {
   const { user, isAuthenticated } = useAuth();
@@ -30,54 +31,40 @@ const RewardsPage = () => {
     <main className="flex-grow container mx-auto px-4 py-6">
       <h2 className="font-heading font-bold text-xl mb-6">Loyalty Rewards</h2>
       
-      <Card className="mb-6">
-        <CardContent className="pt-6">
-          <div className="flex items-center justify-between">
-            <div>
-              <h3 className="font-heading font-semibold text-lg">Your Points</h3>
-              <p className="text-gray-600">Earn 1 point for every $1 spent</p>
-            </div>
-            <div className="flex items-center">
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                className="h-6 w-6 mr-2 text-accent"
-                viewBox="0 0 20 20"
-                fill="currentColor"
-              >
-                <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
-              </svg>
-              <span className="font-heading font-bold text-2xl">
-                {user?.loyaltyPoints || 0}
-              </span>
-            </div>
+      {/* New RewardsCard component */}
+      <RewardsCard />
+      
+      {/* Show available rewards from the API */}
+      {rewards && rewards.length > 0 && (
+        <div className="mt-8">
+          <h3 className="font-heading font-semibold text-lg mb-4">More Rewards</h3>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            {rewards.map((reward) => (
+              <Card key={reward.id} className="overflow-hidden">
+                <CardContent className="p-6">
+                  <div className="flex justify-between items-center">
+                    <div>
+                      <h4 className="font-medium mb-1">{reward.name}</h4>
+                      <p className="text-sm text-gray-600">{reward.description}</p>
+                    </div>
+                    <div className="text-right">
+                      <div className="text-sm font-medium text-amber-700">
+                        {reward.pointsRequired} points
+                      </div>
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        className="mt-2"
+                        disabled={!user || user.loyaltyPoints < reward.pointsRequired}
+                      >
+                        Redeem
+                      </Button>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            ))}
           </div>
-        </CardContent>
-      </Card>
-      
-      <h3 className="font-heading font-semibold text-lg mb-4">Available Rewards</h3>
-      
-      {isLoading ? (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {[1, 2, 3].map((i) => (
-            <div
-              key={i}
-              className="h-40 bg-gray-200 rounded-lg animate-pulse"
-            ></div>
-          ))}
-        </div>
-      ) : !rewards || rewards.length === 0 ? (
-        <Card>
-          <CardContent className="pt-6">
-            <div className="text-center py-6">
-              <p className="text-gray-500">No rewards available at the moment</p>
-            </div>
-          </CardContent>
-        </Card>
-      ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {rewards.map((reward) => (
-            <RewardsCard key={reward.id} reward={reward} />
-          ))}
         </div>
       )}
     </main>

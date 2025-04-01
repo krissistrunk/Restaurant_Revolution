@@ -153,3 +153,17 @@ export interface RestaurantContextType {
   restaurant: Restaurant | null;
   isLoading: boolean;
 }
+
+export interface QueueEntry {
+  id: number;
+  userId: number;
+  restaurantId: number;
+  partySize: number;
+  status: 'waiting' | 'ready' | 'completed' | 'cancelled';
+  position: number;
+  estimatedWaitTime: number;
+  joinedAt: string;
+  notes?: string | null;
+  phone?: string | null;
+  notificationSent?: boolean;
+}

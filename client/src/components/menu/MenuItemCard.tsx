@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { MenuItem } from "@/types";
 import { useCart } from "@/hooks/useCart";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog";
@@ -7,6 +7,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
 import { useLocation } from "wouter";
+import { motion } from "framer-motion";
 
 interface MenuItemCardProps {
   menuItem: MenuItem;
@@ -58,52 +59,94 @@ const MenuItemCard = ({ menuItem }: MenuItemCardProps) => {
 
   return (
     <>
-      <div 
-        className="bg-white rounded-lg shadow p-4 flex cursor-pointer" 
+      <motion.div 
+        className="bg-white rounded-lg shadow p-4 flex cursor-pointer relative overflow-hidden" 
         onClick={handleShowDetails}
+        whileHover={{ 
+          scale: 1.02,
+          boxShadow: "0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1)"
+        }}
+        transition={{ 
+          type: "spring", 
+          stiffness: 400, 
+          damping: 17
+        }}
       >
-        <img
+        {/* Add a subtle gradient overlay on hover */}
+        <motion.div 
+          className="absolute inset-0 bg-gradient-to-r from-primary/10 to-transparent opacity-0 z-0"
+          initial={{ opacity: 0 }}
+          whileHover={{ opacity: 1 }}
+          transition={{ duration: 0.3 }}
+        />
+
+        <motion.img
           src={menuItem.imageUrl}
           alt={menuItem.name}
-          className="w-24 h-24 object-cover rounded-lg"
+          className="w-24 h-24 object-cover rounded-lg relative z-10"
+          whileHover={{ scale: 1.05 }}
+          transition={{ duration: 0.2 }}
         />
-        <div className="ml-4 flex-grow">
+        
+        <div className="ml-4 flex-grow relative z-10">
           <div className="flex justify-between">
-            <h4 className="font-heading font-semibold">{menuItem.name}</h4>
+            <motion.h4 
+              className="font-heading font-semibold"
+              whileHover={{ color: "var(--primary)" }}
+            >
+              {menuItem.name}
+            </motion.h4>
             <span className="font-accent font-semibold text-primary">
               ${menuItem.price.toFixed(2)}
             </span>
           </div>
+          
           <p className="text-sm text-gray-600 mt-1">{menuItem.description}</p>
+          
           <div className="flex justify-between items-center mt-2">
-            <div className="flex space-x-1">
+            <div className="flex flex-wrap gap-1">
               {menuItem.isVegetarian && (
-                <span className="bg-green-100 text-green-800 text-xs px-2 py-1 rounded">
+                <motion.span 
+                  className="bg-green-100 text-green-800 text-xs px-2 py-1 rounded"
+                  whileHover={{ scale: 1.05, backgroundColor: "rgb(187, 247, 208)" }}
+                >
                   Vegetarian
-                </span>
+                </motion.span>
               )}
               {menuItem.isGlutenFree && (
-                <span className="bg-yellow-100 text-yellow-800 text-xs px-2 py-1 rounded">
+                <motion.span 
+                  className="bg-yellow-100 text-yellow-800 text-xs px-2 py-1 rounded"
+                  whileHover={{ scale: 1.05, backgroundColor: "rgb(254, 240, 138)" }}
+                >
                   Gluten Free
-                </span>
+                </motion.span>
               )}
               {menuItem.isSeafood && (
-                <span className="bg-red-100 text-red-800 text-xs px-2 py-1 rounded">
+                <motion.span 
+                  className="bg-red-100 text-red-800 text-xs px-2 py-1 rounded"
+                  whileHover={{ scale: 1.05, backgroundColor: "rgb(254, 205, 211)" }}
+                >
                   Seafood
-                </span>
+                </motion.span>
               )}
               {menuItem.isPopular && (
-                <span className="bg-blue-100 text-blue-800 text-xs px-2 py-1 rounded">
+                <motion.span 
+                  className="bg-blue-100 text-blue-800 text-xs px-2 py-1 rounded"
+                  whileHover={{ scale: 1.05, backgroundColor: "rgb(191, 219, 254)" }}
+                >
                   Popular
-                </span>
+                </motion.span>
               )}
             </div>
-            <button
-              className="bg-primary text-white rounded-full p-1 z-10"
+            
+            <motion.button
+              className="bg-primary text-white rounded-full p-1 z-10 relative"
               onClick={(e) => {
                 e.stopPropagation();
                 handleAddToCart();
               }}
+              whileHover={{ scale: 1.1 }}
+              whileTap={{ scale: 0.95 }}
             >
               <svg
                 xmlns="http://www.w3.org/2000/svg"
@@ -117,10 +160,10 @@ const MenuItemCard = ({ menuItem }: MenuItemCardProps) => {
                   clipRule="evenodd"
                 />
               </svg>
-            </button>
+            </motion.button>
           </div>
         </div>
-      </div>
+      </motion.div>
 
       {/* Customization Dialog */}
       <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>

@@ -21,6 +21,7 @@ import AppWrapper from "@/components/AppWrapper";
 import { AuthProvider } from "@/context/AuthContext";
 import { CartProvider } from "@/context/CartContext";
 import { RestaurantProvider } from "@/context/RestaurantContext";
+import { LoyaltyProvider } from "@/context/LoyaltyContext";
 
 function Router() {
   return (
@@ -52,10 +53,12 @@ function App() {
       <RestaurantProvider>
         <AuthProvider>
           <CartProvider>
-            <AppWrapper>
-              <Router />
-              <Toaster />
-            </AppWrapper>
+            <LoyaltyProvider>
+              <AppWrapper>
+                <Router />
+                <Toaster />
+              </AppWrapper>
+            </LoyaltyProvider>
           </CartProvider>
         </AuthProvider>
       </RestaurantProvider>
