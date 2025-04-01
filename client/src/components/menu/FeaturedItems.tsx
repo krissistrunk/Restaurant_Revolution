@@ -1,6 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
 import { MenuItem } from "@/types";
 import { useCart } from "@/hooks/useCart";
+import { useState } from "react";
 
 const FeaturedItems = () => {
   const { data: featuredItems, isLoading, error } = useQuery<MenuItem[]>({
@@ -8,12 +9,21 @@ const FeaturedItems = () => {
   });
 
   const { addToCart } = useCart();
+  const [showDetails, setShowDetails] = useState<MenuItem | null>(null);
 
   const handleAddToCart = (item: MenuItem) => {
     addToCart({
       menuItem: item,
       quantity: 1,
     });
+  };
+
+  const handleShowDetails = (item: MenuItem) => {
+    setShowDetails(item);
+  };
+
+  const handleCloseModal = () => {
+    setShowDetails(null);
   };
 
   if (isLoading) {
@@ -44,7 +54,8 @@ const FeaturedItems = () => {
           {featuredItems.map((item) => (
             <div
               key={item.id}
-              className="flex-shrink-0 w-64 rounded-lg overflow-hidden shadow-lg bg-white"
+              className="flex-shrink-0 w-64 rounded-lg overflow-hidden shadow-lg bg-white cursor-pointer"
+              onClick={() => handleShowDetails(item)}
             >
               <div className="relative">
                 <img
@@ -88,6 +99,15 @@ const FeaturedItems = () => {
           ))}
         </div>
       </div>
+      {showDetails && (
+        <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50">
+          <div className="bg-white rounded shadow p-6 w-96">
+            <h2 className="text-xl font-bold mb-2">{showDetails.name}</h2>
+            <p>{showDetails.description}</p>
+            <button onClick={handleCloseModal}>Close</button>
+          </div>
+        </div>
+      )}
     </section>
   );
 };
