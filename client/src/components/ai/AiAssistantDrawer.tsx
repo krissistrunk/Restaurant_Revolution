@@ -7,14 +7,12 @@ import {
   Sheet, 
   SheetContent, 
   SheetHeader,
-  SheetTitle, 
-  SheetTrigger 
+  SheetTitle
 } from "@/components/ui/sheet";
-import { MessageSquareIcon, Sparkles, X } from "lucide-react";
-import { Badge } from "@/components/ui/badge";
+import { ChevronLeft, ChevronRight, Sparkles, X } from "lucide-react";
 
 const AiAssistantDrawer = () => {
-  const { isAuthenticated, user } = useAuth();
+  const { isAuthenticated } = useAuth();
   const { currentConversation, startNewConversation } = useAiAssistant();
   const [open, setOpen] = useState(false);
   
@@ -27,42 +25,52 @@ const AiAssistantDrawer = () => {
   
   return (
     <>
-      {/* Fixed button in bottom right corner without SheetTrigger */}
-      <div className="fixed bottom-20 right-4 z-50 flex flex-col items-end gap-2">
+      {/* Fixed tab on right side of the screen */}
+      <div 
+        className={`fixed right-0 top-1/3 z-50 transition-transform duration-300 ${open ? 'translate-x-full' : 'translate-x-0'}`}
+      >
         <Button 
-          size="icon" 
-          className="h-12 w-12 rounded-full shadow-lg"
+          variant="default"
+          className="h-36 rounded-l-xl rounded-r-none py-3 px-2 shadow-xl flex flex-col justify-center items-center gap-2 border-r-0 border-2"
           onClick={() => setOpen(true)}
         >
-          <MessageSquareIcon className="h-6 w-6" />
+          <Sparkles className="h-4 w-4 mb-1" />
+          <span className="rotate-90 whitespace-nowrap text-sm font-medium">AI Assistant</span>
+          <ChevronLeft className="h-4 w-4 mt-2" />
         </Button>
-        
-        {isAuthenticated && (
-          <Badge variant="outline" className="bg-background">
-            <Sparkles className="h-3 w-3 text-primary mr-1" />
-            <span className="text-xs">AI Assistant</span>
-          </Badge>
-        )}
       </div>
       
       {/* Drawer with chat interface */}
       <Sheet open={open} onOpenChange={setOpen}>
         <SheetContent 
           side="right" 
-          className="sm:max-w-md md:max-w-lg w-[90vw] p-0 flex flex-col h-full"
+          className="sm:max-w-md md:max-w-lg w-[90vw] p-0 flex flex-col h-[60vh] mt-[20vh]"
         >
           <SheetHeader className="px-4 py-3 border-b flex-row items-center justify-between">
             <SheetTitle className="flex items-center gap-2">
               <Sparkles className="h-5 w-5 text-primary" />
               Restaurant Assistant
             </SheetTitle>
-            <Button 
-              variant="ghost" 
-              size="icon" 
-              onClick={() => setOpen(false)}
-            >
-              <X className="h-4 w-4" />
-            </Button>
+
+            <div className="flex items-center gap-2">
+              <Button 
+                variant="ghost" 
+                size="icon" 
+                className="h-8 w-8"
+                onClick={() => setOpen(false)}
+              >
+                <ChevronRight className="h-4 w-4" />
+              </Button>
+              
+              <Button 
+                variant="ghost" 
+                size="icon"
+                className="h-8 w-8" 
+                onClick={() => setOpen(false)}
+              >
+                <X className="h-4 w-4" />
+              </Button>
+            </div>
           </SheetHeader>
           
           <div className="flex-1 overflow-hidden">
