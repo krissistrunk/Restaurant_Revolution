@@ -3,7 +3,6 @@ import { useAiAssistant } from "@/hooks/useAiAssistant";
 import { useAuth } from "@/hooks/useAuth";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
 import { 
   Card, 
   CardContent, 
@@ -17,11 +16,16 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { ChevronDown, Send, Sparkles } from "lucide-react";
+import { ChevronDown, PlusCircle, Send, Sparkles } from "lucide-react";
 import ChatBubble from "./ChatBubble";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { cn } from "@/lib/utils";
 
-const ChatInterface = () => {
+interface ChatInterfaceProps {
+  embedded?: boolean;
+}
+
+const ChatInterface = ({ embedded = false }: ChatInterfaceProps) => {
   const { isAuthenticated } = useAuth();
   const { 
     currentConversation, 
@@ -33,7 +37,6 @@ const ChatInterface = () => {
   
   const [inputValue, setInputValue] = useState("");
   const messagesEndRef = useRef<HTMLDivElement>(null);
-  const [isTyping, setIsTyping] = useState(false);
   
   useEffect(() => {
     // Start a new conversation if none exists
@@ -64,16 +67,117 @@ const ChatInterface = () => {
     await getRecommendations(type);
   };
   
+  // Content when user is not authenticated
   if (!isAuthenticated) {
     return (
-      <Card className="w-full max-w-xl mx-auto">
-        <CardContent className="p-6 text-center">
-          <p>Please log in to use the AI Assistant.</p>
-        </CardContent>
-      </Card>
+      <div className={cn(
+        "flex flex-col justify-center items-center h-full",
+        embedded ? "p-4" : "w-full max-w-xl mx-auto"
+      )}>
+        <p className="text-center text-muted-foreground py-8">
+          Please log in to use the AI Assistant.
+        </p>
+        <Button
+          variant="outline"
+          onClick={() => window.location.href = "/login"}
+        >
+          Log In
+        </Button>
+      </div>
     );
   }
   
+  // Chat content wrapper
+  const ChatContent = () => (
+    <>
+      <div className={embedded ? "p-2" : "p-4"}>
+        {currentConversation?.messages.map((message, index) => (
+          <ChatBubble key={index} message={message} />
+        ))}
+        
+        {isSending && (
+          <div className="flex justify-start mt-4">
+            <div className="bg-muted p-3 rounded-lg">
+              <div className="flex space-x-2">
+                <div className="w-2 h-2 rounded-full bg-muted-foreground/40 animate-bounce" style={{ animationDelay: "0s" }}></div>
+                <div className="w-2 h-2 rounded-full bg-muted-foreground/40 animate-bounce" style={{ animationDelay: "0.2s" }}></div>
+                <div className="w-2 h-2 rounded-full bg-muted-foreground/40 animate-bounce" style={{ animationDelay: "0.4s" }}></div>
+              </div>
+            </div>
+          </div>
+        )}
+        
+        <div ref={messagesEndRef} />
+      </div>
+    </>
+  );
+  
+  // Chat input form
+  const ChatInputForm = () => (
+    <form onSubmit={handleSubmit} className="w-full flex gap-2">
+      <Input
+        className="flex-1"
+        placeholder="Type your message..."
+        value={inputValue}
+        onChange={(e) => setInputValue(e.target.value)}
+        disabled={isSending}
+      />
+      <Button type="submit" disabled={isSending || !inputValue.trim()}>
+        <Send className="h-4 w-4" />
+        <span className="sr-only">Send message</span>
+      </Button>
+    </form>
+  );
+  
+  // When embedded in drawer, use a different layout
+  if (embedded) {
+    return (
+      <div className="flex flex-col h-full">
+        <div className="p-3 border-b flex items-center justify-between">
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="outline" size="sm">
+                Quick Actions <ChevronDown className="h-4 w-4 ml-1" />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="start">
+              <DropdownMenuItem onClick={() => handleGetRecommendations("menu")}>
+                Menu Recommendations
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={() => handleGetRecommendations("reservation")}>
+                Make a Reservation
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={() => handleGetRecommendations("order")}>
+                Place an Order
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
+          
+          {currentConversation && (
+            <Button
+              variant="ghost" 
+              size="sm"
+              onClick={() => startNewConversation()}
+              className="text-xs"
+            >
+              <PlusCircle className="h-3.5 w-3.5 mr-1" />
+              New Chat
+            </Button>
+          )}
+        </div>
+        
+        <ScrollArea className="flex-1">
+          <ChatContent />
+        </ScrollArea>
+        
+        <div className="p-3 border-t">
+          <ChatInputForm />
+        </div>
+      </div>
+    );
+  }
+  
+  // Standalone mode (for the dedicated page)
   return (
     <Card className="w-full max-w-xl mx-auto">
       <CardHeader className="p-4 border-b">
@@ -104,42 +208,14 @@ const ChatInterface = () => {
         </CardTitle>
       </CardHeader>
       
-      <ScrollArea className="h-[400px] p-4">
-        <CardContent className="p-4">
-          {currentConversation?.messages.map((message, index) => (
-            <ChatBubble key={index} message={message} />
-          ))}
-          
-          {isSending && (
-            <div className="flex justify-start mt-4">
-              <div className="bg-muted p-3 rounded-lg">
-                <div className="flex space-x-2">
-                  <div className="w-2 h-2 rounded-full bg-muted-foreground/40 animate-bounce" style={{ animationDelay: "0s" }}></div>
-                  <div className="w-2 h-2 rounded-full bg-muted-foreground/40 animate-bounce" style={{ animationDelay: "0.2s" }}></div>
-                  <div className="w-2 h-2 rounded-full bg-muted-foreground/40 animate-bounce" style={{ animationDelay: "0.4s" }}></div>
-                </div>
-              </div>
-            </div>
-          )}
-          
-          <div ref={messagesEndRef} />
+      <ScrollArea className="h-[400px]">
+        <CardContent>
+          <ChatContent />
         </CardContent>
       </ScrollArea>
       
       <CardFooter className="p-4 border-t">
-        <form onSubmit={handleSubmit} className="w-full flex gap-2">
-          <Input
-            className="flex-1"
-            placeholder="Type your message..."
-            value={inputValue}
-            onChange={(e) => setInputValue(e.target.value)}
-            disabled={isSending}
-          />
-          <Button type="submit" disabled={isSending || !inputValue.trim()}>
-            <Send className="h-4 w-4" />
-            <span className="sr-only">Send message</span>
-          </Button>
-        </form>
+        <ChatInputForm />
       </CardFooter>
     </Card>
   );

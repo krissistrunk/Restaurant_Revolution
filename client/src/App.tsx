@@ -11,13 +11,13 @@ import RewardsPage from "@/pages/RewardsPage";
 import InfoPage from "@/pages/InfoPage";
 import LoginPage from "@/pages/LoginPage";
 import RegisterPage from "@/pages/RegisterPage";
-import AiAssistantPage from "@/pages/AiAssistantPage";
 
 import Header from "@/components/Header";
 import Navigation from "@/components/Navigation";
 import CartButton from "@/components/cart/CartButton";
 import CartModal from "@/components/cart/CartModal";
 import AppWrapper from "@/components/AppWrapper";
+import AiAssistantDrawer from "@/components/ai/AiAssistantDrawer";
 
 import { AuthProvider } from "@/context/AuthContext";
 import { CartProvider } from "@/context/CartContext";
@@ -38,7 +38,6 @@ function Router() {
         <Route path="/order" component={OrderPage} />
         <Route path="/rewards" component={RewardsPage} />
         <Route path="/info" component={InfoPage} />
-        <Route path="/assistant" component={AiAssistantPage} />
         <Route path="/login" component={LoginPage} />
         <Route path="/register" component={RegisterPage} />
         <Route component={NotFound} />
@@ -46,6 +45,7 @@ function Router() {
       
       <CartButton />
       <CartModal />
+      <AiAssistantDrawer />
     </div>
   );
 }
