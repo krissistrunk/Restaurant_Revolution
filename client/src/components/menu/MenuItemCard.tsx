@@ -244,8 +244,16 @@ const MenuItemCard = ({ menuItem }: MenuItemCardProps) => {
       {/* Details Dialog */}
       <Dialog open={isDetailModalOpen} onOpenChange={setIsDetailModalOpen}>
         <DialogContent className="max-w-3xl">
-          <DialogHeader>
-            <DialogTitle className="text-xl">{menuItem.name}</DialogTitle>
+          <DialogHeader className="flex items-center justify-between">
+            <button 
+              onClick={() => setIsDetailModalOpen(false)}
+              className="absolute left-4 top-4 p-2 hover:bg-gray-100 rounded-full"
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M19 12H5M12 19l-7-7 7-7"/>
+              </svg>
+            </button>
+            <DialogTitle className="text-xl ml-8">{menuItem.name}</DialogTitle>
             <DialogDescription className="text-sm text-gray-500">
               {menuItem.categoryId && `Category ID: ${menuItem.categoryId}`}
             </DialogDescription>
