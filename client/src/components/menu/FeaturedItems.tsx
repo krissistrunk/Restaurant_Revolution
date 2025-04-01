@@ -2,6 +2,8 @@ import { useQuery } from "@tanstack/react-query";
 import { MenuItem } from "@/types";
 import { useCart } from "@/hooks/useCart";
 import { useState } from "react";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
+import { Button } from "@/components/ui/button";
 
 const FeaturedItems = () => {
   const { data: featuredItems, isLoading, error } = useQuery<MenuItem[]>({
@@ -99,15 +101,91 @@ const FeaturedItems = () => {
           ))}
         </div>
       </div>
-      {showDetails && (
-        <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50">
-          <div className="bg-white rounded shadow p-6 w-96">
-            <h2 className="text-xl font-bold mb-2">{showDetails.name}</h2>
-            <p>{showDetails.description}</p>
-            <button onClick={handleCloseModal}>Close</button>
+      <Dialog open={!!showDetails} onOpenChange={() => setShowDetails(null)}>
+        <DialogContent className="max-w-3xl">
+          <DialogHeader className="flex items-center justify-between">
+            <button 
+              onClick={() => setShowDetails(null)}
+              className="absolute left-4 top-4 p-2 hover:bg-gray-100 rounded-full"
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M19 12H5M12 19l-7-7 7-7"/>
+              </svg>
+            </button>
+            <DialogTitle className="text-xl ml-8">{showDetails?.name}</DialogTitle>
+          </DialogHeader>
+          
+          <div className="flex flex-col md:flex-row gap-6">
+            <div className="w-full md:w-1/2">
+              <img
+                src={showDetails?.imageUrl}
+                alt={showDetails?.name}
+                className="w-full h-auto rounded-lg object-cover"
+              />
+            </div>
+            
+            <div className="w-full md:w-1/2 space-y-4">
+              <div>
+                <h3 className="font-medium text-lg">Description</h3>
+                <p className="text-gray-600">{showDetails?.description}</p>
+              </div>
+              
+              <div>
+                <h3 className="font-medium text-lg">Price</h3>
+                <p className="text-xl font-accent text-primary">${showDetails?.price.toFixed(2)}</p>
+              </div>
+              
+              {showDetails?.allergens && showDetails.allergens.length > 0 && (
+                <div>
+                  <h3 className="font-medium text-lg">Allergens</h3>
+                  <div className="flex flex-wrap gap-2 mt-1">
+                    {showDetails.allergens.map((allergen, index) => (
+                      <span key={index} className="bg-red-50 text-red-700 px-2 py-1 rounded text-sm">
+                        {allergen}
+                      </span>
+                    ))}
+                  </div>
+                </div>
+              )}
+              
+              <div>
+                <h3 className="font-medium text-lg">Dietary Information</h3>
+                <div className="flex flex-wrap gap-2 mt-1">
+                  {showDetails?.isVegetarian && (
+                    <span className="bg-green-100 text-green-800 px-2 py-1 rounded text-sm">
+                      Vegetarian
+                    </span>
+                  )}
+                  {showDetails?.isGlutenFree && (
+                    <span className="bg-yellow-100 text-yellow-800 px-2 py-1 rounded text-sm">
+                      Gluten Free
+                    </span>
+                  )}
+                  {showDetails?.isSeafood && (
+                    <span className="bg-red-100 text-red-800 px-2 py-1 rounded text-sm">
+                      Contains Seafood
+                    </span>
+                  )}
+                  {!showDetails?.isVegetarian && !showDetails?.isGlutenFree && !showDetails?.isSeafood && (
+                    <span className="bg-gray-100 text-gray-800 px-2 py-1 rounded text-sm">
+                      No specific dietary information
+                    </span>
+                  )}
+                </div>
+              </div>
+            </div>
           </div>
-        </div>
-      )}
+          
+          <DialogFooter className="flex space-x-2">
+            <Button variant="outline" onClick={() => setShowDetails(null)}>
+              Close
+            </Button>
+            <Button onClick={() => handleAddToCart(showDetails!)}>
+              Add to Cart - ${showDetails?.price.toFixed(2)}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </section>
   );
 };
