@@ -16,6 +16,7 @@ import Header from "@/components/Header";
 import Navigation from "@/components/Navigation";
 import CartButton from "@/components/cart/CartButton";
 import CartModal from "@/components/cart/CartModal";
+import AppWrapper from "@/components/AppWrapper";
 
 import { AuthProvider } from "@/context/AuthContext";
 import { CartProvider } from "@/context/CartContext";
@@ -51,8 +52,10 @@ function App() {
       <RestaurantProvider>
         <AuthProvider>
           <CartProvider>
-            <Router />
-            <Toaster />
+            <AppWrapper>
+              <Router />
+              <Toaster />
+            </AppWrapper>
           </CartProvider>
         </AuthProvider>
       </RestaurantProvider>

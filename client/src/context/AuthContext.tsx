@@ -11,6 +11,7 @@ interface AuthProviderProps {
 export const AuthProvider = ({ children }: AuthProviderProps) => {
   const [user, setUser] = useState<User | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [showWelcomeAnimation, setShowWelcomeAnimation] = useState(false);
   
   useEffect(() => {
     // Check if we have a user ID stored in local storage
@@ -49,6 +50,9 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
       setUser(userData);
       localStorage.setItem("userId", userData.id.toString());
       
+      // Show welcome animation after successful login
+      setShowWelcomeAnimation(true);
+      
       return userData;
     } catch (error) {
       throw error;
@@ -79,6 +83,11 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
   const logout = () => {
     setUser(null);
     localStorage.removeItem("userId");
+    setShowWelcomeAnimation(false);
+  };
+  
+  const hideWelcomeAnimation = () => {
+    setShowWelcomeAnimation(false);
   };
   
   const value: AuthContextType = {
@@ -88,6 +97,8 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
     register,
     isAuthenticated: !!user,
     isLoading,
+    showWelcomeAnimation,
+    hideWelcomeAnimation
   };
   
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

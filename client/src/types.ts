@@ -130,6 +130,8 @@ export interface AuthContextType {
   }) => Promise<User>;
   isAuthenticated: boolean;
   isLoading: boolean;
+  showWelcomeAnimation: boolean;
+  hideWelcomeAnimation: () => void;
 }
 
 export interface CartContextType {
