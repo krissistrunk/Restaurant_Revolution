@@ -3,7 +3,8 @@ import { createServer, type Server } from "http";
 import { storage } from "./storage";
 import { 
   insertUserSchema, insertReservationSchema, insertOrderSchema, 
-  insertOrderItemSchema
+  insertOrderItemSchema, insertQueueEntrySchema, insertAiConversationSchema,
+  insertUserPreferenceSchema, insertUserItemInteractionSchema
 } from "@shared/schema";
 import { z } from "zod";
 
@@ -310,6 +311,292 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
   
+  // Virtual Queue routes
+  app.get("/api/queue-entries", async (req: Request, res: Response) => {
+    try {
+      const restaurantId = 1; // Default restaurant ID
+      
+      const queueEntries = await storage.getQueueEntries(restaurantId);
+      return res.json(queueEntries);
+    } catch (error) {
+      console.error("Error fetching queue entries:", error);
+      return res.status(500).json({ message: "Internal server error" });
+    }
+  });
+  
+  app.get("/api/user-queue-entry", async (req: Request, res: Response) => {
+    try {
+      const userId = parseInt(req.query.userId as string);
+      const restaurantId = 1; // Default restaurant ID
+      
+      if (!userId) {
+        return res.status(400).json({ message: "User ID is required" });
+      }
+      
+      const queueEntry = await storage.getUserQueueEntry(userId, restaurantId);
+      return res.json(queueEntry || null);
+    } catch (error) {
+      console.error("Error fetching user queue entry:", error);
+      return res.status(500).json({ message: "Internal server error" });
+    }
+  });
+  
+  app.post("/api/queue-entries", async (req: Request, res: Response) => {
+    try {
+      const queueEntryInput = insertQueueEntrySchema.parse(req.body);
+      
+      // Check if user is already in queue
+      const existingEntry = await storage.getUserQueueEntry(
+        queueEntryInput.userId, 
+        queueEntryInput.restaurantId
+      );
+      
+      if (existingEntry) {
+        return res.status(400).json({ 
+          message: "User is already in queue", 
+          queueEntry: existingEntry 
+        });
+      }
+      
+      // Get estimated wait time
+      const estimatedWaitTime = await storage.getQueueEstimatedWaitTime(
+        queueEntryInput.restaurantId, 
+        queueEntryInput.partySize
+      );
+      
+      // Create queue entry
+      const queueEntry = await storage.createQueueEntry({
+        ...queueEntryInput,
+        estimatedWaitTime
+      });
+      
+      return res.status(201).json(queueEntry);
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ message: error.errors });
+      }
+      console.error("Error creating queue entry:", error);
+      return res.status(500).json({ message: "Internal server error" });
+    }
+  });
+  
+  app.patch("/api/queue-entries/:id", async (req: Request, res: Response) => {
+    try {
+      const id = parseInt(req.params.id);
+      const updates = req.body;
+      
+      const updatedEntry = await storage.updateQueueEntry(id, updates);
+      
+      if (!updatedEntry) {
+        return res.status(404).json({ message: "Queue entry not found" });
+      }
+      
+      return res.json(updatedEntry);
+    } catch (error) {
+      console.error("Error updating queue entry:", error);
+      return res.status(500).json({ message: "Internal server error" });
+    }
+  });
+  
+  app.get("/api/queue-wait-time", async (req: Request, res: Response) => {
+    try {
+      const restaurantId = 1; // Default restaurant ID
+      const partySize = parseInt(req.query.partySize as string) || 2;
+      
+      const waitTime = await storage.getQueueEstimatedWaitTime(restaurantId, partySize);
+      return res.json({ estimatedWaitTime: waitTime });
+    } catch (error) {
+      console.error("Error calculating wait time:", error);
+      return res.status(500).json({ message: "Internal server error" });
+    }
+  });
+  
+  // AI Assistant routes
+  app.get("/api/ai-conversations", async (req: Request, res: Response) => {
+    try {
+      const userId = parseInt(req.query.userId as string);
+      
+      if (!userId) {
+        return res.status(400).json({ message: "User ID is required" });
+      }
+      
+      const conversations = await storage.getAiConversations(userId);
+      return res.json(conversations);
+    } catch (error) {
+      console.error("Error fetching AI conversations:", error);
+      return res.status(500).json({ message: "Internal server error" });
+    }
+  });
+  
+  app.get("/api/ai-conversations/:id", async (req: Request, res: Response) => {
+    try {
+      const id = parseInt(req.params.id);
+      
+      const conversation = await storage.getAiConversation(id);
+      
+      if (!conversation) {
+        return res.status(404).json({ message: "Conversation not found" });
+      }
+      
+      return res.json(conversation);
+    } catch (error) {
+      console.error("Error fetching AI conversation:", error);
+      return res.status(500).json({ message: "Internal server error" });
+    }
+  });
+  
+  app.post("/api/ai-conversations", async (req: Request, res: Response) => {
+    try {
+      const conversationInput = insertAiConversationSchema.parse(req.body);
+      
+      const conversation = await storage.createAiConversation(conversationInput);
+      return res.status(201).json(conversation);
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ message: error.errors });
+      }
+      console.error("Error creating AI conversation:", error);
+      return res.status(500).json({ message: "Internal server error" });
+    }
+  });
+  
+  app.post("/api/ai-conversations/:id/messages", async (req: Request, res: Response) => {
+    try {
+      const id = parseInt(req.params.id);
+      const message = req.body;
+      
+      const updatedConversation = await storage.updateAiConversation(id, message);
+      
+      if (!updatedConversation) {
+        return res.status(404).json({ message: "Conversation not found" });
+      }
+      
+      return res.json(updatedConversation);
+    } catch (error) {
+      console.error("Error adding message to conversation:", error);
+      return res.status(500).json({ message: "Internal server error" });
+    }
+  });
+  
+  app.post("/api/ai-conversations/:id/resolve", async (req: Request, res: Response) => {
+    try {
+      const id = parseInt(req.params.id);
+      
+      const resolvedConversation = await storage.resolveAiConversation(id);
+      
+      if (!resolvedConversation) {
+        return res.status(404).json({ message: "Conversation not found" });
+      }
+      
+      return res.json(resolvedConversation);
+    } catch (error) {
+      console.error("Error resolving conversation:", error);
+      return res.status(500).json({ message: "Internal server error" });
+    }
+  });
+  
+  // User Preferences routes
+  app.get("/api/user-preferences", async (req: Request, res: Response) => {
+    try {
+      const userId = parseInt(req.query.userId as string);
+      
+      if (!userId) {
+        return res.status(400).json({ message: "User ID is required" });
+      }
+      
+      const preferences = await storage.getUserPreference(userId);
+      return res.json(preferences || null);
+    } catch (error) {
+      console.error("Error fetching user preferences:", error);
+      return res.status(500).json({ message: "Internal server error" });
+    }
+  });
+  
+  app.post("/api/user-preferences", async (req: Request, res: Response) => {
+    try {
+      const preferenceInput = insertUserPreferenceSchema.parse(req.body);
+      
+      // Check if preferences already exist
+      const existingPreferences = await storage.getUserPreference(preferenceInput.userId);
+      
+      if (existingPreferences) {
+        // Update existing preferences
+        const updatedPreferences = await storage.updateUserPreference(
+          preferenceInput.userId, 
+          preferenceInput
+        );
+        return res.json(updatedPreferences);
+      }
+      
+      // Create new preferences
+      const preferences = await storage.createUserPreference(preferenceInput);
+      return res.status(201).json(preferences);
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ message: error.errors });
+      }
+      console.error("Error creating user preferences:", error);
+      return res.status(500).json({ message: "Internal server error" });
+    }
+  });
+  
+  app.patch("/api/user-preferences/:userId", async (req: Request, res: Response) => {
+    try {
+      const userId = parseInt(req.params.userId);
+      const updates = req.body;
+      
+      const updatedPreferences = await storage.updateUserPreference(userId, updates);
+      
+      if (!updatedPreferences) {
+        return res.status(404).json({ message: "User preferences not found" });
+      }
+      
+      return res.json(updatedPreferences);
+    } catch (error) {
+      console.error("Error updating user preferences:", error);
+      return res.status(500).json({ message: "Internal server error" });
+    }
+  });
+  
+  // Menu Recommendation routes
+  app.post("/api/menu-interactions", async (req: Request, res: Response) => {
+    try {
+      const interactionInput = insertUserItemInteractionSchema.parse(req.body);
+      
+      const interaction = await storage.recordUserItemInteraction(interactionInput);
+      return res.status(201).json(interaction);
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ message: error.errors });
+      }
+      console.error("Error recording menu interaction:", error);
+      return res.status(500).json({ message: "Internal server error" });
+    }
+  });
+  
+  app.get("/api/recommended-menu-items", async (req: Request, res: Response) => {
+    try {
+      const userId = parseInt(req.query.userId as string);
+      const restaurantId = 1; // Default restaurant ID
+      const limit = req.query.limit ? parseInt(req.query.limit as string) : 5;
+      
+      if (!userId) {
+        return res.status(400).json({ message: "User ID is required" });
+      }
+      
+      const recommendations = await storage.getPersonalizedMenuRecommendations(
+        userId, 
+        restaurantId,
+        limit
+      );
+      
+      return res.json(recommendations);
+    } catch (error) {
+      console.error("Error fetching personalized recommendations:", error);
+      return res.status(500).json({ message: "Internal server error" });
+    }
+  });
+
   // Create HTTP server
   const httpServer = createServer(app);
   

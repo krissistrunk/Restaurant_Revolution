@@ -11,7 +11,11 @@ import {
   Order, InsertOrder,
   OrderItem, InsertOrderItem,
   LoyaltyReward, InsertLoyaltyReward,
-  Promotion, InsertPromotion
+  Promotion, InsertPromotion,
+  QueueEntry, InsertQueueEntry,
+  AiConversation, InsertAiConversation,
+  UserPreference, InsertUserPreference,
+  UserItemInteraction, InsertUserItemInteraction
 } from '../shared/schema';
 import * as schema from '../shared/schema';
 
@@ -282,5 +286,260 @@ export class PgStorage implements IStorage {
   async createPromotion(promotion: InsertPromotion): Promise<Promotion> {
     const result = await db.insert(schema.promotions).values(promotion).returning();
     return result[0];
+  }
+
+  // Virtual Queue methods
+  async getQueueEntries(restaurantId: number): Promise<QueueEntry[]> {
+    return db.select().from(schema.queueEntries).where(eq(schema.queueEntries.restaurantId, restaurantId));
+  }
+
+  async getUserQueueEntry(userId: number, restaurantId: number): Promise<QueueEntry | undefined> {
+    const entries = await db.select().from(schema.queueEntries).where(
+      and(
+        eq(schema.queueEntries.userId, userId),
+        eq(schema.queueEntries.restaurantId, restaurantId),
+        eq(schema.queueEntries.status, 'waiting')
+      )
+    );
+    return entries[0];
+  }
+
+  async createQueueEntry(entry: InsertQueueEntry): Promise<QueueEntry> {
+    // Get current queue size for position calculation
+    const activeEntries = await db.select().from(schema.queueEntries).where(
+      and(
+        eq(schema.queueEntries.restaurantId, entry.restaurantId),
+        eq(schema.queueEntries.status, 'waiting')
+      )
+    );
+    
+    // Calculate estimated wait time if not provided
+    let estimatedWaitTime = entry.estimatedWaitTime;
+    if (!estimatedWaitTime) {
+      estimatedWaitTime = await this.getQueueEstimatedWaitTime(entry.restaurantId, entry.partySize);
+    }
+    
+    // Set joined time to now if not provided
+    const joinedAt = new Date();
+    
+    const result = await db.insert(schema.queueEntries).values({
+      ...entry,
+      estimatedWaitTime,
+      joinedAt
+    }).returning();
+    
+    return result[0];
+  }
+
+  async updateQueueEntry(id: number, updates: Partial<QueueEntry>): Promise<QueueEntry | undefined> {
+    const result = await db
+      .update(schema.queueEntries)
+      .set(updates)
+      .where(eq(schema.queueEntries.id, id))
+      .returning();
+    
+    return result[0];
+  }
+
+  async getQueueEstimatedWaitTime(restaurantId: number, partySize: number): Promise<number> {
+    // Get number of active parties in queue
+    const activeEntries = await db.select().from(schema.queueEntries).where(
+      and(
+        eq(schema.queueEntries.restaurantId, restaurantId),
+        eq(schema.queueEntries.status, 'waiting')
+      )
+    );
+    
+    // Base wait time: 5 minutes per party ahead in queue
+    const baseWaitTime = activeEntries.length * 5;
+    
+    // Adjust for party size (larger parties wait longer)
+    // Add 2 minutes for each person over 2
+    const partySizeAdjustment = Math.max(0, partySize - 2) * 2;
+    
+    return baseWaitTime + partySizeAdjustment;
+  }
+
+  // AI Assistant methods
+  async getAiConversations(userId: number): Promise<AiConversation[]> {
+    return db.select().from(schema.aiConversations).where(eq(schema.aiConversations.userId, userId));
+  }
+
+  async getAiConversation(id: number): Promise<AiConversation | undefined> {
+    const conversations = await db.select().from(schema.aiConversations).where(eq(schema.aiConversations.id, id));
+    return conversations[0];
+  }
+
+  async createAiConversation(conversation: InsertAiConversation): Promise<AiConversation> {
+    const now = new Date();
+    const result = await db.insert(schema.aiConversations).values({
+      ...conversation,
+      createdAt: now,
+      updatedAt: now,
+      resolved: false
+    }).returning();
+    
+    return result[0];
+  }
+
+  async updateAiConversation(id: number, message: any): Promise<AiConversation | undefined> {
+    const conversation = await this.getAiConversation(id);
+    if (!conversation) return undefined;
+    
+    // Update the messages array
+    const messages = Array.isArray(conversation.messages) ? [...conversation.messages, message] : [message];
+    
+    const result = await db
+      .update(schema.aiConversations)
+      .set({ 
+        messages, 
+        updatedAt: new Date() 
+      })
+      .where(eq(schema.aiConversations.id, id))
+      .returning();
+    
+    return result[0];
+  }
+
+  async resolveAiConversation(id: number): Promise<AiConversation | undefined> {
+    const result = await db
+      .update(schema.aiConversations)
+      .set({ 
+        resolved: true,
+        updatedAt: new Date() 
+      })
+      .where(eq(schema.aiConversations.id, id))
+      .returning();
+    
+    return result[0];
+  }
+
+  // User Preferences methods
+  async getUserPreference(userId: number): Promise<UserPreference | undefined> {
+    const preferences = await db.select().from(schema.userPreferences).where(eq(schema.userPreferences.userId, userId));
+    return preferences[0];
+  }
+
+  async createUserPreference(preference: InsertUserPreference): Promise<UserPreference> {
+    const result = await db.insert(schema.userPreferences).values({
+      ...preference,
+      lastUpdated: new Date()
+    }).returning();
+    
+    return result[0];
+  }
+
+  async updateUserPreference(userId: number, updates: Partial<UserPreference>): Promise<UserPreference | undefined> {
+    const result = await db
+      .update(schema.userPreferences)
+      .set({ 
+        ...updates,
+        lastUpdated: new Date() 
+      })
+      .where(eq(schema.userPreferences.userId, userId))
+      .returning();
+    
+    return result[0];
+  }
+
+  // Menu Recommendation methods
+  async recordUserItemInteraction(interaction: InsertUserItemInteraction): Promise<UserItemInteraction> {
+    const result = await db.insert(schema.userItemInteractions).values({
+      ...interaction,
+      timestamp: new Date()
+    }).returning();
+    
+    return result[0];
+  }
+
+  async getUserItemInteractions(userId: number): Promise<UserItemInteraction[]> {
+    return db.select().from(schema.userItemInteractions).where(eq(schema.userItemInteractions.userId, userId));
+  }
+
+  async getMenuItemInteractions(menuItemId: number): Promise<UserItemInteraction[]> {
+    return db.select().from(schema.userItemInteractions).where(eq(schema.userItemInteractions.menuItemId, menuItemId));
+  }
+
+  async getPersonalizedMenuRecommendations(userId: number, restaurantId: number, limit: number = 5): Promise<MenuItem[]> {
+    // 1. Get user preferences and interactions
+    const userPreference = await this.getUserPreference(userId);
+    const userInteractions = await this.getUserItemInteractions(userId);
+    
+    // 2. Get all menu items from the restaurant
+    const allMenuItems = await this.getMenuItems(restaurantId);
+    
+    // If we have no personalization data, return featured items
+    if (!userPreference && userInteractions.length === 0) {
+      return this.getFeaturedMenuItems(restaurantId);
+    }
+    
+    // 3. Create a scored list of menu items
+    const scoredItems = await Promise.all(allMenuItems.map(async (item) => {
+      let score = 0;
+      
+      // 3.1 Score based on user preferences
+      if (userPreference) {
+        // Match dietary preferences from dietaryPreferences array
+        const dietaryPreferences = userPreference.dietaryPreferences || {};
+        
+        // Check for vegetarian preference
+        if (
+          Object.keys(dietaryPreferences).includes('vegetarian') &&
+          item.isVegetarian
+        ) {
+          score += 10;
+        }
+        
+        // Check for gluten-free preference
+        if (
+          Object.keys(dietaryPreferences).includes('glutenFree') &&
+          item.isGlutenFree
+        ) {
+          score += 10;
+        }
+        
+        // Match favorite categories
+        const favoriteCategories = userPreference.favoriteCategories || {};
+        if (
+          Object.keys(favoriteCategories).includes(item.categoryId.toString())
+        ) {
+          score += 15;
+        }
+        
+        // Avoid allergens
+        const allergens = userPreference.allergens || {};
+        const itemAllergens = item.allergens || {};
+        
+        const hasAllergen = Object.keys(allergens).some(allergen => 
+          Object.keys(itemAllergens).includes(allergen)
+        );
+        
+        if (hasAllergen) {
+          score -= 50; // Strong negative score for allergens
+        }
+      }
+      
+      // 3.2 Score based on past interactions
+      const itemInteractions = userInteractions.filter(i => i.menuItemId === item.id);
+      itemInteractions.forEach(interaction => {
+        if (interaction.interaction === 'view') score += 2;
+        if (interaction.interaction === 'like') score += 10;
+        if (interaction.interaction === 'purchase') score += 15;
+        if (interaction.interaction === 'dislike') score -= 20;
+      });
+      
+      // 3.3 Boost score for popular and featured items
+      if (item.isPopular) score += 5;
+      if (item.isFeatured) score += 5;
+      
+      // Add modifiers to items
+      item.modifiers = await this.getModifiers(item.id);
+      
+      return { item, score };
+    }));
+    
+    // 4. Sort by score and return top items
+    scoredItems.sort((a, b) => b.score - a.score);
+    return scoredItems.slice(0, limit).map(scored => scored.item);
   }
 }

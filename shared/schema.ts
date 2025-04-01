@@ -162,14 +162,94 @@ export const promotions = pgTable("promotions", {
   restaurantId: integer("restaurant_id").notNull(),
 });
 
+// Virtual Queue Schema
+export const queueEntries = pgTable("queue_entries", {
+  id: serial("id").primaryKey(),
+  userId: integer("user_id").notNull(),
+  restaurantId: integer("restaurant_id").notNull(),
+  partySize: integer("party_size").notNull(),
+  status: text("status").default("waiting").notNull(), // waiting, seated, cancelled
+  estimatedWaitTime: integer("estimated_wait_time").notNull(), // in minutes
+  actualWaitTime: integer("actual_wait_time"), // in minutes
+  joinedAt: timestamp("joined_at").defaultNow().notNull(),
+  notificationSent: boolean("notification_sent").default(false),
+  seatedAt: timestamp("seated_at"),
+  phone: text("phone"),
+  note: text("note"),
+});
+
+// AI Assistant Conversations Schema
+export const aiConversations = pgTable("ai_conversations", {
+  id: serial("id").primaryKey(),
+  userId: integer("user_id").notNull(),
+  restaurantId: integer("restaurant_id").notNull(),
+  messages: jsonb("messages").notNull(),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+  context: jsonb("context"), // Context like order ID, menu items, etc.
+  resolved: boolean("resolved").default(false),
+});
+
+// User Preferences for Personalized Recommendations
+export const userPreferences = pgTable("user_preferences", {
+  id: serial("id").primaryKey(),
+  userId: integer("user_id").notNull().unique(),
+  dietaryPreferences: jsonb("dietary_preferences"),
+  favoriteCategories: jsonb("favorite_categories"),
+  dislikedItems: jsonb("disliked_items"),
+  allergens: jsonb("allergens"),
+  tastePreferences: jsonb("taste_preferences"), // spicy, sweet, savory, etc.
+  lastUpdated: timestamp("last_updated").defaultNow().notNull(),
+});
+
+// Table for storing user item interactions for recommendations
+export const userItemInteractions = pgTable("user_item_interactions", {
+  id: serial("id").primaryKey(),
+  userId: integer("user_id").notNull(),
+  menuItemId: integer("menu_item_id").notNull(),
+  interaction: text("interaction").notNull(), // viewed, ordered, liked, favorited
+  rating: integer("rating"), // 1-5 stars if provided
+  timestamp: timestamp("timestamp").defaultNow().notNull(),
+});
+
 export const insertPromotionSchema = createInsertSchema(promotions).omit({
   id: true,
 });
 
+// Insert schemas for new tables
+export const insertQueueEntrySchema = createInsertSchema(queueEntries).omit({
+  id: true,
+  joinedAt: true,
+  seatedAt: true,
+  actualWaitTime: true,
+  notificationSent: true,
+});
+
+export const insertAiConversationSchema = createInsertSchema(aiConversations).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+  resolved: true,
+});
+
+export const insertUserPreferenceSchema = createInsertSchema(userPreferences).omit({
+  id: true,
+  lastUpdated: true,
+});
+
+export const insertUserItemInteractionSchema = createInsertSchema(userItemInteractions).omit({
+  id: true,
+  timestamp: true,
+});
+
 // Relations
-export const usersRelations = relations(users, ({ many }) => ({
+export const usersRelations = relations(users, ({ many, one }) => ({
   reservations: many(reservations),
-  orders: many(orders)
+  orders: many(orders),
+  queueEntries: many(queueEntries),
+  aiConversations: many(aiConversations),
+  preferences: one(userPreferences),
+  itemInteractions: many(userItemInteractions)
 }));
 
 export const restaurantsRelations = relations(restaurants, ({ many }) => ({
@@ -178,7 +258,9 @@ export const restaurantsRelations = relations(restaurants, ({ many }) => ({
   reservations: many(reservations),
   orders: many(orders),
   loyaltyRewards: many(loyaltyRewards),
-  promotions: many(promotions)
+  promotions: many(promotions),
+  queueEntries: many(queueEntries),
+  aiConversations: many(aiConversations)
 }));
 
 export const categoriesRelations = relations(categories, ({ one, many }) => ({
@@ -199,7 +281,8 @@ export const menuItemsRelations = relations(menuItems, ({ one, many }) => ({
     references: [restaurants.id]
   }),
   modifiers: many(modifiers),
-  orderItems: many(orderItems)
+  orderItems: many(orderItems),
+  userInteractions: many(userItemInteractions)
 }));
 
 export const modifiersRelations = relations(modifiers, ({ one }) => ({
@@ -257,6 +340,46 @@ export const promotionsRelations = relations(promotions, ({ one }) => ({
   })
 }));
 
+export const queueEntriesRelations = relations(queueEntries, ({ one }) => ({
+  user: one(users, {
+    fields: [queueEntries.userId],
+    references: [users.id]
+  }),
+  restaurant: one(restaurants, {
+    fields: [queueEntries.restaurantId],
+    references: [restaurants.id]
+  })
+}));
+
+export const aiConversationsRelations = relations(aiConversations, ({ one }) => ({
+  user: one(users, {
+    fields: [aiConversations.userId],
+    references: [users.id]
+  }),
+  restaurant: one(restaurants, {
+    fields: [aiConversations.restaurantId],
+    references: [restaurants.id]
+  })
+}));
+
+export const userPreferencesRelations = relations(userPreferences, ({ one }) => ({
+  user: one(users, {
+    fields: [userPreferences.userId],
+    references: [users.id]
+  })
+}));
+
+export const userItemInteractionsRelations = relations(userItemInteractions, ({ one }) => ({
+  user: one(users, {
+    fields: [userItemInteractions.userId],
+    references: [users.id]
+  }),
+  menuItem: one(menuItems, {
+    fields: [userItemInteractions.menuItemId],
+    references: [menuItems.id]
+  })
+}));
+
 export type User = typeof users.$inferSelect;
 export type InsertUser = z.infer<typeof insertUserSchema>;
 
@@ -292,3 +415,16 @@ export type InsertLoyaltyReward = z.infer<typeof insertLoyaltyRewardSchema>;
 
 export type Promotion = typeof promotions.$inferSelect;
 export type InsertPromotion = z.infer<typeof insertPromotionSchema>;
+
+// New table types
+export type QueueEntry = typeof queueEntries.$inferSelect;
+export type InsertQueueEntry = z.infer<typeof insertQueueEntrySchema>;
+
+export type AiConversation = typeof aiConversations.$inferSelect;
+export type InsertAiConversation = z.infer<typeof insertAiConversationSchema>;
+
+export type UserPreference = typeof userPreferences.$inferSelect;
+export type InsertUserPreference = z.infer<typeof insertUserPreferenceSchema>;
+
+export type UserItemInteraction = typeof userItemInteractions.$inferSelect;
+export type InsertUserItemInteraction = z.infer<typeof insertUserItemInteractionSchema>;
