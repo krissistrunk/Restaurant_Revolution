@@ -17,6 +17,10 @@ import Navigation from "@/components/Navigation";
 import CartButton from "@/components/cart/CartButton";
 import CartModal from "@/components/cart/CartModal";
 
+import { AuthProvider } from "@/context/AuthContext";
+import { CartProvider } from "@/context/CartContext";
+import { RestaurantProvider } from "@/context/RestaurantContext";
+
 function Router() {
   return (
     <div className="flex flex-col min-h-screen">
@@ -44,8 +48,14 @@ function Router() {
 function App() {
   return (
     <QueryClientProvider client={queryClient}>
-      <Router />
-      <Toaster />
+      <RestaurantProvider>
+        <AuthProvider>
+          <CartProvider>
+            <Router />
+            <Toaster />
+          </CartProvider>
+        </AuthProvider>
+      </RestaurantProvider>
     </QueryClientProvider>
   );
 }
