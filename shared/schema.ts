@@ -1,6 +1,7 @@
 import { pgTable, text, serial, integer, boolean, timestamp, jsonb, real, date, time } from "drizzle-orm/pg-core";
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
+import { relations } from "drizzle-orm";
 
 // User Schema
 export const users = pgTable("users", {
@@ -152,15 +153,109 @@ export const promotions = pgTable("promotions", {
   id: serial("id").primaryKey(),
   name: text("name").notNull(),
   description: text("description"),
+  discountType: text("discount_type").notNull(),
+  discountValue: real("discount_value").notNull(),
   startDate: timestamp("start_date").notNull(),
   endDate: timestamp("end_date").notNull(),
-  applicableItems: jsonb("applicable_items"),
+  code: text("code"),
+  isActive: boolean("is_active").default(true),
   restaurantId: integer("restaurant_id").notNull(),
 });
 
 export const insertPromotionSchema = createInsertSchema(promotions).omit({
   id: true,
 });
+
+// Relations
+export const usersRelations = relations(users, ({ many }) => ({
+  reservations: many(reservations),
+  orders: many(orders)
+}));
+
+export const restaurantsRelations = relations(restaurants, ({ many }) => ({
+  categories: many(categories),
+  menuItems: many(menuItems),
+  reservations: many(reservations),
+  orders: many(orders),
+  loyaltyRewards: many(loyaltyRewards),
+  promotions: many(promotions)
+}));
+
+export const categoriesRelations = relations(categories, ({ one, many }) => ({
+  restaurant: one(restaurants, {
+    fields: [categories.restaurantId],
+    references: [restaurants.id]
+  }),
+  menuItems: many(menuItems)
+}));
+
+export const menuItemsRelations = relations(menuItems, ({ one, many }) => ({
+  category: one(categories, {
+    fields: [menuItems.categoryId],
+    references: [categories.id]
+  }),
+  restaurant: one(restaurants, {
+    fields: [menuItems.restaurantId],
+    references: [restaurants.id]
+  }),
+  modifiers: many(modifiers),
+  orderItems: many(orderItems)
+}));
+
+export const modifiersRelations = relations(modifiers, ({ one }) => ({
+  menuItem: one(menuItems, {
+    fields: [modifiers.menuItemId],
+    references: [menuItems.id]
+  })
+}));
+
+export const reservationsRelations = relations(reservations, ({ one }) => ({
+  user: one(users, {
+    fields: [reservations.userId],
+    references: [users.id]
+  }),
+  restaurant: one(restaurants, {
+    fields: [reservations.restaurantId],
+    references: [restaurants.id]
+  })
+}));
+
+export const ordersRelations = relations(orders, ({ one, many }) => ({
+  user: one(users, {
+    fields: [orders.userId],
+    references: [users.id]
+  }),
+  restaurant: one(restaurants, {
+    fields: [orders.restaurantId],
+    references: [restaurants.id]
+  }),
+  orderItems: many(orderItems)
+}));
+
+export const orderItemsRelations = relations(orderItems, ({ one }) => ({
+  order: one(orders, {
+    fields: [orderItems.orderId],
+    references: [orders.id]
+  }),
+  menuItem: one(menuItems, {
+    fields: [orderItems.menuItemId],
+    references: [menuItems.id]
+  })
+}));
+
+export const loyaltyRewardsRelations = relations(loyaltyRewards, ({ one }) => ({
+  restaurant: one(restaurants, {
+    fields: [loyaltyRewards.restaurantId],
+    references: [restaurants.id]
+  })
+}));
+
+export const promotionsRelations = relations(promotions, ({ one }) => ({
+  restaurant: one(restaurants, {
+    fields: [promotions.restaurantId],
+    references: [restaurants.id]
+  })
+}));
 
 export type User = typeof users.$inferSelect;
 export type InsertUser = z.infer<typeof insertUserSchema>;
@@ -171,7 +266,9 @@ export type InsertRestaurant = z.infer<typeof insertRestaurantSchema>;
 export type Category = typeof categories.$inferSelect;
 export type InsertCategory = z.infer<typeof insertCategorySchema>;
 
-export type MenuItem = typeof menuItems.$inferSelect;
+export type MenuItem = typeof menuItems.$inferSelect & {
+  modifiers?: Modifier[];
+};
 export type InsertMenuItem = z.infer<typeof insertMenuItemSchema>;
 
 export type Modifier = typeof modifiers.$inferSelect;
@@ -180,10 +277,14 @@ export type InsertModifier = z.infer<typeof insertModifierSchema>;
 export type Reservation = typeof reservations.$inferSelect;
 export type InsertReservation = z.infer<typeof insertReservationSchema>;
 
-export type Order = typeof orders.$inferSelect;
+export type Order = typeof orders.$inferSelect & {
+  items?: OrderItem[];
+};
 export type InsertOrder = z.infer<typeof insertOrderSchema>;
 
-export type OrderItem = typeof orderItems.$inferSelect;
+export type OrderItem = typeof orderItems.$inferSelect & {
+  menuItem?: MenuItem;
+};
 export type InsertOrderItem = z.infer<typeof insertOrderItemSchema>;
 
 export type LoyaltyReward = typeof loyaltyRewards.$inferSelect;

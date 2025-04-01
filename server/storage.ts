@@ -289,6 +289,34 @@ export class MemStorage implements IStorage {
     ];
     
     loyaltyRewards.forEach(reward => this.createLoyaltyReward(reward));
+    
+    // Add promotions
+    const promotions = [
+      {
+        name: "Summer Special",
+        description: "Get 20% off your entire order",
+        discountType: "percentage",
+        discountValue: 20,
+        startDate: new Date("2025-06-01"),
+        endDate: new Date("2025-08-31"),
+        code: "SUMMER25",
+        isActive: true,
+        restaurantId: 1
+      },
+      {
+        name: "Happy Hour",
+        description: "Buy one get one free on appetizers",
+        discountType: "bogo",
+        discountValue: 100,
+        startDate: new Date("2025-01-01"),
+        endDate: new Date("2025-12-31"),
+        code: "HAPPYHOUR",
+        isActive: true,
+        restaurantId: 1
+      }
+    ];
+    
+    promotions.forEach(promotion => this.createPromotion(promotion));
   }
   
   // User methods
@@ -310,7 +338,13 @@ export class MemStorage implements IStorage {
   
   async createUser(user: InsertUser): Promise<User> {
     const id = this.userId++;
-    const newUser: User = { ...user, id, loyaltyPoints: 0 };
+    const newUser: User = { 
+      ...user, 
+      id, 
+      loyaltyPoints: 0,
+      phone: user.phone || null,
+      dietaryPreferences: user.dietaryPreferences || null
+    };
     this.users.set(id, newUser);
     return newUser;
   }
@@ -332,7 +366,16 @@ export class MemStorage implements IStorage {
   
   async createRestaurant(restaurant: InsertRestaurant): Promise<Restaurant> {
     const id = this.restaurantId++;
-    const newRestaurant: Restaurant = { ...restaurant, id };
+    const newRestaurant: Restaurant = { 
+      ...restaurant, 
+      id,
+      email: restaurant.email || null,
+      description: restaurant.description || null,
+      logoUrl: restaurant.logoUrl || null,
+      openingHours: restaurant.openingHours || null,
+      latitude: restaurant.latitude || null,
+      longitude: restaurant.longitude || null
+    };
     this.restaurants.set(id, newRestaurant);
     return newRestaurant;
   }
@@ -351,7 +394,12 @@ export class MemStorage implements IStorage {
   async getCategories(restaurantId: number): Promise<Category[]> {
     return Array.from(this.categories.values())
       .filter(category => category.restaurantId === restaurantId)
-      .sort((a, b) => a.displayOrder - b.displayOrder);
+      .sort((a, b) => {
+        // Handle null display orders, treating null as the highest value
+        const orderA = a.displayOrder === null ? Number.MAX_SAFE_INTEGER : a.displayOrder;
+        const orderB = b.displayOrder === null ? Number.MAX_SAFE_INTEGER : b.displayOrder;
+        return orderA - orderB;
+      });
   }
   
   async getCategory(id: number): Promise<Category | undefined> {
@@ -360,7 +408,11 @@ export class MemStorage implements IStorage {
   
   async createCategory(category: InsertCategory): Promise<Category> {
     const id = this.categoryId++;
-    const newCategory: Category = { ...category, id };
+    const newCategory: Category = { 
+      ...category, 
+      id,
+      displayOrder: category.displayOrder || null 
+    };
     this.categories.set(id, newCategory);
     return newCategory;
   }
@@ -385,7 +437,21 @@ export class MemStorage implements IStorage {
   
   async createMenuItem(menuItem: InsertMenuItem): Promise<MenuItem> {
     const id = this.menuItemId++;
-    const newMenuItem: MenuItem = { ...menuItem, id };
+    const newMenuItem: MenuItem = { 
+      ...menuItem, 
+      id,
+      description: menuItem.description || null,
+      imageUrl: menuItem.imageUrl || null,
+      isAvailable: menuItem.isAvailable ?? true,
+      isPopular: menuItem.isPopular ?? false,
+      isFeatured: menuItem.isFeatured ?? false,
+      isVegetarian: menuItem.isVegetarian ?? false,
+      isGlutenFree: menuItem.isGlutenFree ?? false,
+      isSeafood: menuItem.isSeafood ?? false,
+      nutritionInfo: menuItem.nutritionInfo || null,
+      allergens: menuItem.allergens || null,
+      modifiers: []
+    };
     this.menuItems.set(id, newMenuItem);
     return newMenuItem;
   }
@@ -398,7 +464,11 @@ export class MemStorage implements IStorage {
   
   async createModifier(modifier: InsertModifier): Promise<Modifier> {
     const id = this.modifierId++;
-    const newModifier: Modifier = { ...modifier, id };
+    const newModifier: Modifier = { 
+      ...modifier, 
+      id,
+      price: modifier.price || null
+    };
     this.modifiers.set(id, newModifier);
     return newModifier;
   }
@@ -426,6 +496,8 @@ export class MemStorage implements IStorage {
     const newReservation: Reservation = { 
       ...reservation, 
       id,
+      status: reservation.status || 'pending',
+      notes: reservation.notes || null,
       createdAt: new Date()
     };
     this.reservations.set(id, newReservation);
@@ -462,7 +534,10 @@ export class MemStorage implements IStorage {
     const newOrder: Order = { 
       ...order, 
       id,
-      orderDate: new Date()
+      status: order.status || 'pending',
+      pickupTime: order.pickupTime || null,
+      orderDate: new Date(),
+      items: []
     };
     this.orders.set(id, newOrder);
     return newOrder;
@@ -486,8 +561,22 @@ export class MemStorage implements IStorage {
   
   async createOrderItem(orderItem: InsertOrderItem): Promise<OrderItem> {
     const id = this.orderItemId++;
-    const newOrderItem: OrderItem = { ...orderItem, id };
+    const newOrderItem: OrderItem = { 
+      ...orderItem, 
+      id,
+      notes: orderItem.notes || null,
+      quantity: orderItem.quantity || 1,
+      modifiers: orderItem.modifiers || null
+    };
     this.orderItems.set(id, newOrderItem);
+    
+    // Add this order item to the order's items array
+    const order = await this.getOrder(orderItem.orderId);
+    if (order && order.items) {
+      order.items.push(newOrderItem);
+      this.orders.set(order.id, order);
+    }
+    
     return newOrderItem;
   }
   
@@ -503,7 +592,12 @@ export class MemStorage implements IStorage {
   
   async createLoyaltyReward(reward: InsertLoyaltyReward): Promise<LoyaltyReward> {
     const id = this.loyaltyRewardId++;
-    const newReward: LoyaltyReward = { ...reward, id };
+    const newReward: LoyaltyReward = { 
+      ...reward, 
+      id,
+      description: reward.description || null,
+      isActive: reward.isActive ?? true
+    };
     this.loyaltyRewards.set(id, newReward);
     return newReward;
   }
@@ -525,10 +619,19 @@ export class MemStorage implements IStorage {
   
   async createPromotion(promotion: InsertPromotion): Promise<Promotion> {
     const id = this.promotionId++;
-    const newPromotion: Promotion = { ...promotion, id };
+    const newPromotion: Promotion = { 
+      ...promotion, 
+      id,
+      code: promotion.code || null,
+      description: promotion.description || null,
+      isActive: promotion.isActive ?? true
+    };
     this.promotions.set(id, newPromotion);
     return newPromotion;
   }
 }
 
-export const storage = new MemStorage();
+import { PgStorage } from './pgStorage';
+
+// Use PostgreSQL storage implementation for database persistence
+export const storage = new PgStorage();
