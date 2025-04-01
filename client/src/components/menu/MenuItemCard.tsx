@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
+import { useLocation } from "wouter";
 
 interface MenuItemCardProps {
   menuItem: MenuItem;
@@ -14,9 +15,11 @@ interface MenuItemCardProps {
 const MenuItemCard = ({ menuItem }: MenuItemCardProps) => {
   const { addToCart } = useCart();
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isDetailModalOpen, setIsDetailModalOpen] = useState(false);
   const [notes, setNotes] = useState("");
   const [quantity, setQuantity] = useState(1);
   const [selectedModifiers, setSelectedModifiers] = useState<Record<string, boolean>>({});
+  const [location, navigate] = useLocation();
 
   const handleAddToCart = () => {
     if (menuItem.modifiers && menuItem.modifiers.length > 0) {
@@ -49,9 +52,16 @@ const MenuItemCard = ({ menuItem }: MenuItemCardProps) => {
     });
   };
 
+  const handleShowDetails = () => {
+    setIsDetailModalOpen(true);
+  };
+
   return (
     <>
-      <div className="bg-white rounded-lg shadow p-4 flex">
+      <div 
+        className="bg-white rounded-lg shadow p-4 flex cursor-pointer" 
+        onClick={handleShowDetails}
+      >
         <img
           src={menuItem.imageUrl}
           alt={menuItem.name}
@@ -89,8 +99,11 @@ const MenuItemCard = ({ menuItem }: MenuItemCardProps) => {
               )}
             </div>
             <button
-              className="bg-primary text-white rounded-full p-1"
-              onClick={handleAddToCart}
+              className="bg-primary text-white rounded-full p-1 z-10"
+              onClick={(e) => {
+                e.stopPropagation();
+                handleAddToCart();
+              }}
             >
               <svg
                 xmlns="http://www.w3.org/2000/svg"
@@ -109,6 +122,7 @@ const MenuItemCard = ({ menuItem }: MenuItemCardProps) => {
         </div>
       </div>
 
+      {/* Customization Dialog */}
       <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
         <DialogContent>
           <DialogHeader>
@@ -179,6 +193,118 @@ const MenuItemCard = ({ menuItem }: MenuItemCardProps) => {
             </Button>
             <Button onClick={handleAddToCartWithModifiers}>
               Add to Cart - ${(menuItem.price * quantity).toFixed(2)}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Details Dialog */}
+      <Dialog open={isDetailModalOpen} onOpenChange={setIsDetailModalOpen}>
+        <DialogContent className="max-w-3xl">
+          <DialogHeader>
+            <DialogTitle className="text-xl">{menuItem.name}</DialogTitle>
+            <DialogDescription className="text-sm text-gray-500">
+              {menuItem.categoryId && `Category ID: ${menuItem.categoryId}`}
+            </DialogDescription>
+          </DialogHeader>
+          
+          <div className="flex flex-col md:flex-row gap-6">
+            <div className="w-full md:w-1/2">
+              <img
+                src={menuItem.imageUrl}
+                alt={menuItem.name}
+                className="w-full h-auto rounded-lg object-cover"
+              />
+            </div>
+            
+            <div className="w-full md:w-1/2 space-y-4">
+              <div>
+                <h3 className="font-medium text-lg">Description</h3>
+                <p className="text-gray-600">{menuItem.description}</p>
+              </div>
+              
+              <div>
+                <h3 className="font-medium text-lg">Price</h3>
+                <p className="text-xl font-accent text-primary">${menuItem.price.toFixed(2)}</p>
+              </div>
+              
+              {menuItem.allergens && menuItem.allergens.length > 0 && (
+                <div>
+                  <h3 className="font-medium text-lg">Allergens</h3>
+                  <div className="flex flex-wrap gap-2 mt-1">
+                    {menuItem.allergens.map((allergen, index) => (
+                      <span key={index} className="bg-red-50 text-red-700 px-2 py-1 rounded text-sm">
+                        {allergen}
+                      </span>
+                    ))}
+                  </div>
+                </div>
+              )}
+              
+              <div>
+                <h3 className="font-medium text-lg">Dietary Information</h3>
+                <div className="flex flex-wrap gap-2 mt-1">
+                  {menuItem.isVegetarian && (
+                    <span className="bg-green-100 text-green-800 px-2 py-1 rounded text-sm">
+                      Vegetarian
+                    </span>
+                  )}
+                  {menuItem.isGlutenFree && (
+                    <span className="bg-yellow-100 text-yellow-800 px-2 py-1 rounded text-sm">
+                      Gluten Free
+                    </span>
+                  )}
+                  {menuItem.isSeafood && (
+                    <span className="bg-red-100 text-red-800 px-2 py-1 rounded text-sm">
+                      Contains Seafood
+                    </span>
+                  )}
+                  {!menuItem.isVegetarian && !menuItem.isGlutenFree && !menuItem.isSeafood && (
+                    <span className="bg-gray-100 text-gray-800 px-2 py-1 rounded text-sm">
+                      No specific dietary information
+                    </span>
+                  )}
+                </div>
+              </div>
+              
+              {menuItem.nutritionInfo && (
+                <div>
+                  <h3 className="font-medium text-lg">Nutrition Information</h3>
+                  <div className="grid grid-cols-2 gap-2 mt-1">
+                    {Object.entries(menuItem.nutritionInfo).map(([key, value]) => (
+                      <div key={key} className="bg-gray-50 p-2 rounded">
+                        <span className="font-medium">{key}: </span>
+                        <span>{value}</span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+              
+              {menuItem.modifiers && menuItem.modifiers.length > 0 && (
+                <div>
+                  <h3 className="font-medium text-lg">Available Modifiers</h3>
+                  <div className="space-y-2 mt-1">
+                    {menuItem.modifiers.map((modifier) => (
+                      <div key={modifier.id} className="flex justify-between items-center">
+                        <span>{modifier.name}</span>
+                        {modifier.price > 0 && (
+                          <span className="text-gray-600">+${modifier.price.toFixed(2)}</span>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </div>
+          </div>
+          
+          <DialogFooter className="flex space-x-2">
+            <Button variant="outline" onClick={() => setIsDetailModalOpen(false)}>
+              Close
+            </Button>
+            <Button onClick={handleAddToCart}>
+              Add to Cart - ${menuItem.price.toFixed(2)}
             </Button>
           </DialogFooter>
         </DialogContent>
