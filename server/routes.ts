@@ -7,6 +7,7 @@ import {
   insertUserPreferenceSchema, insertUserItemInteractionSchema
 } from "@shared/schema";
 import { z } from "zod";
+import { sendTableReadySMS, sendQueueConfirmationSMS } from "./services/notificationService";
 
 export async function registerRoutes(app: Express): Promise<Server> {
   // API routes
@@ -370,6 +371,22 @@ export async function registerRoutes(app: Express): Promise<Server> {
         estimatedWaitTime
       });
       
+      // Send confirmation SMS if phone number is available
+      if (queueEntry.phone) {
+        // Get restaurant info for the notification
+        const restaurant = await storage.getRestaurant(queueEntry.restaurantId);
+        const restaurantName = restaurant ? restaurant.name : "the restaurant";
+        
+        // Send SMS notification asynchronously (don't await)
+        sendQueueConfirmationSMS(queueEntry, restaurantName)
+          .then(success => {
+            console.log(`Confirmation SMS ${success ? 'sent' : 'failed'} for queue entry ${queueEntry.id}`);
+          })
+          .catch(error => {
+            console.error('Error sending confirmation SMS:', error);
+          });
+      }
+      
       return res.status(201).json(queueEntry);
     } catch (error) {
       if (error instanceof z.ZodError) {
@@ -385,10 +402,30 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const id = parseInt(req.params.id);
       const updates = req.body;
       
+      // Get the queue entry before updating
+      const queueEntry = await storage.getQueueEntry(id);
+      
+      if (!queueEntry) {
+        return res.status(404).json({ message: "Queue entry not found" });
+      }
+      
       const updatedEntry = await storage.updateQueueEntry(id, updates);
       
-      if (!updatedEntry) {
-        return res.status(404).json({ message: "Queue entry not found" });
+      // Check if status was updated to "ready" and notification hasn't been sent yet
+      if (updates.status === 'ready' && !queueEntry.notificationSent) {
+        // Get restaurant info for the notification
+        const restaurant = await storage.getRestaurant(queueEntry.restaurantId);
+        const restaurantName = restaurant ? restaurant.name : "the restaurant";
+        
+        // Send SMS notification
+        if (queueEntry.phone) {
+          const notificationSent = await sendTableReadySMS(queueEntry, restaurantName);
+          
+          // Mark notification as sent if successful
+          if (notificationSent) {
+            await storage.updateQueueEntry(id, { notificationSent: true });
+          }
+        }
       }
       
       return res.json(updatedEntry);

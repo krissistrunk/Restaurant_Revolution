@@ -68,6 +68,7 @@ export interface IStorage {
   
   // Virtual Queue methods
   getQueueEntries(restaurantId: number): Promise<QueueEntry[]>;
+  getQueueEntry(id: number): Promise<QueueEntry | undefined>;
   getUserQueueEntry(userId: number, restaurantId: number): Promise<QueueEntry | undefined>;
   createQueueEntry(entry: InsertQueueEntry): Promise<QueueEntry>;
   updateQueueEntry(id: number, updates: Partial<QueueEntry>): Promise<QueueEntry | undefined>;
@@ -678,6 +679,10 @@ export class MemStorage implements IStorage {
     return Array.from(this.queueEntries.values())
       .filter(entry => entry.restaurantId === restaurantId)
       .sort((a, b) => a.position - b.position);
+  }
+  
+  async getQueueEntry(id: number): Promise<QueueEntry | undefined> {
+    return this.queueEntries.get(id);
   }
 
   async getUserQueueEntry(userId: number, restaurantId: number): Promise<QueueEntry | undefined> {

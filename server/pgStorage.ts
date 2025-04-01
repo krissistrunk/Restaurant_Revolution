@@ -292,6 +292,11 @@ export class PgStorage implements IStorage {
   async getQueueEntries(restaurantId: number): Promise<QueueEntry[]> {
     return db.select().from(schema.queueEntries).where(eq(schema.queueEntries.restaurantId, restaurantId));
   }
+  
+  async getQueueEntry(id: number): Promise<QueueEntry | undefined> {
+    const entries = await db.select().from(schema.queueEntries).where(eq(schema.queueEntries.id, id));
+    return entries[0];
+  }
 
   async getUserQueueEntry(userId: number, restaurantId: number): Promise<QueueEntry | undefined> {
     const entries = await db.select().from(schema.queueEntries).where(
