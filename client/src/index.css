@@ -1,0 +1,76 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  body {
+    @apply font-sans antialiased bg-light text-dark;
+  }
+}
+
+/* Custom CSS for the restaurant app */
+.tab-active { 
+  border-bottom: 3px solid hsl(var(--primary)); 
+  color: hsl(var(--primary)); 
+}
+
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+/* Global Font Styles */
+:root {
+  --font-heading: 'Poppins', sans-serif;
+  --font-body: 'Inter', sans-serif;
+  --font-accent: 'Montserrat', sans-serif;
+}
+
+.font-heading {
+  font-family: var(--font-heading);
+}
+
+.font-body {
+  font-family: var(--font-body);
+}
+
+.font-accent {
+  font-family: var(--font-accent);
+}
+
+/* Background Colors */
+.bg-light {
+  background-color: #F1FAEE;
+}
+
+.bg-dark {
+  background-color: #1D3557;
+}
+
+.bg-accent {
+  background-color: #F1C40F;
+}
+
+.text-dark {
+  color: #1D3557;
+}
+
+/* Menu Item Animation */
+.menu-item-enter {
+  transform: translateY(20px);
+  opacity: 0;
+}
+
+.menu-item-enter-active {
+  transform: translateY(0);
+  opacity: 1;
+  transition: all 0.3s ease;
+}
