@@ -36,6 +36,11 @@ const Navigation = () => {
               Info
             </a>
           </Link>
+          <Link href="/assistant">
+            <a className={`flex-shrink-0 px-4 py-2 font-medium text-sm ${currentTab === "/assistant" ? "tab-active" : "text-gray-600"}`}>
+              Assistant
+            </a>
+          </Link>
         </div>
       </div>
     </nav>

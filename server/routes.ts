@@ -1,4 +1,4 @@
-import type { Express, Request, Response } from "express";
+import type { Express, Request, Response, NextFunction } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
 import { 
@@ -8,6 +8,7 @@ import {
 } from "@shared/schema";
 import { z } from "zod";
 import { sendTableReadySMS, sendQueueConfirmationSMS } from "./services/notificationService";
+import AiService from "./aiService";
 
 export async function registerRoutes(app: Express): Promise<Server> {
   // API routes
@@ -500,15 +501,22 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.post("/api/ai-conversations/:id/messages", async (req: Request, res: Response) => {
     try {
       const id = parseInt(req.params.id);
-      const message = req.body;
+      const userMessage = req.body;
       
-      const updatedConversation = await storage.updateAiConversation(id, message);
-      
-      if (!updatedConversation) {
+      // 1. Add user message to conversation
+      const updatedWithUserMessage = await storage.updateAiConversation(id, userMessage);
+      if (!updatedWithUserMessage) {
         return res.status(404).json({ message: "Conversation not found" });
       }
       
-      return res.json(updatedConversation);
+      // 2. Process the user message with AI service
+      const aiService = new AiService(storage);
+      const aiResponse = await aiService.processMessage(id, userMessage);
+      
+      // 3. Add AI response to conversation
+      const finalConversation = await storage.updateAiConversation(id, aiResponse);
+      
+      return res.json(finalConversation);
     } catch (error) {
       console.error("Error adding message to conversation:", error);
       return res.status(500).json({ message: "Internal server error" });

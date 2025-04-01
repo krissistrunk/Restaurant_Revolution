@@ -11,6 +11,7 @@ import RewardsPage from "@/pages/RewardsPage";
 import InfoPage from "@/pages/InfoPage";
 import LoginPage from "@/pages/LoginPage";
 import RegisterPage from "@/pages/RegisterPage";
+import AiAssistantPage from "@/pages/AiAssistantPage";
 
 import Header from "@/components/Header";
 import Navigation from "@/components/Navigation";
@@ -22,6 +23,7 @@ import { AuthProvider } from "@/context/AuthContext";
 import { CartProvider } from "@/context/CartContext";
 import { RestaurantProvider } from "@/context/RestaurantContext";
 import { LoyaltyProvider } from "@/context/LoyaltyContext";
+import { AiAssistantProvider } from "@/context/AiAssistantContext";
 
 function Router() {
   return (
@@ -36,6 +38,7 @@ function Router() {
         <Route path="/order" component={OrderPage} />
         <Route path="/rewards" component={RewardsPage} />
         <Route path="/info" component={InfoPage} />
+        <Route path="/assistant" component={AiAssistantPage} />
         <Route path="/login" component={LoginPage} />
         <Route path="/register" component={RegisterPage} />
         <Route component={NotFound} />
@@ -54,10 +57,12 @@ function App() {
         <AuthProvider>
           <CartProvider>
             <LoyaltyProvider>
-              <AppWrapper>
-                <Router />
-                <Toaster />
-              </AppWrapper>
+              <AiAssistantProvider>
+                <AppWrapper>
+                  <Router />
+                  <Toaster />
+                </AppWrapper>
+              </AiAssistantProvider>
             </LoyaltyProvider>
           </CartProvider>
         </AuthProvider>
