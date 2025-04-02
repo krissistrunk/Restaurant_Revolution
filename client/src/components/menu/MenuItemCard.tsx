@@ -262,6 +262,7 @@ const MenuItemCard = ({ menuItem }: MenuItemCardProps) => {
                   </svg>
                 </button>
               </div>
+            </div>
           </DialogHeader>
           
           <div className="flex flex-col md:flex-row gap-6">
