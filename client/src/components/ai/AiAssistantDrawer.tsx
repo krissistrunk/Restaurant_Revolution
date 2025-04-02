@@ -31,12 +31,12 @@ const AiAssistantDrawer = () => {
       >
         <Button 
           variant="default"
-          className="h-36 rounded-l-xl rounded-r-none py-3 px-2 shadow-xl flex flex-col justify-center items-center gap-2 border-r-0 border-2"
+          className="h-24 rounded-l-xl rounded-r-none py-2 px-1 shadow-xl flex flex-col justify-center items-center gap-1 border-r-0 border-2"
           onClick={() => setOpen(true)}
         >
-          <Sparkles className="h-4 w-4 mb-1" />
-          <span className="rotate-90 whitespace-nowrap text-sm font-medium">AI Assistant</span>
-          <ChevronLeft className="h-4 w-4 mt-2" />
+          <Sparkles className="h-4 w-4" />
+          <span className="rotate-90 whitespace-nowrap text-xs font-medium">Assistant</span>
+          <ChevronLeft className="h-4 w-4" />
         </Button>
       </div>
       
@@ -44,7 +44,7 @@ const AiAssistantDrawer = () => {
       <Sheet open={open} onOpenChange={setOpen}>
         <SheetContent 
           side="right" 
-          className="sm:max-w-[220px] md:max-w-[240px] w-[90vw] p-0 flex flex-col h-[60vh] mt-[20vh]"
+          className="sm:max-w-[180px] md:max-w-[200px] w-[80vw] p-0 flex flex-col h-[60vh] mt-[20vh]"
         >
           <SheetHeader className="px-4 py-3 border-b flex-row items-center justify-between">
             <SheetTitle className="flex items-center gap-2">
