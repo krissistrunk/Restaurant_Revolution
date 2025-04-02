@@ -503,12 +503,6 @@ export class MemStorage implements IStorage {
         isAvailable: true,
         restaurantId: 1
       }
-        imageUrl: "https://images.unsplash.com/photo-1544025162-d76694265947?ixlib=rb-1.2.1&auto=format&fit=crop&w=120&h=120&q=80",
-        categoryId: 2,
-        isAvailable: true,
-        isGlutenFree: true,
-        restaurantId: 1
-      },
       {
         name: "Chicken Parmesan",
         description: "Breaded chicken breast with marinara sauce and melted mozzarella",
