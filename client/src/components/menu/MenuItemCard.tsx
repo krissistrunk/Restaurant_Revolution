@@ -255,39 +255,46 @@ const MenuItemCard = ({ menuItem }: MenuItemCardProps) => {
             </div>
           </DialogHeader>
           
-          <div className="flex flex-col md:flex-row gap-6">
-            <div className="w-full md:w-1/2 space-y-4">
+          <div className="flex flex-col gap-6">
+            <div className="grid grid-cols-2 gap-4">
               <img
                 src={menuItem.imageUrl}
-                alt={menuItem.name}
-                className="w-full h-auto rounded-lg object-cover"
+                alt={`${menuItem.name} - main view`}
+                className="w-full h-48 rounded-lg object-cover"
               />
-              <button 
-                onClick={() => setIsDetailModalOpen(false)}
-                className="w-full py-2 flex items-center justify-center gap-2 text-primary hover:text-primary/80 font-medium border border-primary rounded-lg"
-              >
-                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                  <path d="M19 12H5M12 19l-7-7 7-7"/>
-                </svg>
-                Back to Menu
-              </button>
+              <img
+                src={menuItem.imageUrl}
+                alt={`${menuItem.name} - secondary view`}
+                className="w-full h-48 rounded-lg object-cover"
+              />
+              <div className="col-span-2 flex justify-center">
+                <button 
+                  onClick={() => setIsDetailModalOpen(false)}
+                  className="px-6 py-2 flex items-center justify-center gap-2 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-lg transition-colors"
+                >
+                  <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M19 12H5M12 19l-7-7 7-7"/>
+                  </svg>
+                  Back to Menu
+                </button>
+              </div>
             </div>
             
-            <div className="w-full md:w-1/2 space-y-4">
-              <div>
-                <h3 className="font-medium text-lg">Description</h3>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="bg-gray-50 p-4 rounded-lg">
+                <h3 className="font-medium text-lg mb-2">Description</h3>
                 <p className="text-gray-600">{menuItem.description}</p>
               </div>
               
-              <div>
-                <h3 className="font-medium text-lg">Price</h3>
-                <p className="text-xl font-accent text-primary">${menuItem.price.toFixed(2)}</p>
+              <div className="bg-gray-50 p-4 rounded-lg">
+                <h3 className="font-medium text-lg mb-2">Price</h3>
+                <p className="text-2xl font-accent text-primary">${menuItem.price.toFixed(2)}</p>
               </div>
               
               {menuItem.allergens && menuItem.allergens.length > 0 && (
-                <div>
-                  <h3 className="font-medium text-lg">Allergens</h3>
-                  <div className="flex flex-wrap gap-2 mt-1">
+                <div className="bg-gray-50 p-4 rounded-lg">
+                  <h3 className="font-medium text-lg mb-2">Allergens</h3>
+                  <div className="flex flex-wrap gap-2">
                     {menuItem.allergens.map((allergen, index) => (
                       <span key={index} className="bg-red-50 text-red-700 px-2 py-1 rounded text-sm">
                         {allergen}
