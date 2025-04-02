@@ -249,29 +249,28 @@ const MenuItemCard = ({ menuItem }: MenuItemCardProps) => {
               <div className="flex items-center gap-4">
                 <DialogTitle className="text-xl">{menuItem.name}</DialogTitle>
               </div>
-              <div className="flex items-center gap-4">
-                <DialogDescription className="text-sm text-gray-500">
-                  {menuItem.categoryId && `Category ID: ${menuItem.categoryId}`}
-                </DialogDescription>
-                <button 
-                  onClick={() => setIsDetailModalOpen(false)}
-                  className="flex items-center gap-2 text-primary hover:text-primary/80 font-medium"
-                >
-                  <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                    <path d="M6 18L18 6M6 6l12 12"/>
-                  </svg>
-                </button>
-              </div>
+              <DialogDescription className="text-sm text-gray-500">
+                {menuItem.categoryId && `Category ID: ${menuItem.categoryId}`}
+              </DialogDescription>
             </div>
           </DialogHeader>
           
           <div className="flex flex-col md:flex-row gap-6">
-            <div className="w-full md:w-1/2">
+            <div className="w-full md:w-1/2 space-y-4">
               <img
                 src={menuItem.imageUrl}
                 alt={menuItem.name}
                 className="w-full h-auto rounded-lg object-cover"
               />
+              <button 
+                onClick={() => setIsDetailModalOpen(false)}
+                className="w-full py-2 flex items-center justify-center gap-2 text-primary hover:text-primary/80 font-medium border border-primary rounded-lg"
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M19 12H5M12 19l-7-7 7-7"/>
+                </svg>
+                Back to Menu
+              </button>
             </div>
             
             <div className="w-full md:w-1/2 space-y-4">
