@@ -502,7 +502,7 @@ export class MemStorage implements IStorage {
         categoryId: 6,
         isAvailable: true,
         restaurantId: 1
-      }
+      },
       {
         name: "Chicken Parmesan",
         description: "Breaded chicken breast with marinara sauce and melted mozzarella",
