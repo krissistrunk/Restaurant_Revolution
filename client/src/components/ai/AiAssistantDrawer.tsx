@@ -44,7 +44,7 @@ const AiAssistantDrawer = () => {
       <Sheet open={open} onOpenChange={setOpen}>
         <SheetContent 
           side="right" 
-          className="sm:max-w-[280px] md:max-w-[320px] w-[90vw] p-0 flex flex-col h-[60vh] mt-[20vh]"
+          className="sm:max-w-[220px] md:max-w-[240px] w-[90vw] p-0 flex flex-col h-[60vh] mt-[20vh]"
         >
           <SheetHeader className="px-4 py-3 border-b flex-row items-center justify-between">
             <SheetTitle className="flex items-center gap-2">
