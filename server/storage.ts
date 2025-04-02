@@ -202,7 +202,11 @@ export class MemStorage implements IStorage {
         name: "Bruschetta",
         description: "Toasted bread topped with tomatoes, fresh basil, and garlic",
         price: 12.99,
-        imageUrl: "https://images.unsplash.com/photo-1546241072-48010ad2862c?ixlib=rb-1.2.1&auto=format&fit=crop&w=120&h=120&q=80",
+        imageUrl: "https://images.unsplash.com/photo-1546241072-48010ad2862c",
+        images: [
+          "https://images.unsplash.com/photo-1546241072-48010ad2862c",
+          "https://images.unsplash.com/photo-1572695157366-5e585ab2b69f"
+        ],
         categoryId: 1,
         isAvailable: true,
         isVegetarian: true,
@@ -212,10 +216,69 @@ export class MemStorage implements IStorage {
         name: "Calamari",
         description: "Crispy fried calamari served with marinara sauce",
         price: 14.50,
-        imageUrl: "https://images.unsplash.com/photo-1569058242567-93de6f36f8eb?ixlib=rb-1.2.1&auto=format&fit=crop&w=120&h=120&q=80",
+        imageUrl: "https://images.unsplash.com/photo-1569058242567-93de6f36f8eb",
+        images: [
+          "https://images.unsplash.com/photo-1569058242567-93de6f36f8eb",
+          "https://images.unsplash.com/photo-1571162372345-3f5fcfc51b55"
+        ],
         categoryId: 1,
         isAvailable: true,
         isSeafood: true,
+        restaurantId: 1
+      },
+      {
+        name: "Spinach Artichoke Dip",
+        description: "Creamy spinach and artichoke dip with tortilla chips",
+        price: 13.99,
+        imageUrl: "https://images.unsplash.com/photo-1576072115035-d3694794275a",
+        images: [
+          "https://images.unsplash.com/photo-1576072115035-d3694794275a",
+          "https://images.unsplash.com/photo-1576072115035-d3694794275b"
+        ],
+        categoryId: 1,
+        isAvailable: true,
+        isVegetarian: true,
+        restaurantId: 1
+      },
+      {
+        name: "Shrimp Cocktail",
+        description: "Chilled jumbo shrimp with cocktail sauce",
+        price: 16.99,
+        imageUrl: "https://images.unsplash.com/photo-1565557623262-b51c2513a641",
+        images: [
+          "https://images.unsplash.com/photo-1565557623262-b51c2513a641",
+          "https://images.unsplash.com/photo-1565557623262-b51c2513a642"
+        ],
+        categoryId: 1,
+        isAvailable: true,
+        isSeafood: true,
+        restaurantId: 1
+      },
+      {
+        name: "Chicken Wings",
+        description: "Choose from buffalo, BBQ, or garlic parmesan",
+        price: 15.99,
+        imageUrl: "https://images.unsplash.com/photo-1567620832903-9fc6debc209f",
+        images: [
+          "https://images.unsplash.com/photo-1567620832903-9fc6debc209f",
+          "https://images.unsplash.com/photo-1567620832903-9fc6debc209e"
+        ],
+        categoryId: 1,
+        isAvailable: true,
+        restaurantId: 1
+      },
+      {
+        name: "Caprese Salad",
+        description: "Fresh mozzarella, tomatoes, and basil with balsamic glaze",
+        price: 13.99,
+        imageUrl: "https://images.unsplash.com/photo-1580064755419-883acc42900b",
+        images: [
+          "https://images.unsplash.com/photo-1580064755419-883acc42900b",
+          "https://images.unsplash.com/photo-1580064755419-883acc42900c"
+        ],
+        categoryId: 1,
+        isAvailable: true,
+        isVegetarian: true,
         restaurantId: 1
       },
       // Main Course
@@ -223,6 +286,223 @@ export class MemStorage implements IStorage {
         name: "Ribeye Steak",
         description: "12oz prime ribeye with roasted potatoes and seasonal vegetables",
         price: 32.99,
+        imageUrl: "https://images.unsplash.com/photo-1544025162-d76694265947",
+        images: [
+          "https://images.unsplash.com/photo-1544025162-d76694265947",
+          "https://images.unsplash.com/photo-1544025162-d76694265948"
+        ],
+        categoryId: 2,
+        isAvailable: true,
+        isGlutenFree: true,
+        restaurantId: 1
+      },
+      {
+        name: "Grilled Salmon",
+        description: "Fresh Atlantic salmon with lemon herb butter",
+        price: 28.99,
+        imageUrl: "https://images.unsplash.com/photo-1485921325833-c519f76c4927",
+        images: [
+          "https://images.unsplash.com/photo-1485921325833-c519f76c4927",
+          "https://images.unsplash.com/photo-1485921325833-c519f76c4928"
+        ],
+        categoryId: 2,
+        isAvailable: true,
+        isSeafood: true,
+        isGlutenFree: true,
+        restaurantId: 1
+      },
+      {
+        name: "Chicken Marsala",
+        description: "Pan-seared chicken with mushroom marsala sauce",
+        price: 24.99,
+        imageUrl: "https://images.unsplash.com/photo-1549572189-dddb1adf739b",
+        images: [
+          "https://images.unsplash.com/photo-1549572189-dddb1adf739b",
+          "https://images.unsplash.com/photo-1549572189-dddb1adf739c"
+        ],
+        categoryId: 2,
+        isAvailable: true,
+        restaurantId: 1
+      },
+      {
+        name: "Vegetable Stir Fry",
+        description: "Fresh vegetables in garlic sauce with tofu",
+        price: 19.99,
+        imageUrl: "https://images.unsplash.com/photo-1512058564366-18510be2db19",
+        images: [
+          "https://images.unsplash.com/photo-1512058564366-18510be2db19",
+          "https://images.unsplash.com/photo-1512058564366-18510be2db20"
+        ],
+        categoryId: 2,
+        isAvailable: true,
+        isVegetarian: true,
+        isGlutenFree: true,
+        restaurantId: 1
+      },
+      // Pasta
+      {
+        name: "Fettuccine Alfredo",
+        description: "Creamy parmesan sauce with fettuccine",
+        price: 18.99,
+        imageUrl: "https://images.unsplash.com/photo-1645112411341-6c4fd023882c",
+        images: [
+          "https://images.unsplash.com/photo-1645112411341-6c4fd023882c",
+          "https://images.unsplash.com/photo-1645112411341-6c4fd023882d"
+        ],
+        categoryId: 3,
+        isAvailable: true,
+        isVegetarian: true,
+        restaurantId: 1
+      },
+      {
+        name: "Spaghetti Carbonara",
+        description: "Classic carbonara with pancetta and egg",
+        price: 19.99,
+        imageUrl: "https://images.unsplash.com/photo-1612874742237-6526221588e3",
+        images: [
+          "https://images.unsplash.com/photo-1612874742237-6526221588e3",
+          "https://images.unsplash.com/photo-1612874742237-6526221588e4"
+        ],
+        categoryId: 3,
+        isAvailable: true,
+        restaurantId: 1
+      },
+      {
+        name: "Penne Arrabbiata",
+        description: "Spicy tomato sauce with garlic and red chili",
+        price: 17.99,
+        imageUrl: "https://images.unsplash.com/photo-1563379926898-05f4575a45d8",
+        images: [
+          "https://images.unsplash.com/photo-1563379926898-05f4575a45d8",
+          "https://images.unsplash.com/photo-1563379926898-05f4575a45d9"
+        ],
+        categoryId: 3,
+        isAvailable: true,
+        isVegetarian: true,
+        restaurantId: 1
+      },
+      // Pizza
+      {
+        name: "Margherita Pizza",
+        description: "Fresh mozzarella, tomatoes, and basil",
+        price: 16.99,
+        imageUrl: "https://images.unsplash.com/photo-1604068549290-dea0e4a305ca",
+        images: [
+          "https://images.unsplash.com/photo-1604068549290-dea0e4a305ca",
+          "https://images.unsplash.com/photo-1604068549290-dea0e4a305cb"
+        ],
+        categoryId: 4,
+        isAvailable: true,
+        isVegetarian: true,
+        restaurantId: 1
+      },
+      {
+        name: "Pepperoni Pizza",
+        description: "Classic pepperoni with mozzarella",
+        price: 17.99,
+        imageUrl: "https://images.unsplash.com/photo-1534308983496-4fabb1a015ee",
+        images: [
+          "https://images.unsplash.com/photo-1534308983496-4fabb1a015ee",
+          "https://images.unsplash.com/photo-1534308983496-4fabb1a015ef"
+        ],
+        categoryId: 4,
+        isAvailable: true,
+        restaurantId: 1
+      },
+      {
+        name: "Vegetarian Supreme",
+        description: "Bell peppers, onions, mushrooms, olives",
+        price: 18.99,
+        imageUrl: "https://images.unsplash.com/photo-1571066811602-716837d681de",
+        images: [
+          "https://images.unsplash.com/photo-1571066811602-716837d681de",
+          "https://images.unsplash.com/photo-1571066811602-716837d681df"
+        ],
+        categoryId: 4,
+        isAvailable: true,
+        isVegetarian: true,
+        restaurantId: 1
+      },
+      // Desserts
+      {
+        name: "Tiramisu",
+        description: "Classic Italian coffee-flavored dessert",
+        price: 9.99,
+        imageUrl: "https://images.unsplash.com/photo-1571877227200-a0d98ea607e9",
+        images: [
+          "https://images.unsplash.com/photo-1571877227200-a0d98ea607e9",
+          "https://images.unsplash.com/photo-1571877227200-a0d98ea607ea"
+        ],
+        categoryId: 5,
+        isAvailable: true,
+        restaurantId: 1
+      },
+      {
+        name: "Chocolate Lava Cake",
+        description: "Warm chocolate cake with molten center",
+        price: 10.99,
+        imageUrl: "https://images.unsplash.com/photo-1606313564200-e75d5e30476c",
+        images: [
+          "https://images.unsplash.com/photo-1606313564200-e75d5e30476c",
+          "https://images.unsplash.com/photo-1606313564200-e75d5e30476d"
+        ],
+        categoryId: 5,
+        isAvailable: true,
+        restaurantId: 1
+      },
+      {
+        name: "New York Cheesecake",
+        description: "Classic cheesecake with berry compote",
+        price: 9.99,
+        imageUrl: "https://images.unsplash.com/photo-1533134242443-d4fd215305ad",
+        images: [
+          "https://images.unsplash.com/photo-1533134242443-d4fd215305ad",
+          "https://images.unsplash.com/photo-1533134242443-d4fd215305ae"
+        ],
+        categoryId: 5,
+        isAvailable: true,
+        restaurantId: 1
+      },
+      // Drinks
+      {
+        name: "Signature Sangria",
+        description: "Red wine sangria with fresh fruit",
+        price: 11.99,
+        imageUrl: "https://images.unsplash.com/photo-1556679343-c7306c1976bc",
+        images: [
+          "https://images.unsplash.com/photo-1556679343-c7306c1976bc",
+          "https://images.unsplash.com/photo-1556679343-c7306c1976bd"
+        ],
+        categoryId: 6,
+        isAvailable: true,
+        restaurantId: 1
+      },
+      {
+        name: "Craft Beer Flight",
+        description: "Selection of four local craft beers",
+        price: 14.99,
+        imageUrl: "https://images.unsplash.com/photo-1575367439058-6096bb9cf5e2",
+        images: [
+          "https://images.unsplash.com/photo-1575367439058-6096bb9cf5e2",
+          "https://images.unsplash.com/photo-1575367439058-6096bb9cf5e3"
+        ],
+        categoryId: 6,
+        isAvailable: true,
+        restaurantId: 1
+      },
+      {
+        name: "Espresso Martini",
+        description: "Vodka, coffee liqueur, fresh espresso",
+        price: 12.99,
+        imageUrl: "https://images.unsplash.com/photo-1545438102-799c3991ffb2",
+        images: [
+          "https://images.unsplash.com/photo-1545438102-799c3991ffb2",
+          "https://images.unsplash.com/photo-1545438102-799c3991ffb3"
+        ],
+        categoryId: 6,
+        isAvailable: true,
+        restaurantId: 1
+      }
         imageUrl: "https://images.unsplash.com/photo-1544025162-d76694265947?ixlib=rb-1.2.1&auto=format&fit=crop&w=120&h=120&q=80",
         categoryId: 2,
         isAvailable: true,

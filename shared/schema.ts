@@ -391,6 +391,7 @@ export type InsertCategory = z.infer<typeof insertCategorySchema>;
 
 export type MenuItem = typeof menuItems.$inferSelect & {
   modifiers?: Modifier[];
+  images?: string[];
 };
 export type InsertMenuItem = z.infer<typeof insertMenuItemSchema>;
 
