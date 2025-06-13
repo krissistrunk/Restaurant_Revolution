@@ -9,39 +9,52 @@ import {
 import { z } from "zod";
 import { sendTableReadySMS, sendQueueConfirmationSMS } from "./services/notificationService";
 import AiService from "./aiService";
+import { cmsMiddleware } from "./middleware/cmsMiddleware";
 
 export async function registerRoutes(app: Express): Promise<Server> {
   // API routes
   const apiRouter = app.route("/api");
   
+  // CMS Health check and cache management
+  app.get("/api/cms/health", cmsMiddleware.healthCheck);
+  app.post("/api/cms/clear-cache", cmsMiddleware.clearCache);
+
   // Get restaurant info
-  app.get("/api/restaurant", async (req: Request, res: Response) => {
-    try {
-      const restaurant = await storage.getRestaurant(1);
-      if (!restaurant) {
-        return res.status(404).json({ message: "Restaurant not found" });
+  app.get("/api/restaurant", 
+    cmsMiddleware.withRestaurantCMS(),
+    cmsMiddleware.withCMSFallback(),
+    async (req: Request, res: Response) => {
+      try {
+        const restaurant = await storage.getRestaurant(1);
+        if (!restaurant) {
+          return res.status(404).json({ message: "Restaurant not found" });
+        }
+        return res.json(restaurant);
+      } catch (error) {
+        console.error("Error fetching restaurant:", error);
+        return res.status(500).json({ message: "Internal server error" });
       }
-      return res.json(restaurant);
-    } catch (error) {
-      console.error("Error fetching restaurant:", error);
-      return res.status(500).json({ message: "Internal server error" });
     }
-  });
+  );
 
   // Get restaurant info by ID (alternative endpoint)
-  app.get("/api/restaurants/:id", async (req: Request, res: Response) => {
-    try {
-      const restaurantId = parseInt(req.params.id);
-      const restaurant = await storage.getRestaurant(restaurantId);
-      if (!restaurant) {
-        return res.status(404).json({ message: "Restaurant not found" });
+  app.get("/api/restaurants/:id", 
+    cmsMiddleware.withRestaurantCMS(),
+    cmsMiddleware.withCMSFallback(),
+    async (req: Request, res: Response) => {
+      try {
+        const restaurantId = parseInt(req.params.id);
+        const restaurant = await storage.getRestaurant(restaurantId);
+        if (!restaurant) {
+          return res.status(404).json({ message: "Restaurant not found" });
+        }
+        return res.json(restaurant);
+      } catch (error) {
+        console.error("Error fetching restaurant:", error);
+        return res.status(500).json({ message: "Internal server error" });
       }
-      return res.json(restaurant);
-    } catch (error) {
-      console.error("Error fetching restaurant:", error);
-      return res.status(500).json({ message: "Internal server error" });
     }
-  });
+  );
   
   // Authentication routes
   app.post("/api/auth/register", async (req: Request, res: Response) => {
@@ -129,36 +142,47 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
   
-  // Menu routes
-  app.get("/api/categories", async (req: Request, res: Response) => {
-    try {
-      const restaurantId = 1; // Default restaurant ID
-      const categories = await storage.getCategories(restaurantId);
-      return res.json(categories);
-    } catch (error) {
-      console.error("Error fetching categories:", error);
-      return res.status(500).json({ message: "Internal server error" });
+  // Menu routes with CMS integration
+  app.get("/api/categories", 
+    cmsMiddleware.withMenuCategoriesCMS(),
+    cmsMiddleware.withCMSFallback(),
+    async (req: Request, res: Response) => {
+      try {
+        const restaurantId = parseInt(req.query.restaurantId as string) || 1;
+        const categories = await storage.getCategories(restaurantId);
+        return res.json(categories);
+      } catch (error) {
+        console.error("Error fetching categories:", error);
+        return res.status(500).json({ message: "Internal server error" });
+      }
     }
-  });
+  );
   
-  app.get("/api/menu-items", async (req: Request, res: Response) => {
-    try {
-      const restaurantId = 1; // Default restaurant ID
-      const categoryId = req.query.categoryId ? parseInt(req.query.categoryId as string) : undefined;
-      
-      const menuItems = await storage.getMenuItems(restaurantId, categoryId);
-      return res.json(menuItems);
-    } catch (error) {
-      console.error("Error fetching menu items:", error);
-      return res.status(500).json({ message: "Internal server error" });
+  app.get("/api/menu-items", 
+    cmsMiddleware.withMenuItemsCMS(),
+    cmsMiddleware.withCMSFallback(),
+    async (req: Request, res: Response) => {
+      try {
+        const restaurantId = parseInt(req.query.restaurantId as string) || 1;
+        const categoryId = req.query.categoryId ? parseInt(req.query.categoryId as string) : undefined;
+        
+        const menuItems = await storage.getMenuItems(restaurantId, categoryId);
+        return res.json(menuItems);
+      } catch (error) {
+        console.error("Error fetching menu items:", error);
+        return res.status(500).json({ message: "Internal server error" });
+      }
     }
-  });
+  );
   
-  app.get("/api/featured-items", async (req: Request, res: Response) => {
-    try {
-      const restaurantId = 1; // Default restaurant ID
-      const featuredItems = await storage.getFeaturedMenuItems(restaurantId);
-      return res.json(featuredItems);
+  app.get("/api/featured-items", 
+    cmsMiddleware.withMenuItemsCMS(),
+    cmsMiddleware.withCMSFallback(),
+    async (req: Request, res: Response) => {
+      try {
+        const restaurantId = parseInt(req.query.restaurantId as string) || 1;
+        const featuredItems = await storage.getFeaturedMenuItems(restaurantId);
+        return res.json(featuredItems);
     } catch (error) {
       console.error("Error fetching featured items:", error);
       return res.status(500).json({ message: "Internal server error" });

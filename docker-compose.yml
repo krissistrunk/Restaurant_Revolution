@@ -1,0 +1,87 @@
+version: '3.8'
+
+services:
+  # Main RestaurantRush Application
+  app:
+    build: .
+    ports:
+      - "5001:5001"
+    environment:
+      - NODE_ENV=production
+      - PORT=5001
+      - DATABASE_URL=postgresql://restaurant_user:restaurant_pass@postgres:5432/restaurantrush
+      - STRAPI_URL=http://cms:1337
+      - STRAPI_API_TOKEN=${STRAPI_API_TOKEN}
+      - ENABLE_CMS=true
+      - CMS_FIRST=false
+      - CMS_CACHE_TIMEOUT=300000
+    depends_on:
+      - postgres
+      - cms
+    volumes:
+      - ./uploads:/app/uploads
+    restart: unless-stopped
+
+  # Strapi CMS
+  cms:
+    build: 
+      context: ./cms
+      dockerfile: Dockerfile
+    ports:
+      - "1337:1337"
+    environment:
+      - NODE_ENV=production
+      - PORT=1337
+      - DATABASE_URL=postgresql://strapi_user:strapi_pass@postgres:5432/strapi
+      - ADMIN_JWT_SECRET=${ADMIN_JWT_SECRET}
+      - API_TOKEN_SALT=${API_TOKEN_SALT}
+      - APP_KEYS=${APP_KEYS}
+      - JWT_SECRET=${JWT_SECRET}
+      - UPLOAD_PROVIDER=local
+    depends_on:
+      - postgres
+    volumes:
+      - cms_uploads:/app/public/uploads
+    restart: unless-stopped
+
+  # PostgreSQL Database
+  postgres:
+    image: postgres:15-alpine
+    environment:
+      - POSTGRES_DB=postgres
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./scripts/init-db.sql:/docker-entrypoint-initdb.d/init-db.sql
+    restart: unless-stopped
+
+  # Redis Cache (Optional)
+  redis:
+    image: redis:7-alpine
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    restart: unless-stopped
+
+  # Nginx Reverse Proxy (Production)
+  nginx:
+    image: nginx:alpine
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf
+      - ./nginx/ssl:/etc/nginx/ssl
+    depends_on:
+      - app
+      - cms
+    restart: unless-stopped
+
+volumes:
+  postgres_data:
+  cms_uploads:
+  redis_data:
