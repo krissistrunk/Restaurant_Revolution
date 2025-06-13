@@ -6,6 +6,12 @@ import { MemStorage } from './storage';
 // from the in-memory storage implementation
 
 async function initializeDatabase() {
+  // Skip database initialization if using in-memory storage
+  if (!process.env.DATABASE_URL) {
+    console.log('Using in-memory storage, skipping database initialization...');
+    return;
+  }
+  
   try {
     console.log('Initializing database...');
 

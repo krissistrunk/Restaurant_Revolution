@@ -169,6 +169,7 @@ export const queueEntries = pgTable("queue_entries", {
   restaurantId: integer("restaurant_id").notNull(),
   partySize: integer("party_size").notNull(),
   status: text("status").default("waiting").notNull(), // waiting, seated, cancelled
+  position: integer("position").notNull(),
   estimatedWaitTime: integer("estimated_wait_time").notNull(), // in minutes
   actualWaitTime: integer("actual_wait_time"), // in minutes
   joinedAt: timestamp("joined_at").defaultNow().notNull(),
@@ -176,6 +177,24 @@ export const queueEntries = pgTable("queue_entries", {
   seatedAt: timestamp("seated_at"),
   phone: text("phone"),
   note: text("note"),
+});
+
+// Review Schema
+export const reviews = pgTable("reviews", {
+  id: serial("id").primaryKey(),
+  userId: integer("user_id").notNull(),
+  restaurantId: integer("restaurant_id").notNull(),
+  orderId: integer("order_id"),
+  rating: integer("rating").notNull(), // 1-5 stars
+  comment: text("comment"),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+});
+
+export const insertReviewSchema = createInsertSchema(reviews).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
 });
 
 // AI Assistant Conversations Schema
@@ -246,6 +265,7 @@ export const insertUserItemInteractionSchema = createInsertSchema(userItemIntera
 export const usersRelations = relations(users, ({ many, one }) => ({
   reservations: many(reservations),
   orders: many(orders),
+  reviews: many(reviews),
   queueEntries: many(queueEntries),
   aiConversations: many(aiConversations),
   preferences: one(userPreferences),
@@ -257,6 +277,7 @@ export const restaurantsRelations = relations(restaurants, ({ many }) => ({
   menuItems: many(menuItems),
   reservations: many(reservations),
   orders: many(orders),
+  reviews: many(reviews),
   loyaltyRewards: many(loyaltyRewards),
   promotions: many(promotions),
   queueEntries: many(queueEntries),
@@ -351,6 +372,21 @@ export const queueEntriesRelations = relations(queueEntries, ({ one }) => ({
   })
 }));
 
+export const reviewsRelations = relations(reviews, ({ one }) => ({
+  user: one(users, {
+    fields: [reviews.userId],
+    references: [users.id]
+  }),
+  restaurant: one(restaurants, {
+    fields: [reviews.restaurantId],
+    references: [restaurants.id]
+  }),
+  order: one(orders, {
+    fields: [reviews.orderId],
+    references: [orders.id]
+  })
+}));
+
 export const aiConversationsRelations = relations(aiConversations, ({ one }) => ({
   user: one(users, {
     fields: [aiConversations.userId],
@@ -416,6 +452,9 @@ export type InsertLoyaltyReward = z.infer<typeof insertLoyaltyRewardSchema>;
 
 export type Promotion = typeof promotions.$inferSelect;
 export type InsertPromotion = z.infer<typeof insertPromotionSchema>;
+
+export type Review = typeof reviews.$inferSelect;
+export type InsertReview = z.infer<typeof insertReviewSchema>;
 
 // New table types
 export type QueueEntry = typeof queueEntries.$inferSelect;

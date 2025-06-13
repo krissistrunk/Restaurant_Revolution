@@ -4,7 +4,7 @@ import {
   Modifier, InsertModifier, Reservation, InsertReservation,
   Order, InsertOrder, OrderItem, InsertOrderItem,
   LoyaltyReward, InsertLoyaltyReward, Promotion, InsertPromotion,
-  QueueEntry, InsertQueueEntry, AiConversation, InsertAiConversation,
+  Review, InsertReview, QueueEntry, InsertQueueEntry, AiConversation, InsertAiConversation,
   UserPreference, InsertUserPreference, UserItemInteraction, InsertUserItemInteraction,
   users
 } from "@shared/schema";
@@ -66,6 +66,12 @@ export interface IStorage {
   getPromotion(id: number): Promise<Promotion | undefined>;
   createPromotion(promotion: InsertPromotion): Promise<Promotion>;
   
+  // Review methods
+  getReviews(restaurantId: number): Promise<Review[]>;
+  getUserReviews(userId: number): Promise<Review[]>;
+  getReview(id: number): Promise<Review | undefined>;
+  createReview(review: InsertReview): Promise<Review>;
+  
   // Virtual Queue methods
   getQueueEntries(restaurantId: number): Promise<QueueEntry[]>;
   getQueueEntry(id: number): Promise<QueueEntry | undefined>;
@@ -104,6 +110,7 @@ export class MemStorage implements IStorage {
   private orderItems: Map<number, OrderItem>;
   private loyaltyRewards: Map<number, LoyaltyReward>;
   private promotions: Map<number, Promotion>;
+  private reviews: Map<number, Review>;
   private queueEntries: Map<number, QueueEntry>;
   private aiConversations: Map<number, AiConversation>;
   private userPreferences: Map<number, UserPreference>;
@@ -119,6 +126,7 @@ export class MemStorage implements IStorage {
   private orderItemId: number;
   private loyaltyRewardId: number;
   private promotionId: number;
+  private reviewId: number;
   private queueEntryId: number;
   private aiConversationId: number;
   private userPreferenceId: number;
@@ -135,6 +143,7 @@ export class MemStorage implements IStorage {
     this.orderItems = new Map();
     this.loyaltyRewards = new Map();
     this.promotions = new Map();
+    this.reviews = new Map();
     this.queueEntries = new Map();
     this.aiConversations = new Map();
     this.userPreferences = new Map();
@@ -150,6 +159,7 @@ export class MemStorage implements IStorage {
     this.orderItemId = 1;
     this.loyaltyRewardId = 1;
     this.promotionId = 1;
+    this.reviewId = 1;
     this.queueEntryId = 1;
     this.aiConversationId = 1;
     this.userPreferenceId = 1;
@@ -948,6 +958,38 @@ export class MemStorage implements IStorage {
     return newPromotion;
   }
 
+  // Review methods
+  async getReviews(restaurantId: number): Promise<Review[]> {
+    return Array.from(this.reviews.values())
+      .filter(review => review.restaurantId === restaurantId)
+      .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+  }
+  
+  async getUserReviews(userId: number): Promise<Review[]> {
+    return Array.from(this.reviews.values())
+      .filter(review => review.userId === userId)
+      .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+  }
+  
+  async getReview(id: number): Promise<Review | undefined> {
+    return this.reviews.get(id);
+  }
+  
+  async createReview(review: InsertReview): Promise<Review> {
+    const id = this.reviewId++;
+    const now = new Date();
+    const newReview: Review = { 
+      ...review, 
+      id,
+      comment: review.comment || null,
+      orderId: review.orderId || null,
+      createdAt: now,
+      updatedAt: now
+    };
+    this.reviews.set(id, newReview);
+    return newReview;
+  }
+
   // Virtual Queue methods
   async getQueueEntries(restaurantId: number): Promise<QueueEntry[]> {
     return Array.from(this.queueEntries.values())
@@ -973,13 +1015,19 @@ export class MemStorage implements IStorage {
     const position = activeEntries.length + 1;
     
     const newEntry: QueueEntry = {
-      ...entry,
       id,
+      userId: entry.userId,
+      restaurantId: entry.restaurantId,
+      partySize: entry.partySize,
       position,
       status: entry.status || 'waiting',
-      estimatedWaitTimeMinutes: entry.estimatedWaitTimeMinutes || await this.getQueueEstimatedWaitTime(entry.restaurantId, entry.partySize),
-      checkInTime: new Date(),
-      notes: entry.notes || null,
+      estimatedWaitTime: entry.estimatedWaitTime || await this.getQueueEstimatedWaitTime(entry.restaurantId, entry.partySize),
+      actualWaitTime: null,
+      joinedAt: new Date(),
+      notificationSent: false,
+      seatedAt: null,
+      phone: entry.phone ?? null,
+      note: entry.note ?? null,
     };
     
     this.queueEntries.set(id, newEntry);
@@ -1041,10 +1089,12 @@ export class MemStorage implements IStorage {
   async createAiConversation(conversation: InsertAiConversation): Promise<AiConversation> {
     const id = this.aiConversationId++;
     const newConversation: AiConversation = {
-      ...conversation,
       id,
+      userId: conversation.userId,
+      restaurantId: conversation.restaurantId,
       messages: conversation.messages || [],
-      status: 'active',
+      context: conversation.context || null,
+      resolved: false,
       createdAt: new Date(),
       updatedAt: new Date()
     };
@@ -1057,7 +1107,7 @@ export class MemStorage implements IStorage {
     const conversation = this.aiConversations.get(id);
     if (!conversation) return undefined;
     
-    const updatedMessages = [...conversation.messages, message];
+    const updatedMessages = [...(Array.isArray(conversation.messages) ? conversation.messages : []), message];
     const updatedConversation = { 
       ...conversation, 
       messages: updatedMessages,
@@ -1093,12 +1143,12 @@ export class MemStorage implements IStorage {
     const newPreference: UserPreference = {
       ...preference,
       id,
-      allergies: preference.allergies || null,
+      allergens: preference.allergens || null,
       favoriteCategories: preference.favoriteCategories || null,
-      dietaryRestrictions: preference.dietaryRestrictions || null,
-      spicePreference: preference.spicePreference || null,
-      createdAt: new Date(),
-      updatedAt: new Date()
+      dietaryPreferences: preference.dietaryPreferences || null,
+      dislikedItems: preference.dislikedItems || null,
+      tastePreferences: preference.tastePreferences || null,
+      lastUpdated: new Date()
     };
     
     this.userPreferences.set(id, newPreference);
@@ -1127,6 +1177,7 @@ export class MemStorage implements IStorage {
     const newInteraction: UserItemInteraction = {
       ...interaction,
       id,
+      rating: interaction.rating || null,
       timestamp: new Date()
     };
     
@@ -1168,25 +1219,27 @@ export class MemStorage implements IStorage {
       // Boost score based on preferences
       if (userPreference) {
         // Match dietary preferences
-        if (userPreference.dietaryRestrictions) {
-          if (userPreference.dietaryRestrictions.includes('vegetarian') && item.isVegetarian) {
+        if (userPreference.dietaryPreferences && typeof userPreference.dietaryPreferences === 'object') {
+          const dietaryPrefs = userPreference.dietaryPreferences as Record<string, any>;
+          if (dietaryPrefs.vegetarian && item.isVegetarian) {
             score += 10;
           }
-          if (userPreference.dietaryRestrictions.includes('gluten-free') && item.isGlutenFree) {
+          if (dietaryPrefs['gluten-free'] && item.isGlutenFree) {
             score += 10;
           }
         }
         
         // Match favorite categories
-        if (userPreference.favoriteCategories && 
+        if (userPreference.favoriteCategories && Array.isArray(userPreference.favoriteCategories) && 
             userPreference.favoriteCategories.includes(item.categoryId)) {
           score += 15;
         }
         
         // Avoid allergens if specified
-        if (userPreference.allergies && item.allergens) {
-          const allergenMatch = userPreference.allergies.some(allergen => 
-            item.allergens?.includes(allergen)
+        if (userPreference.allergens && Array.isArray(userPreference.allergens) && 
+            item.allergens && Array.isArray(item.allergens)) {
+          const allergenMatch = userPreference.allergens.some((allergen: any) => 
+            (item.allergens as any[])?.includes(allergen)
           );
           if (allergenMatch) {
             score -= 50; // Strong negative score for allergies
@@ -1197,10 +1250,10 @@ export class MemStorage implements IStorage {
       // Boost score based on past interactions
       const itemInteractions = userInteractions.filter(i => i.menuItemId === item.id);
       itemInteractions.forEach(interaction => {
-        if (interaction.interactionType === 'view') score += 2;
-        if (interaction.interactionType === 'like') score += 10;
-        if (interaction.interactionType === 'purchase') score += 15;
-        if (interaction.interactionType === 'dislike') score -= 20;
+        if (interaction.interaction === 'viewed') score += 2;
+        if (interaction.interaction === 'liked') score += 10;
+        if (interaction.interaction === 'ordered') score += 15;
+        if (interaction.interaction === 'favorited') score += 20;
       });
       
       // Boost score for popular and featured items (but less than personalized factors)
@@ -1218,5 +1271,5 @@ export class MemStorage implements IStorage {
 
 import { PgStorage } from './pgStorage';
 
-// Use PostgreSQL storage implementation for database persistence
-export const storage = new PgStorage();
+// Use in-memory storage for development when PostgreSQL is not available
+export const storage = process.env.DATABASE_URL ? new PgStorage() : new MemStorage();

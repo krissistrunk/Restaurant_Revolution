@@ -1,5 +1,6 @@
 import { useContext } from "react";
-import { RestaurantContext, RestaurantContextType } from "@/context/RestaurantContext";
+import { RestaurantContext } from "@/context/RestaurantContext";
+import { RestaurantContextType } from "@/types";
 
 export const useRestaurant = (): RestaurantContextType => {
   const context = useContext(RestaurantContext);

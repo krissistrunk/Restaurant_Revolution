@@ -4,7 +4,7 @@ import { storage } from "./storage";
 import { 
   insertUserSchema, insertReservationSchema, insertOrderSchema, 
   insertOrderItemSchema, insertQueueEntrySchema, insertAiConversationSchema,
-  insertUserPreferenceSchema, insertUserItemInteractionSchema
+  insertUserPreferenceSchema, insertUserItemInteractionSchema, insertReviewSchema
 } from "@shared/schema";
 import { z } from "zod";
 import { sendTableReadySMS, sendQueueConfirmationSMS } from "./services/notificationService";
@@ -18,6 +18,21 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get("/api/restaurant", async (req: Request, res: Response) => {
     try {
       const restaurant = await storage.getRestaurant(1);
+      if (!restaurant) {
+        return res.status(404).json({ message: "Restaurant not found" });
+      }
+      return res.json(restaurant);
+    } catch (error) {
+      console.error("Error fetching restaurant:", error);
+      return res.status(500).json({ message: "Internal server error" });
+    }
+  });
+
+  // Get restaurant info by ID (alternative endpoint)
+  app.get("/api/restaurants/:id", async (req: Request, res: Response) => {
+    try {
+      const restaurantId = parseInt(req.params.id);
+      const restaurant = await storage.getRestaurant(restaurantId);
       if (!restaurant) {
         return res.status(404).json({ message: "Restaurant not found" });
       }
@@ -95,10 +110,19 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(404).json({ message: "User not found" });
       }
       
-      // Remove password from response
+      // Get user's order statistics
+      const orders = await storage.getUserOrders(userId);
+      const totalOrders = orders.length;
+      const totalSpent = orders.reduce((sum, order) => sum + order.totalPrice, 0);
+      
+      // Remove password from response and add calculated stats
       const { password, ...userResponse } = user;
       
-      return res.json(userResponse);
+      return res.json({
+        ...userResponse,
+        totalOrders,
+        totalSpent: parseFloat(totalSpent.toFixed(2))
+      });
     } catch (error) {
       console.error("Error fetching user:", error);
       return res.status(500).json({ message: "Internal server error" });
@@ -219,8 +243,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Get order items for each order
       const ordersWithItems = await Promise.all(
         orders.map(async (order) => {
-          const items = await storage.getOrderItems(order.id);
-          return { ...order, items };
+          const orderItems = await storage.getOrderItems(order.id);
+          return { ...order, orderItems };
         })
       );
       
@@ -599,6 +623,54 @@ export async function registerRoutes(app: Express): Promise<Server> {
       return res.json(updatedPreferences);
     } catch (error) {
       console.error("Error updating user preferences:", error);
+      return res.status(500).json({ message: "Internal server error" });
+    }
+  });
+  
+  // Review routes
+  app.get("/api/reviews", async (req: Request, res: Response) => {
+    try {
+      const restaurantId = parseInt(req.query.restaurantId as string) || 1;
+      const reviews = await storage.getReviews(restaurantId);
+      return res.json(reviews);
+    } catch (error) {
+      console.error("Error fetching reviews:", error);
+      return res.status(500).json({ message: "Internal server error" });
+    }
+  });
+  
+  app.get("/api/user-reviews", async (req: Request, res: Response) => {
+    try {
+      const userId = parseInt(req.query.userId as string);
+      
+      if (!userId) {
+        return res.status(400).json({ message: "User ID is required" });
+      }
+      
+      const reviews = await storage.getUserReviews(userId);
+      return res.json(reviews);
+    } catch (error) {
+      console.error("Error fetching user reviews:", error);
+      return res.status(500).json({ message: "Internal server error" });
+    }
+  });
+  
+  app.post("/api/reviews", async (req: Request, res: Response) => {
+    try {
+      const reviewInput = insertReviewSchema.parse(req.body);
+      
+      // Validate rating is between 1 and 5
+      if (reviewInput.rating < 1 || reviewInput.rating > 5) {
+        return res.status(400).json({ message: "Rating must be between 1 and 5" });
+      }
+      
+      const review = await storage.createReview(reviewInput);
+      return res.status(201).json(review);
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ message: error.errors });
+      }
+      console.error("Error creating review:", error);
       return res.status(500).json({ message: "Internal server error" });
     }
   });

@@ -111,7 +111,7 @@ export class PgStorage implements IStorage {
     if (menuItem) {
       // Fetch modifiers for this menu item
       const modifiers = await this.getModifiers(id);
-      menuItem.modifiers = modifiers;
+      return { ...menuItem, modifiers };
     }
     
     return menuItem;
@@ -126,11 +126,14 @@ export class PgStorage implements IStorage {
     );
 
     // Fetch modifiers for each menu item
-    for (const menuItem of menuItems) {
-      menuItem.modifiers = await this.getModifiers(menuItem.id);
-    }
+    const menuItemsWithModifiers = await Promise.all(
+      menuItems.map(async (menuItem) => {
+        const modifiers = await this.getModifiers(menuItem.id);
+        return { ...menuItem, modifiers };
+      })
+    );
     
-    return menuItems;
+    return menuItemsWithModifiers;
   }
 
   async createMenuItem(menuItem: InsertMenuItem): Promise<MenuItem> {
@@ -190,24 +193,28 @@ export class PgStorage implements IStorage {
     const orders = await db.select().from(schema.orders).where(eq(schema.orders.restaurantId, restaurantId));
     
     // Fetch order items for each order
-    for (const order of orders) {
-      const items = await this.getOrderItems(order.id);
-      order.items = items;
-    }
+    const ordersWithItems = await Promise.all(
+      orders.map(async (order) => {
+        const items = await this.getOrderItems(order.id);
+        return { ...order, items };
+      })
+    );
     
-    return orders;
+    return ordersWithItems;
   }
 
   async getUserOrders(userId: number): Promise<Order[]> {
     const orders = await db.select().from(schema.orders).where(eq(schema.orders.userId, userId));
     
     // Fetch order items for each order
-    for (const order of orders) {
-      const items = await this.getOrderItems(order.id);
-      order.items = items;
-    }
+    const ordersWithItems = await Promise.all(
+      orders.map(async (order) => {
+        const items = await this.getOrderItems(order.id);
+        return { ...order, items };
+      })
+    );
     
-    return orders;
+    return ordersWithItems;
   }
 
   async getOrder(id: number): Promise<Order | undefined> {
@@ -217,7 +224,7 @@ export class PgStorage implements IStorage {
     if (order) {
       // Fetch order items
       const items = await this.getOrderItems(id);
-      order.items = items;
+      return { ...order, items };
     }
     
     return order;
@@ -243,14 +250,17 @@ export class PgStorage implements IStorage {
     const orderItems = await db.select().from(schema.orderItems).where(eq(schema.orderItems.orderId, orderId));
     
     // Fetch menuItem details for each order item
-    for (const item of orderItems) {
-      if (item.menuItemId) {
-        const menuItem = await this.getMenuItem(item.menuItemId);
-        item.menuItem = menuItem;
-      }
-    }
+    const orderItemsWithMenuItems = await Promise.all(
+      orderItems.map(async (item) => {
+        if (item.menuItemId) {
+          const menuItem = await this.getMenuItem(item.menuItemId);
+          return { ...item, menuItem };
+        }
+        return item;
+      })
+    );
     
-    return orderItems;
+    return orderItemsWithMenuItems;
   }
 
   async createOrderItem(orderItem: InsertOrderItem): Promise<OrderItem> {
@@ -311,7 +321,7 @@ export class PgStorage implements IStorage {
 
   async createQueueEntry(entry: InsertQueueEntry): Promise<QueueEntry> {
     // Get current queue size for position calculation
-    const activeEntries = await db.select().from(schema.queueEntries).where(
+    const activeEntriesCount = await db.select().from(schema.queueEntries).where(
       and(
         eq(schema.queueEntries.restaurantId, entry.restaurantId),
         eq(schema.queueEntries.status, 'waiting')
@@ -327,8 +337,11 @@ export class PgStorage implements IStorage {
     // Set joined time to now if not provided
     const joinedAt = new Date();
     
+    const position = activeEntriesCount.length + 1;
+    
     const result = await db.insert(schema.queueEntries).values({
       ...entry,
+      position,
       estimatedWaitTime,
       joinedAt
     }).returning();
