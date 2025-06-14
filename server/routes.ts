@@ -10,6 +10,7 @@ import { z } from "zod";
 import { sendTableReadySMS, sendQueueConfirmationSMS } from "./services/notificationService";
 import AiService from "./aiService";
 import { cmsMiddleware } from "./middleware/cmsMiddleware";
+import { requireAuth, requireOwner, requireAdmin, requireCMSAccess, requireRestaurantAccess } from "./middleware/authMiddleware";
 
 export async function registerRoutes(app: Express): Promise<Server> {
   // API routes
