@@ -1,88 +1,70 @@
+import { Link } from "wouter";
 import { useAuth } from "@/hooks/useAuth";
-import RewardsButton from "@/components/loyalty/RewardsButton";
-import { Link, useLocation } from "wouter";
+import { useRestaurant } from "@/hooks/useRestaurant";
+import { Button } from "@/components/ui/button";
+import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { User, LogOut } from "lucide-react";
 
-const Header = () => {
-  const { user, isAuthenticated, logout } = useAuth();
-  const [location, navigate] = useLocation();
+export default function Header() {
+  const { user, logout } = useAuth();
+  const { restaurant } = useRestaurant();
 
   return (
-    <header className="bg-white shadow-md">
-      <div className="container mx-auto px-4 py-3 flex justify-between items-center">
-        <div className="flex items-center">
-          <img
-            src="https://images.unsplash.com/photo-1555396273-367ea4eb4db5?ixlib=rb-1.2.1&auto=format&fit=crop&w=60&h=60&q=80"
-            alt="Bistro 23 Logo"
-            className="h-10 w-10 rounded-full"
-          />
-          <h1 className="ml-3 font-heading font-bold text-xl text-dark">Bistro 23</h1>
-        </div>
-        
-        <div className="flex items-center space-x-4">
-          {isAuthenticated && user ? (
-            <>
-              <RewardsButton points={user.loyaltyPoints} />
-              <div className="relative">
-                <button className="bg-light rounded-full p-1 focus:outline-none">
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    className="h-6 w-6 text-dark"
-                    fill="none"
-                    viewBox="0 0 24 24"
-                    stroke="currentColor"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth="2"
-                      d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
-                    />
-                  </svg>
-                </button>
-                <div className="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg hidden group-hover:block">
-                  <div className="py-1">
-                    <span className="block px-4 py-2 text-sm text-gray-700">{user.name}</span>
-                    <span className="block px-4 py-2 text-sm text-gray-700">{user.loyaltyPoints} points</span>
-                    <Link href="/rewards">
-                      <a className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">My Rewards</a>
-                    </Link>
-                    <button 
-                      className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
-                      onClick={() => {
-                        logout();
-                        navigate("/");
-                      }}
-                    >
-                      Logout
-                    </button>
-                  </div>
-                </div>
-              </div>
-            </>
-          ) : (
-            <Link href="/login">
-              <a className="bg-light rounded-full p-1 focus:outline-none">
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  className="h-6 w-6 text-dark"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  stroke="currentColor"
+    <header className="bg-white shadow-sm border-b">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="flex justify-between items-center h-16">
+          <Link href="/" className="flex items-center space-x-3">
+            <div className="w-8 h-8 bg-gradient-to-r from-orange-500 to-red-500 rounded-lg flex items-center justify-center">
+              <span className="text-white font-bold text-sm">🍽️</span>
+            </div>
+            <div>
+              <h1 className="text-xl font-bold text-gray-900">
+                {restaurant?.name || "RestaurantRush"}
+              </h1>
+              <p className="text-xs text-gray-500">
+                {restaurant?.description || "Digital dining experience"}
+              </p>
+            </div>
+          </Link>
+
+          <div className="flex items-center space-x-4">
+            {user ? (
+              <div className="flex items-center space-x-3">
+                <Avatar className="h-8 w-8">
+                  <AvatarFallback className="bg-orange-100 text-orange-600">
+                    {user.name.charAt(0).toUpperCase()}
+                  </AvatarFallback>
+                </Avatar>
+                <span className="text-sm font-medium text-gray-700">
+                  {user.name}
+                </span>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={logout}
+                  className="text-gray-500 hover:text-gray-700"
                 >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth="2"
-                    d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
-                  />
-                </svg>
-              </a>
-            </Link>
-          )}
+                  <LogOut className="h-4 w-4" />
+                </Button>
+              </div>
+            ) : (
+              <div className="flex items-center space-x-2">
+                <Link href="/login">
+                  <Button variant="ghost" size="sm">
+                    <User className="h-4 w-4 mr-1" />
+                    Login
+                  </Button>
+                </Link>
+                <Link href="/register">
+                  <Button size="sm" className="bg-orange-500 hover:bg-orange-600">
+                    Sign Up
+                  </Button>
+                </Link>
+              </div>
+            )}
+          </div>
         </div>
       </div>
     </header>
   );
-};
-
-export default Header;
+}
