@@ -828,6 +828,38 @@ export async function registerRoutes(app: Express): Promise<Server> {
     res.send(html);
   });
 
+  // Serve demo and marketing files
+  app.get('/owner-demo.html', (_req: Request, res: Response) => {
+    res.sendFile('owner-demo.html', { root: process.cwd() });
+  });
+
+  app.get('/customer-demo.html', (_req: Request, res: Response) => {
+    res.sendFile('customer-demo.html', { root: process.cwd() });
+  });
+
+  app.get('/marketing-materials.html', (_req: Request, res: Response) => {
+    res.sendFile('marketing-materials.html', { root: process.cwd() });
+  });
+
+  // Serve marketing directory files
+  app.get('/marketing/:filename', (req: Request, res: Response) => {
+    const filename = req.params.filename;
+    res.setHeader('Access-Control-Allow-Origin', '*');
+    res.setHeader('Access-Control-Allow-Methods', 'GET');
+    res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
+    res.sendFile(`marketing/${filename}`, { root: process.cwd() });
+  });
+
+  // Serve marketing subdirectory files
+  app.get('/marketing/:subdir/:filename', (req: Request, res: Response) => {
+    const subdir = req.params.subdir;
+    const filename = req.params.filename;
+    res.setHeader('Access-Control-Allow-Origin', '*');
+    res.setHeader('Access-Control-Allow-Methods', 'GET');
+    res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
+    res.sendFile(`marketing/${subdir}/${filename}`, { root: process.cwd() });
+  });
+
   // Create HTTP server
   const httpServer = createServer(app);
   

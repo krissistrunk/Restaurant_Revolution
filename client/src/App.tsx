@@ -15,6 +15,7 @@ import AiAssistantPage from "@/pages/AiAssistantPage";
 
 import Header from "@/components/Header";
 import Navigation from "@/components/Navigation";
+import Footer from "@/components/Footer";
 import CartButton from "@/components/cart/CartButton";
 import CartModal from "@/components/cart/CartModal";
 import AppWrapper from "@/components/AppWrapper";
@@ -44,6 +45,8 @@ function Router() {
         <Route path="/register" component={RegisterPage} />
         <Route component={NotFound} />
       </Switch>
+      
+      <Footer />
       
       <CartButton />
       <CartModal />

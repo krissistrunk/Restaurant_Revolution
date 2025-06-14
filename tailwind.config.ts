@@ -11,7 +11,47 @@ export default {
         sm: "calc(var(--radius) - 4px)",
       },
       colors: {
-        background: "hsl(var(--background))",
+        // Modern Professional Colors
+        primary: {
+          DEFAULT: "#8B1538",
+          light: "#A62C4C",
+          dark: "#6D1027",
+          foreground: "#FFFFFF",
+        },
+        secondary: {
+          DEFAULT: "#D4AF37",
+          light: "#E6C455",
+          dark: "#B8941F",
+          foreground: "#1A1A1A",
+        },
+        background: {
+          DEFAULT: "#FDFCF9",
+          alt: "#F8F6F2",
+        },
+        surface: {
+          DEFAULT: "#FFFFFF",
+          elevated: "#FFFFFF",
+        },
+        text: {
+          primary: "#1A1A1A",
+          secondary: "#2C2C2C",
+          muted: "#6B7280",
+          light: "#9CA3AF",
+        },
+        status: {
+          success: "#228B22",
+          "success-light": "#48CC48",
+          warning: "#F59E0B",
+          error: "#DC2626",
+          info: "#3B82F6",
+        },
+        border: {
+          DEFAULT: "#E5E7EB",
+          hover: "#D1D5DB",
+          focus: "#8B1538",
+        },
+        
+        // Legacy Shadcn Colors (for existing components)
         foreground: "hsl(var(--foreground))",
         card: {
           DEFAULT: "hsl(var(--card))",
@@ -20,14 +60,6 @@ export default {
         popover: {
           DEFAULT: "hsl(var(--popover))",
           foreground: "hsl(var(--popover-foreground))",
-        },
-        primary: {
-          DEFAULT: "hsl(var(--primary))",
-          foreground: "hsl(var(--primary-foreground))",
-        },
-        secondary: {
-          DEFAULT: "hsl(var(--secondary))",
-          foreground: "hsl(var(--secondary-foreground))",
         },
         muted: {
           DEFAULT: "hsl(var(--muted))",
@@ -41,7 +73,6 @@ export default {
           DEFAULT: "hsl(var(--destructive))",
           foreground: "hsl(var(--destructive-foreground))",
         },
-        border: "hsl(var(--border))",
         input: "hsl(var(--input))",
         ring: "hsl(var(--ring))",
         chart: {
