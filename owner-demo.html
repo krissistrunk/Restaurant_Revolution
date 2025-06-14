@@ -50,6 +50,22 @@
             align-items: center;
         }
         
+        .close-button {
+            background: #e74c3c;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 14px;
+            text-decoration: none;
+            display: inline-block;
+        }
+        
+        .close-button:hover {
+            background: #c0392b;
+        }
+        
         .nav-tabs {
             display: flex;
             gap: 20px;
@@ -219,7 +235,10 @@
                     <button class="nav-tab" onclick="showTab('queue')">Queue</button>
                     <button class="nav-tab" onclick="showTab('analytics')">Analytics</button>
                 </div>
-                <div style="color: #ecf0f1;">Bella Vista Bistro | Today: June 14, 2025</div>
+                <div style="display: flex; align-items: center; gap: 20px;">
+                    <div style="color: #ecf0f1;">Bella Vista Bistro | Today: June 14, 2025</div>
+                    <a href="/demo" class="close-button">← Back to Demo Menu</a>
+                </div>
             </div>
             
             <div class="dashboard-content">
