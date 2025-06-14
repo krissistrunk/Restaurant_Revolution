@@ -15,7 +15,8 @@ import {
   QueueEntry, InsertQueueEntry,
   AiConversation, InsertAiConversation,
   UserPreference, InsertUserPreference,
-  UserItemInteraction, InsertUserItemInteraction
+  UserItemInteraction, InsertUserItemInteraction,
+  Review, InsertReview
 } from '../shared/schema';
 import * as schema from '../shared/schema';
 
@@ -559,5 +560,24 @@ export class PgStorage implements IStorage {
     // 4. Sort by score and return top items
     scoredItems.sort((a, b) => b.score - a.score);
     return scoredItems.slice(0, limit).map(scored => scored.item);
+  }
+
+  // Review methods
+  async getReviews(restaurantId: number): Promise<Review[]> {
+    return await this.db.select().from(reviews).where(eq(reviews.restaurantId, restaurantId));
+  }
+
+  async getUserReviews(userId: number): Promise<Review[]> {
+    return await this.db.select().from(reviews).where(eq(reviews.userId, userId));
+  }
+
+  async getReview(id: number): Promise<Review | undefined> {
+    const result = await this.db.select().from(reviews).where(eq(reviews.id, id)).limit(1);
+    return result[0];
+  }
+
+  async createReview(review: InsertReview): Promise<Review> {
+    const result = await this.db.insert(reviews).values(review).returning();
+    return result[0];
   }
 }

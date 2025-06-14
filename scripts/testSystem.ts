@@ -1,5 +1,5 @@
 import { db } from "../server/db";
-import { users } from "../shared/schema";
+import { users as usersTable } from "../shared/schema";
 
 interface TestResult {
   test: string;
@@ -42,8 +42,8 @@ class SystemTester {
     console.log("\n🔗 Testing Database Connection...");
     
     try {
-      const users = await db.select().from(users).limit(1);
-      this.addResult("Database Connection", true, `Connected successfully, found ${users.length} users`);
+      const allUsers = await db.select().from(usersTable).limit(1);
+      this.addResult("Database Connection", true, `Connected successfully, found ${allUsers.length} users`);
     } catch (error) {
       this.addResult("Database Connection", false, `Failed: ${error.message}`);
     }
@@ -53,7 +53,7 @@ class SystemTester {
     console.log("\n👥 Testing User Roles...");
     
     try {
-      const allUsers = await db.select().from(users);
+      const allUsers = await db.select().from(usersTable);
       const customerCount = allUsers.filter(u => u.role === "customer").length;
       const ownerCount = allUsers.filter(u => u.role === "owner").length;
       const adminCount = allUsers.filter(u => u.role === "admin").length;
