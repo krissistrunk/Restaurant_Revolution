@@ -21,6 +21,8 @@ import {
 import * as schema from '../shared/schema';
 
 export class PgStorage implements IStorage {
+  private db = db;
+  
   // User methods
   async getUser(id: number): Promise<User | undefined> {
     const users = await db.select().from(schema.users).where(eq(schema.users.id, id));
@@ -564,20 +566,20 @@ export class PgStorage implements IStorage {
 
   // Review methods
   async getReviews(restaurantId: number): Promise<Review[]> {
-    return await this.db.select().from(reviews).where(eq(reviews.restaurantId, restaurantId));
+    return await this.db.select().from(schema.reviews).where(eq(schema.reviews.restaurantId, restaurantId));
   }
 
   async getUserReviews(userId: number): Promise<Review[]> {
-    return await this.db.select().from(reviews).where(eq(reviews.userId, userId));
+    return await this.db.select().from(schema.reviews).where(eq(schema.reviews.userId, userId));
   }
 
   async getReview(id: number): Promise<Review | undefined> {
-    const result = await this.db.select().from(reviews).where(eq(reviews.id, id)).limit(1);
+    const result = await this.db.select().from(schema.reviews).where(eq(schema.reviews.id, id)).limit(1);
     return result[0];
   }
 
   async createReview(review: InsertReview): Promise<Review> {
-    const result = await this.db.insert(reviews).values(review).returning();
+    const result = await this.db.insert(schema.reviews).values(review).returning();
     return result[0];
   }
 }

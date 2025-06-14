@@ -16,9 +16,23 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // API routes
   const apiRouter = app.route("/api");
   
-  // CMS Health check and cache management
-  app.get("/api/cms/health", cmsMiddleware.healthCheck);
-  app.post("/api/cms/clear-cache", cmsMiddleware.clearCache);
+  // Simple session middleware to attach user to request
+  const attachUser = async (req: Request, res: Response, next: NextFunction) => {
+    const userId = req.headers['x-user-id'];
+    const userRole = req.headers['x-user-role'];
+    
+    if (userId && userRole) {
+      const user = await storage.getUser(parseInt(userId as string));
+      if (user) {
+        req.user = user;
+      }
+    }
+    next();
+  };
+
+  // CMS Health check and cache management (restricted to owners/admins)
+  app.get("/api/cms/health", attachUser, requireCMSAccess, cmsMiddleware.healthCheck);
+  app.post("/api/cms/clear-cache", attachUser, requireCMSAccess, cmsMiddleware.clearCache);
 
   // Get restaurant info
   app.get("/api/restaurant", 
