@@ -1,0 +1,682 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RestaurantRush Customer Demo - Mobile Experience</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #ff7b7b 0%, #667eea 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+        
+        .phone-container {
+            display: flex;
+            gap: 30px;
+            align-items: center;
+        }
+        
+        .phone-frame {
+            background: #000;
+            border-radius: 30px;
+            padding: 15px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.3);
+            position: relative;
+        }
+        
+        .phone-screen {
+            width: 375px;
+            height: 667px;
+            background: white;
+            border-radius: 20px;
+            overflow: hidden;
+            position: relative;
+        }
+        
+        .demo-info {
+            color: white;
+            max-width: 400px;
+        }
+        
+        .demo-info h1 {
+            font-size: 2.5rem;
+            margin-bottom: 20px;
+        }
+        
+        .demo-info p {
+            font-size: 1.1rem;
+            margin-bottom: 15px;
+            line-height: 1.6;
+        }
+        
+        .app-header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 20px;
+            text-align: center;
+        }
+        
+        .app-title {
+            font-size: 1.5rem;
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+        
+        .restaurant-name {
+            opacity: 0.9;
+            font-size: 0.9rem;
+        }
+        
+        .app-content {
+            padding: 20px;
+            height: calc(100% - 140px);
+            overflow-y: auto;
+        }
+        
+        .nav-tabs {
+            display: flex;
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 5px;
+            margin-bottom: 20px;
+        }
+        
+        .nav-tab {
+            flex: 1;
+            padding: 8px;
+            text-align: center;
+            border: none;
+            background: transparent;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 0.8rem;
+            transition: all 0.3s;
+        }
+        
+        .nav-tab.active {
+            background: white;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+        
+        .tab-content {
+            display: none;
+        }
+        
+        .tab-content.active {
+            display: block;
+        }
+        
+        .menu-category {
+            margin-bottom: 20px;
+        }
+        
+        .category-title {
+            font-size: 1.1rem;
+            font-weight: bold;
+            color: #2c3e50;
+            margin-bottom: 10px;
+            padding-bottom: 5px;
+            border-bottom: 2px solid #3498db;
+        }
+        
+        .menu-item {
+            background: white;
+            border: 1px solid #eee;
+            border-radius: 10px;
+            padding: 15px;
+            margin-bottom: 10px;
+            cursor: pointer;
+            transition: all 0.3s;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+        }
+        
+        .menu-item:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+        
+        .item-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 8px;
+        }
+        
+        .item-name {
+            font-weight: bold;
+            color: #2c3e50;
+            font-size: 0.9rem;
+        }
+        
+        .item-price {
+            color: #e74c3c;
+            font-weight: bold;
+            font-size: 0.9rem;
+        }
+        
+        .item-description {
+            color: #666;
+            font-size: 0.8rem;
+            margin-bottom: 8px;
+            line-height: 1.4;
+        }
+        
+        .item-tags {
+            display: flex;
+            gap: 5px;
+            flex-wrap: wrap;
+            margin-bottom: 10px;
+        }
+        
+        .item-tag {
+            background: #ecf0f1;
+            color: #34495e;
+            padding: 2px 6px;
+            border-radius: 10px;
+            font-size: 0.7rem;
+        }
+        
+        .tag-featured {
+            background: #f39c12;
+            color: white;
+        }
+        
+        .tag-vegetarian {
+            background: #27ae60;
+            color: white;
+        }
+        
+        .add-to-cart {
+            background: #3498db;
+            color: white;
+            border: none;
+            padding: 8px 15px;
+            border-radius: 15px;
+            cursor: pointer;
+            font-size: 0.8rem;
+            transition: all 0.3s;
+            width: 100%;
+        }
+        
+        .add-to-cart:hover {
+            background: #2980b9;
+        }
+        
+        .cart-summary {
+            position: fixed;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #2c3e50;
+            color: white;
+            padding: 12px 20px;
+            border-radius: 20px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+            display: none;
+            cursor: pointer;
+            font-size: 0.9rem;
+        }
+        
+        .loyalty-info {
+            background: linear-gradient(135deg, #f39c12 0%, #e67e22 100%);
+            color: white;
+            padding: 15px;
+            border-radius: 10px;
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        
+        .points-balance {
+            font-size: 1.5rem;
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+        
+        .reward-item {
+            background: white;
+            border: 1px solid #ddd;
+            border-radius: 10px;
+            padding: 15px;
+            margin-bottom: 10px;
+        }
+        
+        .reward-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 8px;
+        }
+        
+        .reward-name {
+            font-weight: bold;
+            color: #2c3e50;
+            font-size: 0.9rem;
+        }
+        
+        .reward-points {
+            background: #3498db;
+            color: white;
+            padding: 3px 8px;
+            border-radius: 12px;
+            font-size: 0.7rem;
+        }
+        
+        .redeem-btn {
+            background: #27ae60;
+            color: white;
+            border: none;
+            padding: 8px 15px;
+            border-radius: 15px;
+            cursor: pointer;
+            font-size: 0.8rem;
+            width: 100%;
+            margin-top: 10px;
+        }
+        
+        .redeem-btn:disabled {
+            background: #bdc3c7;
+            cursor: not-allowed;
+        }
+        
+        .form-group {
+            margin-bottom: 15px;
+        }
+        
+        .form-label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+            color: #2c3e50;
+            font-size: 0.9rem;
+        }
+        
+        .form-input {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 0.9rem;
+        }
+        
+        .reserve-btn {
+            width: 100%;
+            background: #e74c3c;
+            color: white;
+            border: none;
+            padding: 12px;
+            border-radius: 10px;
+            font-size: 1rem;
+            cursor: pointer;
+            margin-top: 15px;
+        }
+        
+        .queue-status {
+            background: #f39c12;
+            color: white;
+            padding: 20px;
+            border-radius: 10px;
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        
+        .queue-position {
+            font-size: 2.5rem;
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+        
+        .join-queue-btn {
+            width: 100%;
+            background: #9b59b6;
+            color: white;
+            border: none;
+            padding: 12px;
+            border-radius: 10px;
+            font-size: 1rem;
+            cursor: pointer;
+        }
+        
+        .success-message {
+            background: #d4edda;
+            color: #155724;
+            padding: 12px;
+            border-radius: 8px;
+            margin-bottom: 15px;
+            display: none;
+            font-size: 0.9rem;
+        }
+        
+        .user-info {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 15px;
+            border-radius: 10px;
+            text-align: center;
+            margin-bottom: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="phone-container">
+        <div class="demo-info">
+            <h1>Customer Experience</h1>
+            <p>This is exactly what your customers see when they use your restaurant app.</p>
+            <p>Try interacting with the menu, adding items to cart, making reservations, and exploring the loyalty program.</p>
+            <p><strong>Key Features:</strong></p>
+            <ul style="margin-left: 20px; line-height: 1.8;">
+                <li>Beautiful menu with dietary filters</li>
+                <li>Smart ordering with real-time cart</li>
+                <li>Loyalty points and rewards</li>
+                <li>Easy table reservations</li>
+                <li>Virtual queue management</li>
+            </ul>
+        </div>
+        
+        <div class="phone-frame">
+            <div class="phone-screen">
+                <div class="app-header">
+                    <div class="app-title">RestaurantRush</div>
+                    <div class="restaurant-name">Bella Vista Bistro</div>
+                </div>
+                
+                <div class="app-content">
+                    <div class="nav-tabs">
+                        <button class="nav-tab active" onclick="showTab('menu')">Menu</button>
+                        <button class="nav-tab" onclick="showTab('rewards')">Rewards</button>
+                        <button class="nav-tab" onclick="showTab('reserve')">Reserve</button>
+                        <button class="nav-tab" onclick="showTab('queue')">Queue</button>
+                        <button class="nav-tab" onclick="showTab('account')">Account</button>
+                    </div>
+                    
+                    <!-- Menu Tab -->
+                    <div id="menu" class="tab-content active">
+                        <div class="menu-category">
+                            <div class="category-title">Featured Items</div>
+                            <div class="menu-item" onclick="addToCart('Spaghetti Carbonara', 22.99)">
+                                <div class="item-header">
+                                    <div class="item-name">Spaghetti Carbonara</div>
+                                    <div class="item-price">$22.99</div>
+                                </div>
+                                <div class="item-description">Classic Roman pasta with pancetta, eggs, pecorino cheese, and black pepper</div>
+                                <div class="item-tags">
+                                    <span class="item-tag tag-featured">Featured</span>
+                                </div>
+                                <button class="add-to-cart">Add to Cart</button>
+                            </div>
+                        </div>
+                        
+                        <div class="menu-category">
+                            <div class="category-title">Appetizers</div>
+                            <div class="menu-item" onclick="addToCart('Bruschetta Trio', 14.99)">
+                                <div class="item-header">
+                                    <div class="item-name">Bruschetta Trio</div>
+                                    <div class="item-price">$14.99</div>
+                                </div>
+                                <div class="item-description">Three varieties: classic tomato basil, mushroom truffle, ricotta honey</div>
+                                <div class="item-tags">
+                                    <span class="item-tag tag-vegetarian">Vegetarian</span>
+                                </div>
+                                <button class="add-to-cart">Add to Cart</button>
+                            </div>
+                            
+                            <div class="menu-item" onclick="addToCart('Calamari Fritti', 16.99)">
+                                <div class="item-header">
+                                    <div class="item-name">Calamari Fritti</div>
+                                    <div class="item-price">$16.99</div>
+                                </div>
+                                <div class="item-description">Golden fried squid rings with marinara sauce and lemon aioli</div>
+                                <div class="item-tags">
+                                    <span class="item-tag">Seafood</span>
+                                </div>
+                                <button class="add-to-cart">Add to Cart</button>
+                            </div>
+                        </div>
+                        
+                        <div class="menu-category">
+                            <div class="category-title">Main Courses</div>
+                            <div class="menu-item" onclick="addToCart('Osso Buco Milanese', 34.99)">
+                                <div class="item-header">
+                                    <div class="item-name">Osso Buco Milanese</div>
+                                    <div class="item-price">$34.99</div>
+                                </div>
+                                <div class="item-description">Braised veal shanks with saffron risotto and gremolata</div>
+                                <div class="item-tags">
+                                    <span class="item-tag tag-featured">Featured</span>
+                                </div>
+                                <button class="add-to-cart">Add to Cart</button>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Rewards Tab -->
+                    <div id="rewards" class="tab-content">
+                        <div class="loyalty-info">
+                            <div class="points-balance">150 Points</div>
+                            <div>John Customer</div>
+                        </div>
+                        
+                        <div class="reward-item">
+                            <div class="reward-header">
+                                <div class="reward-name">Free Appetizer</div>
+                                <div class="reward-points">100 pts</div>
+                            </div>
+                            <div style="color: #666; font-size: 0.8rem; margin-bottom: 10px;">Get a free appetizer of your choice</div>
+                            <button class="redeem-btn" onclick="redeemReward(this, 100)">Redeem Now</button>
+                        </div>
+                        
+                        <div class="reward-item">
+                            <div class="reward-header">
+                                <div class="reward-name">10% Off Next Order</div>
+                                <div class="reward-points">200 pts</div>
+                            </div>
+                            <div style="color: #666; font-size: 0.8rem; margin-bottom: 10px;">Save 10% on your next dining experience</div>
+                            <button class="redeem-btn" disabled>Need 50 more points</button>
+                        </div>
+                        
+                        <div class="reward-item">
+                            <div class="reward-header">
+                                <div class="reward-name">Free Dessert</div>
+                                <div class="reward-points">150 pts</div>
+                            </div>
+                            <div style="color: #666; font-size: 0.8rem; margin-bottom: 10px;">Complimentary dessert with any main course</div>
+                            <button class="redeem-btn" onclick="redeemReward(this, 150)">Redeem Now</button>
+                        </div>
+                    </div>
+                    
+                    <!-- Reserve Tab -->
+                    <div id="reserve" class="tab-content">
+                        <div class="success-message" id="reservation-success">Reservation confirmed! You'll receive a confirmation email shortly.</div>
+                        
+                        <div class="form-group">
+                            <label class="form-label">Date</label>
+                            <input type="date" class="form-input" id="reservation-date" value="2025-06-15">
+                        </div>
+                        
+                        <div class="form-group">
+                            <label class="form-label">Time</label>
+                            <select class="form-input" id="reservation-time">
+                                <option>6:00 PM</option>
+                                <option>6:30 PM</option>
+                                <option>7:00 PM</option>
+                                <option>7:30 PM</option>
+                                <option>8:00 PM</option>
+                            </select>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label class="form-label">Party Size</label>
+                            <select class="form-input" id="party-size">
+                                <option>2 people</option>
+                                <option>3 people</option>
+                                <option>4 people</option>
+                                <option>5 people</option>
+                                <option>6+ people</option>
+                            </select>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label class="form-label">Special Requests</label>
+                            <input type="text" class="form-input" placeholder="Anniversary dinner, high chair needed, etc." id="special-requests">
+                        </div>
+                        
+                        <button class="reserve-btn" onclick="makeReservation()">Make Reservation</button>
+                    </div>
+                    
+                    <!-- Queue Tab -->
+                    <div id="queue" class="tab-content">
+                        <div class="success-message" id="queue-success">Joined queue successfully! We'll text you when your table is ready.</div>
+                        
+                        <div id="queue-join">
+                            <p style="margin-bottom: 20px; text-align: center; color: #666; font-size: 0.9rem;">Restaurant is currently busy. Join our virtual queue to save your spot!</p>
+                            
+                            <div style="margin-bottom: 20px;">
+                                <label class="form-label">Party Size</label>
+                                <select class="form-input" id="queue-party-size">
+                                    <option>2 people</option>
+                                    <option>3 people</option>
+                                    <option>4 people</option>
+                                    <option>5 people</option>
+                                </select>
+                            </div>
+                            
+                            <button class="join-queue-btn" onclick="joinQueue()">Join Queue</button>
+                        </div>
+                        
+                        <div id="queue-status" style="display: none;">
+                            <div class="queue-status">
+                                <div class="queue-position">#2</div>
+                                <div>Position in Queue</div>
+                                <div style="margin-top: 10px; font-size: 0.9rem;">Estimated wait: 15 minutes</div>
+                            </div>
+                            
+                            <p style="text-align: center; color: #666; font-size: 0.9rem;">We'll send you a text when your table is ready. Feel free to explore the area!</p>
+                        </div>
+                    </div>
+                    
+                    <!-- Account Tab -->
+                    <div id="account" class="tab-content">
+                        <div class="user-info">
+                            <div style="font-size: 1.1rem; font-weight: bold; margin-bottom: 5px;">John Customer</div>
+                            <div style="opacity: 0.9; font-size: 0.9rem;">john@example.com</div>
+                            <div style="margin-top: 10px; font-size: 0.9rem;">150 Loyalty Points</div>
+                        </div>
+                        
+                        <div style="background: #f8f9fa; padding: 15px; border-radius: 10px; margin-bottom: 15px;">
+                            <h4 style="margin-bottom: 10px; font-size: 1rem;">Dietary Preferences</h4>
+                            <div class="item-tags">
+                                <span class="item-tag tag-vegetarian">Vegetarian</span>
+                                <span class="item-tag">Gluten-Free</span>
+                            </div>
+                        </div>
+                        
+                        <div style="background: #f8f9fa; padding: 15px; border-radius: 10px;">
+                            <h4 style="margin-bottom: 10px; font-size: 1rem;">Recent Orders</h4>
+                            <div style="color: #666; font-size: 0.9rem;">No recent orders</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="cart-summary" id="cart-summary">
+                    <span id="cart-count">0 items</span> - <span id="cart-total">$0.00</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let cartItems = [];
+        let cartTotal = 0;
+        let userPoints = 150;
+        
+        function showTab(tabName) {
+            const tabs = document.querySelectorAll('.tab-content');
+            tabs.forEach(tab => tab.classList.remove('active'));
+            
+            const navTabs = document.querySelectorAll('.nav-tab');
+            navTabs.forEach(tab => tab.classList.remove('active'));
+            
+            document.getElementById(tabName).classList.add('active');
+            event.target.classList.add('active');
+        }
+        
+        function addToCart(itemName, price) {
+            cartItems.push({name: itemName, price: price});
+            cartTotal += price;
+            updateCartDisplay();
+            
+            event.target.textContent = 'Added!';
+            event.target.style.background = '#27ae60';
+            setTimeout(() => {
+                event.target.textContent = 'Add to Cart';
+                event.target.style.background = '#3498db';
+            }, 1000);
+        }
+        
+        function updateCartDisplay() {
+            const cartSummary = document.getElementById('cart-summary');
+            const cartCount = document.getElementById('cart-count');
+            const cartTotalElement = document.getElementById('cart-total');
+            
+            cartCount.textContent = `${cartItems.length} item${cartItems.length !== 1 ? 's' : ''}`;
+            cartTotalElement.textContent = `$${cartTotal.toFixed(2)}`;
+            
+            if (cartItems.length > 0) {
+                cartSummary.style.display = 'block';
+            }
+        }
+        
+        function redeemReward(button, pointsRequired) {
+            if (userPoints >= pointsRequired) {
+                userPoints -= pointsRequired;
+                button.textContent = 'Redeemed!';
+                button.style.background = '#27ae60';
+                button.disabled = true;
+                
+                document.querySelector('.points-balance').textContent = `${userPoints} Points`;
+                
+                const redeemButtons = document.querySelectorAll('.redeem-btn:not(:disabled)');
+                redeemButtons.forEach(btn => {
+                    const rewardPoints = parseInt(btn.parentElement.querySelector('.reward-points').textContent);
+                    if (userPoints < rewardPoints) {
+                        btn.disabled = true;
+                        btn.textContent = `Need ${rewardPoints - userPoints} more points`;
+                    }
+                });
+            }
+        }
+        
+        function makeReservation() {
+            document.getElementById('reservation-success').style.display = 'block';
+            setTimeout(() => {
+                document.getElementById('reservation-success').style.display = 'none';
+            }, 4000);
+        }
+        
+        function joinQueue() {
+            document.getElementById('queue-join').style.display = 'none';
+            document.getElementById('queue-status').style.display = 'block';
+            document.getElementById('queue-success').style.display = 'block';
+            
+            setTimeout(() => {
+                document.getElementById('queue-success').style.display = 'none';
+            }, 4000);
+            
+            setTimeout(() => {
+                document.querySelector('.queue-position').textContent = '#1';
+                document.querySelector('.queue-status div:last-child').textContent = 'Estimated wait: 5 minutes';
+            }, 8000);
+        }
+    </script>
+</body>
+</html>
