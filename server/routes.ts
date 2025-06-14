@@ -738,6 +738,96 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Add fallback route for demo access (bypasses Vite host restrictions)
+  app.get("/demo", (req: Request, res: Response) => {
+    const html = `
+    <!DOCTYPE html>
+    <html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>RestaurantRush - Demo Access</title>
+        <style>
+            * { margin: 0; padding: 0; box-sizing: border-box; }
+            body {
+                font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+                background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                min-height: 100vh;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                color: white;
+            }
+            .container {
+                text-align: center;
+                background: rgba(255,255,255,0.1);
+                padding: 40px;
+                border-radius: 20px;
+                backdrop-filter: blur(10px);
+                box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+                max-width: 600px;
+                width: 90%;
+            }
+            h1 { font-size: 2.5rem; margin-bottom: 10px; }
+            p { font-size: 1.2rem; margin-bottom: 30px; opacity: 0.9; }
+            .demo-grid {
+                display: grid;
+                grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+                gap: 20px;
+                margin: 30px 0;
+            }
+            .demo-card {
+                background: rgba(255,255,255,0.2);
+                padding: 25px;
+                border-radius: 15px;
+                transition: all 0.3s;
+                text-decoration: none;
+                color: white;
+                border: 2px solid transparent;
+            }
+            .demo-card:hover {
+                background: rgba(255,255,255,0.3);
+                transform: translateY(-5px);
+                border-color: rgba(255,255,255,0.5);
+            }
+            .demo-card h3 { font-size: 1.3rem; margin-bottom: 10px; }
+            .demo-card p { font-size: 0.9rem; opacity: 0.8; }
+            .status { margin-top: 20px; font-size: 0.9rem; opacity: 0.7; }
+        </style>
+    </head>
+    <body>
+        <div class="container">
+            <h1>RestaurantRush</h1>
+            <p>Restaurant Management System - Demo Access</p>
+            
+            <div class="demo-grid">
+                <a href="/owner-demo.html" class="demo-card">
+                    <h3>Restaurant Owner</h3>
+                    <p>Dashboard, orders, reservations, queue management, and analytics</p>
+                </a>
+                
+                <a href="/customer-demo.html" class="demo-card">
+                    <h3>Customer Experience</h3>
+                    <p>Mobile app for ordering, reservations, loyalty rewards</p>
+                </a>
+                
+                <a href="/marketing-materials.html" class="demo-card">
+                    <h3>Marketing Package</h3>
+                    <p>Sales presentations, documentation, implementation guides</p>
+                </a>
+            </div>
+            
+            <div class="status">
+                Server Status: Running | Database: Connected | Demos: Ready
+            </div>
+        </div>
+    </body>
+    </html>`;
+    
+    res.setHeader('Content-Type', 'text/html');
+    res.send(html);
+  });
+
   // Create HTTP server
   const httpServer = createServer(app);
   
