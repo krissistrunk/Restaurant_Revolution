@@ -29,6 +29,25 @@
             text-align: center;
             color: white;
             margin-bottom: 40px;
+            position: relative;
+        }
+        
+        .close-button {
+            position: absolute;
+            top: 0;
+            right: 20px;
+            background: rgba(255,255,255,0.2);
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 14px;
+            text-decoration: none;
+        }
+        
+        .close-button:hover {
+            background: rgba(255,255,255,0.3);
         }
         
         .header h1 {
@@ -240,6 +259,7 @@
     
     <div class="container">
         <div class="header">
+            <a href="/demo" class="close-button">← Back to Demo Menu</a>
             <h1>RestaurantRush Marketing Package</h1>
             <p>Complete Sales Materials, Documentation & Implementation Resources</p>
         </div>
