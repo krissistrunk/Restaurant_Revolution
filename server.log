@@ -1,0 +1,59 @@
+
+> rest-express@1.0.0 dev
+> tsx server/index.ts
+
+Using in-memory storage, skipping database initialization...
+10:59:28 PM [express] Database initialized successfully
+10:59:28 PM [express] serving on port 5001
+10:59:50 PM [express] GET /api/restaurant 200 in 7ms :: {"name":"Bistro 23","description":"A modern r…
+Browserslist: browsers data (caniuse-lite) is 8 months old. Please run:
+  npx update-browserslist-db@latest
+  Why you should do it regularly: https://github.com/browserslist/update-db#readme
+11:09:36 PM [vite] hmr update /src/components/Footer.tsx, /src/index.css?v=ZJhm2V3sn9Mim5MTYffPL
+11:09:46 PM [vite] hmr update /src/components/Footer.tsx, /src/index.css?v=ZJhm2V3sn9Mim5MTYffPL
+11:09:57 PM [vite] hmr update /src/components/Footer.tsx, /src/index.css?v=ZJhm2V3sn9Mim5MTYffPL
+11:10:05 PM [vite] hmr update /src/components/Footer.tsx, /src/index.css?v=ZJhm2V3sn9Mim5MTYffPL
+11:10:14 PM [vite] hmr update /src/components/Footer.tsx, /src/index.css?v=ZJhm2V3sn9Mim5MTYffPL
+11:12:34 PM [vite] hmr update /src/App.tsx?v=ZJhm2V3sn9Mim5MTYffPL, /src/index.css?v=ZJhm2V3sn9Mim5MTYffPL
+11:12:45 PM [vite] hmr update /src/App.tsx?v=ZJhm2V3sn9Mim5MTYffPL, /src/index.css?v=ZJhm2V3sn9Mim5MTYffPL
+11:14:47 PM [vite] hmr update /src/App.tsx?v=ZJhm2V3sn9Mim5MTYffPL, /src/index.css?v=ZJhm2V3sn9Mim5MTYffPL
+11:14:55 PM [vite] hmr update /src/App.tsx?v=ZJhm2V3sn9Mim5MTYffPL, /src/index.css?v=ZJhm2V3sn9Mim5MTYffPL
+11:14:55 PM [vite] hmr update /src/App.tsx?v=ZJhm2V3sn9Mim5MTYffPL, /src/index.css?v=ZJhm2V3sn9Mim5MTYffPL
+11:16:01 PM [vite] hmr update /src/App.tsx?v=ZJhm2V3sn9Mim5MTYffPL, /src/index.css?v=ZJhm2V3sn9Mim5MTYffPL
+11:16:07 PM [vite] hmr update /src/App.tsx?v=ZJhm2V3sn9Mim5MTYffPL, /src/index.css?v=ZJhm2V3sn9Mim5MTYffPL
+11:16:46 PM [vite] hmr update /src/index.css?v=ZJhm2V3sn9Mim5MTYffPL
+11:18:38 PM [vite] hmr update /src/App.tsx?v=ZJhm2V3sn9Mim5MTYffPL, /src/index.css?v=ZJhm2V3sn9Mim5MTYffPL
+11:18:47 PM [vite] hmr update /src/App.tsx?v=ZJhm2V3sn9Mim5MTYffPL, /src/index.css?v=ZJhm2V3sn9Mim5MTYffPL
+11:19:12 PM [vite] hmr update /src/pages/InfoPage.tsx, /src/index.css?v=ZJhm2V3sn9Mim5MTYffPL
+11:19:17 PM [vite] hmr update /src/pages/InfoPage.tsx, /src/index.css?v=ZJhm2V3sn9Mim5MTYffPL
+11:19:24 PM [vite] hmr update /src/pages/InfoPage.tsx, /src/index.css?v=ZJhm2V3sn9Mim5MTYffPL
+11:19:25 PM [vite] hmr update /src/pages/InfoPage.tsx, /src/index.css?v=ZJhm2V3sn9Mim5MTYffPL
+11:19:41 PM [vite] hmr update /src/pages/InfoPage.tsx, /src/index.css?v=ZJhm2V3sn9Mim5MTYffPL
+11:20:44 PM [express] GET /api/restaurant 200 in 5ms :: {"name":"Bistro 23","description":"A modern r…
+11:20:57 PM [express] POST /api/auth/login 401 in 0ms :: {"message":"Invalid username or password"}
+11:21:13 PM [express] POST /api/auth/register 400 in 3ms :: {"message":[{"code":"invalid_type","expec…
+11:21:44 PM [express] POST /api/auth/register 201 in 1ms :: {"username":"owner","name":"Restaurant Ow…
+11:21:58 PM [express] POST /api/auth/register 201 in 1ms :: {"username":"customer","name":"Test Custo…
+11:22:07 PM [express] POST /api/auth/login 200 in 2ms :: {"username":"owner","name":"Restaurant Owner…
+11:22:30 PM [express] GET /api/menu/categories 200 in 19ms
+11:22:35 PM [express] GET /api/menu/categories 200 in 3ms
+11:22:46 PM [express] GET /api/menu/items 200 in 3ms
+11:30:04 PM [vite] hmr update /src/components/Navigation.tsx, /src/index.css?v=ZJhm2V3sn9Mim5MTYffPL
+11:30:11 PM [vite] hmr update /src/components/Navigation.tsx, /src/index.css?v=ZJhm2V3sn9Mim5MTYffPL
+11:30:37 PM [vite] hmr update /src/components/Navigation.tsx, /src/index.css?v=ZJhm2V3sn9Mim5MTYffPL
+11:30:50 PM [vite] hmr update /src/components/Footer.tsx, /src/index.css?v=ZJhm2V3sn9Mim5MTYffPL
+11:31:08 PM [vite] hmr update /src/components/Footer.tsx, /src/index.css?v=ZJhm2V3sn9Mim5MTYffPL
+11:31:14 PM [vite] hmr update /src/components/Footer.tsx, /src/index.css?v=ZJhm2V3sn9Mim5MTYffPL
+11:31:29 PM [vite] hmr update /src/pages/HomePage.tsx, /src/index.css?v=ZJhm2V3sn9Mim5MTYffPL
+11:31:35 PM [vite] hmr update /src/pages/HomePage.tsx, /src/index.css?v=ZJhm2V3sn9Mim5MTYffPL
+11:31:50 PM [vite] hmr update /src/pages/MenuPage.tsx, /src/index.css?v=ZJhm2V3sn9Mim5MTYffPL
+5:50:51 AM [vite] hmr update /src/pages/LoginPage.tsx, /src/index.css?v=ZJhm2V3sn9Mim5MTYffPL
+11:40:51 PM [vite] hmr update /src/App.tsx?v=ZJhm2V3sn9Mim5MTYffPL, /src/index.css?v=ZJhm2V3sn9Mim5MTYffPL
+11:40:57 PM [vite] hmr update /src/App.tsx?v=ZJhm2V3sn9Mim5MTYffPL, /src/index.css?v=ZJhm2V3sn9Mim5MTYffPL
+11:45:33 PM [vite] page reload public/offline.html
+11:45:33 PM [vite] page reload public/offline.html
+11:45:33 PM [vite] page reload public/offline.html
+11:55:46 PM [vite] hmr update /src/App.tsx?v=ZJhm2V3sn9Mim5MTYffPL, /src/index.css?v=ZJhm2V3sn9Mim5MTYffPL
+11:55:46 PM [vite] hmr update /src/App.tsx?v=ZJhm2V3sn9Mim5MTYffPL, /src/index.css?v=ZJhm2V3sn9Mim5MTYffPL
+11:55:57 PM [vite] hmr update /src/components/Header.tsx, /src/index.css?v=ZJhm2V3sn9Mim5MTYffPL
+11:56:06 PM [vite] hmr update /src/components/Header.tsx, /src/index.css?v=ZJhm2V3sn9Mim5MTYffPL

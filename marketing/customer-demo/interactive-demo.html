@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>RestaurantRush Customer Demo - Interactive Experience</title>
+    <title>Restaurant Revolution v3 - Customer Experience Demo</title>
     <style>
         * {
             margin: 0;
@@ -13,29 +13,14 @@
         
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: linear-gradient(135deg, #ff7b7b 0%, #667eea 100%);
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             min-height: 100vh;
         }
         
         .demo-container {
-            max-width: 400px;
+            max-width: 420px;
             margin: 0 auto;
             padding: 20px;
-        }
-        
-        .phone-frame {
-            background: #000;
-            border-radius: 30px;
-            padding: 20px;
-            box-shadow: 0 20px 40px rgba(0,0,0,0.3);
-        }
-        
-        .phone-screen {
-            background: white;
-            border-radius: 20px;
-            overflow: hidden;
-            height: 600px;
-            position: relative;
         }
         
         .demo-header {
@@ -45,57 +30,124 @@
         }
         
         .demo-header h1 {
-            font-size: 2rem;
+            font-size: 2.2rem;
             margin-bottom: 10px;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.3);
+        }
+        
+        .demo-subtitle {
+            font-size: 1.1rem;
+            opacity: 0.9;
+            margin-bottom: 15px;
+        }
+        
+        .version-badge {
+            background: rgba(255,255,255,0.2);
+            padding: 8px 16px;
+            border-radius: 20px;
+            display: inline-block;
+            font-weight: bold;
+            backdrop-filter: blur(10px);
+        }
+        
+        .phone-frame {
+            background: #000;
+            border-radius: 35px;
+            padding: 25px;
+            box-shadow: 0 25px 50px rgba(0,0,0,0.4);
+            position: relative;
+        }
+        
+        .phone-frame::before {
+            content: '';
+            position: absolute;
+            top: 8px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 60px;
+            height: 4px;
+            background: #333;
+            border-radius: 2px;
+        }
+        
+        .phone-screen {
+            background: white;
+            border-radius: 25px;
+            overflow: hidden;
+            height: 700px;
+            position: relative;
         }
         
         .app-header {
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             color: white;
-            padding: 20px;
+            padding: 25px 20px 20px;
             text-align: center;
+            position: relative;
+        }
+        
+        .status-bar {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.8rem;
+            margin-bottom: 15px;
         }
         
         .app-title {
-            font-size: 1.5rem;
+            font-size: 1.6rem;
             font-weight: bold;
             margin-bottom: 5px;
         }
         
         .restaurant-name {
             opacity: 0.9;
-            font-size: 0.9rem;
+            font-size: 1rem;
+        }
+        
+        .ai-indicator {
+            position: absolute;
+            top: 25px;
+            right: 20px;
+            background: rgba(255,255,255,0.2);
+            padding: 4px 8px;
+            border-radius: 10px;
+            font-size: 0.7rem;
+            backdrop-filter: blur(10px);
         }
         
         .app-content {
             padding: 20px;
-            height: calc(100% - 100px);
+            height: calc(100% - 120px);
             overflow-y: auto;
         }
         
         .nav-tabs {
             display: flex;
             background: #f8f9fa;
-            border-radius: 10px;
+            border-radius: 15px;
             padding: 5px;
             margin-bottom: 20px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
         }
         
         .nav-tab {
             flex: 1;
-            padding: 10px;
+            padding: 12px 8px;
             text-align: center;
             border: none;
             background: transparent;
-            border-radius: 8px;
+            border-radius: 12px;
             cursor: pointer;
-            font-size: 0.9rem;
+            font-size: 0.85rem;
+            font-weight: 600;
             transition: all 0.3s;
+            color: #666;
         }
         
         .nav-tab.active {
             background: white;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            box-shadow: 0 3px 12px rgba(0,0,0,0.15);
+            color: #333;
         }
         
         .tab-content {
@@ -107,54 +159,72 @@
         }
         
         .menu-category {
-            margin-bottom: 20px;
+            background: white;
+            border-radius: 15px;
+            margin-bottom: 15px;
+            box-shadow: 0 3px 15px rgba(0,0,0,0.1);
+            overflow: hidden;
         }
         
-        .category-title {
-            font-size: 1.2rem;
+        .category-header {
+            background: linear-gradient(135deg, #ff9a56 0%, #ffad56 100%);
+            color: white;
+            padding: 15px 20px;
             font-weight: bold;
-            color: #2c3e50;
-            margin-bottom: 10px;
-            padding-bottom: 5px;
-            border-bottom: 2px solid #3498db;
+            position: relative;
+        }
+        
+        .ai-recommendations {
+            position: absolute;
+            top: 50%;
+            right: 15px;
+            transform: translateY(-50%);
+            background: rgba(255,255,255,0.2);
+            padding: 3px 8px;
+            border-radius: 8px;
+            font-size: 0.7rem;
+            backdrop-filter: blur(10px);
         }
         
         .menu-item {
-            background: white;
-            border: 1px solid #eee;
-            border-radius: 10px;
-            padding: 15px;
-            margin-bottom: 10px;
+            padding: 15px 20px;
+            border-bottom: 1px solid #f0f0f0;
+            transition: background 0.3s;
             cursor: pointer;
-            transition: all 0.3s;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
         }
         
         .menu-item:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            background: #f8f9fa;
+        }
+        
+        .menu-item:last-child {
+            border-bottom: none;
         }
         
         .item-header {
             display: flex;
-            justify-content: space-between;
+            justify-content: between;
             align-items: flex-start;
             margin-bottom: 8px;
         }
         
         .item-name {
             font-weight: bold;
-            color: #2c3e50;
+            color: #333;
+            flex: 1;
+            margin-right: 10px;
         }
         
         .item-price {
-            color: #e74c3c;
+            color: #667eea;
             font-weight: bold;
+            font-size: 1.1rem;
         }
         
         .item-description {
             color: #666;
             font-size: 0.9rem;
+            line-height: 1.4;
             margin-bottom: 8px;
         }
         
@@ -164,564 +234,428 @@
             flex-wrap: wrap;
         }
         
-        .item-tag {
-            background: #ecf0f1;
-            color: #34495e;
-            padding: 2px 8px;
-            border-radius: 12px;
+        .tag {
+            background: #e3f2fd;
+            color: #1976d2;
+            padding: 3px 8px;
+            border-radius: 8px;
             font-size: 0.7rem;
+            font-weight: 500;
         }
         
-        .tag-featured {
-            background: #f39c12;
-            color: white;
+        .tag.ai-recommended {
+            background: #f3e5f5;
+            color: #7b1fa2;
         }
         
-        .tag-vegetarian {
-            background: #27ae60;
-            color: white;
+        .tag.dietary {
+            background: #e8f5e8;
+            color: #2e7d32;
         }
         
-        .add-to-cart {
-            background: #3498db;
-            color: white;
-            border: none;
-            padding: 8px 15px;
-            border-radius: 15px;
-            cursor: pointer;
-            font-size: 0.8rem;
-            margin-top: 10px;
-            transition: all 0.3s;
-        }
-        
-        .add-to-cart:hover {
-            background: #2980b9;
-        }
-        
-        .cart-summary {
-            position: fixed;
-            bottom: 80px;
-            left: 50%;
-            transform: translateX(-50%);
-            background: #2c3e50;
-            color: white;
-            padding: 15px 25px;
-            border-radius: 25px;
-            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
-            display: none;
-            cursor: pointer;
-        }
-        
-        .loyalty-info {
-            background: linear-gradient(135deg, #f39c12 0%, #e67e22 100%);
+        .loyalty-banner {
+            background: linear-gradient(135deg, #ff6b6b 0%, #ff8e53 100%);
             color: white;
             padding: 15px;
-            border-radius: 10px;
-            text-align: center;
+            border-radius: 15px;
             margin-bottom: 20px;
+            text-align: center;
+            box-shadow: 0 3px 15px rgba(255,107,107,0.3);
         }
         
-        .points-balance {
+        .loyalty-points {
+            font-size: 1.2rem;
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+        
+        .feature-showcase {
+            background: white;
+            border-radius: 15px;
+            padding: 20px;
+            margin-bottom: 15px;
+            box-shadow: 0 3px 15px rgba(0,0,0,0.1);
+        }
+        
+        .feature-title {
+            font-weight: bold;
+            color: #333;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .feature-icon {
+            font-size: 1.2rem;
+        }
+        
+        .feature-description {
+            color: #666;
+            font-size: 0.9rem;
+            line-height: 1.4;
+        }
+        
+        .queue-status {
+            background: linear-gradient(135deg, #4ecdc4 0%, #44a08d 100%);
+            color: white;
+            padding: 15px;
+            border-radius: 15px;
+            text-align: center;
+            margin-bottom: 15px;
+        }
+        
+        .queue-time {
             font-size: 1.5rem;
             font-weight: bold;
             margin-bottom: 5px;
         }
         
-        .reward-item {
-            background: white;
-            border: 1px solid #ddd;
+        .notification {
+            background: #4caf50;
+            color: white;
+            padding: 10px 15px;
             border-radius: 10px;
-            padding: 15px;
-            margin-bottom: 10px;
-        }
-        
-        .reward-header {
+            margin-bottom: 15px;
+            font-size: 0.9rem;
             display: flex;
-            justify-content: space-between;
             align-items: center;
-            margin-bottom: 8px;
+            gap: 8px;
         }
         
-        .reward-name {
-            font-weight: bold;
-            color: #2c3e50;
-        }
-        
-        .reward-points {
-            background: #3498db;
+        .demo-footer {
+            text-align: center;
             color: white;
-            padding: 4px 8px;
-            border-radius: 12px;
-            font-size: 0.8rem;
+            margin-top: 20px;
+            font-size: 0.9rem;
+            opacity: 0.8;
         }
         
-        .redeem-btn {
-            background: #27ae60;
+        .pwa-install {
+            background: rgba(255,255,255,0.2);
             color: white;
-            border: none;
             padding: 8px 15px;
-            border-radius: 15px;
+            border: none;
+            border-radius: 20px;
             cursor: pointer;
             font-size: 0.8rem;
+            backdrop-filter: blur(10px);
             margin-top: 10px;
-        }
-        
-        .redeem-btn:disabled {
-            background: #bdc3c7;
-            cursor: not-allowed;
-        }
-        
-        .reservation-form {
-            background: #f8f9fa;
-            padding: 20px;
-            border-radius: 10px;
-        }
-        
-        .form-group {
-            margin-bottom: 15px;
-        }
-        
-        .form-label {
-            display: block;
-            margin-bottom: 5px;
-            font-weight: bold;
-            color: #2c3e50;
-        }
-        
-        .form-input {
-            width: 100%;
-            padding: 10px;
-            border: 1px solid #ddd;
-            border-radius: 5px;
-            font-size: 1rem;
-        }
-        
-        .reserve-btn {
-            width: 100%;
-            background: #e74c3c;
-            color: white;
-            border: none;
-            padding: 15px;
-            border-radius: 10px;
-            font-size: 1rem;
-            cursor: pointer;
-            margin-top: 15px;
-        }
-        
-        .queue-status {
-            background: #f39c12;
-            color: white;
-            padding: 20px;
-            border-radius: 10px;
-            text-align: center;
-            margin-bottom: 20px;
-        }
-        
-        .queue-position {
-            font-size: 3rem;
-            font-weight: bold;
-            margin-bottom: 10px;
-        }
-        
-        .join-queue-btn {
-            width: 100%;
-            background: #9b59b6;
-            color: white;
-            border: none;
-            padding: 15px;
-            border-radius: 10px;
-            font-size: 1rem;
-            cursor: pointer;
-        }
-        
-        .success-message {
-            background: #d4edda;
-            color: #155724;
-            padding: 15px;
-            border-radius: 10px;
-            margin-bottom: 15px;
-            display: none;
-        }
-        
-        .login-form {
-            background: #f8f9fa;
-            padding: 20px;
-            border-radius: 10px;
-            text-align: center;
-        }
-        
-        .user-info {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            padding: 15px;
-            border-radius: 10px;
-            text-align: center;
-            margin-bottom: 20px;
-        }
-        
-        .login-btn {
-            width: 100%;
-            background: #3498db;
-            color: white;
-            border: none;
-            padding: 15px;
-            border-radius: 10px;
-            font-size: 1rem;
-            cursor: pointer;
         }
     </style>
 </head>
 <body>
     <div class="demo-container">
         <div class="demo-header">
-            <h1>Customer Experience Demo</h1>
+            <h1>Restaurant Revolution v3</h1>
+            <div class="demo-subtitle">AI-Powered Customer Experience</div>
+            <div class="version-badge">🤖 Enhanced with AI & Real-time Features</div>
         </div>
         
         <div class="phone-frame">
             <div class="phone-screen">
                 <div class="app-header">
-                    <div class="app-title">RestaurantRush</div>
-                    <div class="restaurant-name">Bella Vista Bistro</div>
+                    <div class="status-bar">
+                        <span>9:41 AM</span>
+                        <span>🔋 100% 📶</span>
+                    </div>
+                    <div class="ai-indicator">🤖 AI</div>
+                    <div class="app-title">Bistro Revolution</div>
+                    <div class="restaurant-name">Farm-to-Table Cuisine</div>
                 </div>
                 
                 <div class="app-content">
+                    <div class="notification">
+                        <span>🔔</span>
+                        Welcome back! Your table is ready in 5 minutes.
+                    </div>
+                    
+                    <div class="loyalty-banner">
+                        <div class="loyalty-points">💎 150 Points Available</div>
+                        <div>Earn 10 points with every $1 spent!</div>
+                    </div>
+                    
                     <div class="nav-tabs">
-                        <button class="nav-tab active" onclick="showTab('menu')">Menu</button>
-                        <button class="nav-tab" onclick="showTab('rewards')">Rewards</button>
-                        <button class="nav-tab" onclick="showTab('reserve')">Reserve</button>
-                        <button class="nav-tab" onclick="showTab('queue')">Queue</button>
-                        <button class="nav-tab" onclick="showTab('account')">Account</button>
+                        <button class="nav-tab active" onclick="showTab('menu')">🍽️ Menu</button>
+                        <button class="nav-tab" onclick="showTab('queue')">⏱️ Queue</button>
+                        <button class="nav-tab" onclick="showTab('ai')">🤖 AI</button>
+                        <button class="nav-tab" onclick="showTab('features')">✨ Features</button>
                     </div>
                     
-                    <!-- Menu Tab -->
                     <div id="menu" class="tab-content active">
-                        <div class="menu-category">
-                            <div class="category-title">Featured Items</div>
-                            <div class="menu-item" onclick="addToCart('Spaghetti Carbonara', 22.99)">
-                                <div class="item-header">
-                                    <div class="item-name">Spaghetti Carbonara</div>
-                                    <div class="item-price">$22.99</div>
-                                </div>
-                                <div class="item-description">Classic Roman pasta with pancetta, eggs, pecorino cheese, and black pepper</div>
-                                <div class="item-tags">
-                                    <span class="item-tag tag-featured">Featured</span>
-                                </div>
-                                <button class="add-to-cart">Add to Cart</button>
+                        <div class="feature-showcase">
+                            <div class="feature-title">
+                                <span class="feature-icon">🎯</span>
+                                AI Recommendations for You
+                            </div>
+                            <div class="feature-description">
+                                Based on your preferences and order history, here are personalized suggestions.
                             </div>
                         </div>
                         
                         <div class="menu-category">
-                            <div class="category-title">Appetizers</div>
-                            <div class="menu-item" onclick="addToCart('Bruschetta Trio', 14.99)">
-                                <div class="item-header">
-                                    <div class="item-name">Bruschetta Trio</div>
-                                    <div class="item-price">$14.99</div>
-                                </div>
-                                <div class="item-description">Three varieties of our signature bruschetta: classic tomato basil, mushroom truffle, and ricotta honey</div>
-                                <div class="item-tags">
-                                    <span class="item-tag tag-vegetarian">Vegetarian</span>
-                                </div>
-                                <button class="add-to-cart">Add to Cart</button>
+                            <div class="category-header">
+                                🥗 Appetizers
+                                <div class="ai-recommendations">AI Picks</div>
                             </div>
-                            
-                            <div class="menu-item" onclick="addToCart('Calamari Fritti', 16.99)">
+                            <div class="menu-item">
                                 <div class="item-header">
-                                    <div class="item-name">Calamari Fritti</div>
-                                    <div class="item-price">$16.99</div>
+                                    <div class="item-name">Truffle Arancini</div>
+                                    <div class="item-price">$16.00</div>
                                 </div>
-                                <div class="item-description">Golden fried squid rings served with marinara sauce and lemon aioli</div>
+                                <div class="item-description">
+                                    Crispy risotto balls with truffle oil, parmesan, and roasted garlic aioli
+                                </div>
                                 <div class="item-tags">
-                                    <span class="item-tag">Seafood</span>
+                                    <span class="tag ai-recommended">🤖 AI Pick</span>
+                                    <span class="tag dietary">🌱 Vegetarian</span>
+                                    <span class="tag">⭐ Featured</span>
                                 </div>
-                                <button class="add-to-cart">Add to Cart</button>
+                            </div>
+                            <div class="menu-item">
+                                <div class="item-header">
+                                    <div class="item-name">Charcuterie Board</div>
+                                    <div class="item-price">$22.00</div>
+                                </div>
+                                <div class="item-description">
+                                    Artisanal meats, aged cheeses, seasonal fruits, nuts, and house-made preserves
+                                </div>
+                                <div class="item-tags">
+                                    <span class="tag">👥 Popular</span>
+                                    <span class="tag">🍷 Pairs with Wine</span>
+                                </div>
                             </div>
                         </div>
                         
                         <div class="menu-category">
-                            <div class="category-title">Main Courses</div>
-                            <div class="menu-item" onclick="addToCart('Osso Buco Milanese', 34.99)">
+                            <div class="category-header">
+                                🥩 Main Courses
+                                <div class="ai-recommendations">2 AI Picks</div>
+                            </div>
+                            <div class="menu-item">
                                 <div class="item-header">
-                                    <div class="item-name">Osso Buco Milanese</div>
-                                    <div class="item-price">$34.99</div>
+                                    <div class="item-name">Herb-Crusted Lamb</div>
+                                    <div class="item-price">$42.00</div>
                                 </div>
-                                <div class="item-description">Braised veal shanks with saffron risotto and gremolata</div>
+                                <div class="item-description">
+                                    Australian lamb rack with rosemary crust, roasted vegetables, and red wine jus
+                                </div>
                                 <div class="item-tags">
-                                    <span class="item-tag tag-featured">Featured</span>
+                                    <span class="tag ai-recommended">🤖 Perfect Match</span>
+                                    <span class="tag">⭐ Featured</span>
+                                    <span class="tag">🌟 Premium</span>
                                 </div>
-                                <button class="add-to-cart">Add to Cart</button>
+                            </div>
+                            <div class="menu-item">
+                                <div class="item-header">
+                                    <div class="item-name">Mushroom Wellington</div>
+                                    <div class="item-price">$32.00</div>
+                                </div>
+                                <div class="item-description">
+                                    Wild mushroom duxelles in puff pastry with roasted root vegetables
+                                </div>
+                                <div class="item-tags">
+                                    <span class="tag ai-recommended">🤖 Based on History</span>
+                                    <span class="tag dietary">🌱 Vegetarian</span>
+                                    <span class="tag">⭐ Featured</span>
+                                </div>
                             </div>
                         </div>
                     </div>
                     
-                    <!-- Rewards Tab -->
-                    <div id="rewards" class="tab-content">
-                        <div class="loyalty-info">
-                            <div class="points-balance">150 Points</div>
-                            <div>John Customer</div>
-                        </div>
-                        
-                        <div class="reward-item">
-                            <div class="reward-header">
-                                <div class="reward-name">Free Appetizer</div>
-                                <div class="reward-points">100 pts</div>
-                            </div>
-                            <div style="color: #666; font-size: 0.9rem; margin-bottom: 10px;">Get a free appetizer of your choice</div>
-                            <button class="redeem-btn" onclick="redeemReward(this, 100)">Redeem Now</button>
-                        </div>
-                        
-                        <div class="reward-item">
-                            <div class="reward-header">
-                                <div class="reward-name">10% Off Next Order</div>
-                                <div class="reward-points">200 pts</div>
-                            </div>
-                            <div style="color: #666; font-size: 0.9rem; margin-bottom: 10px;">Save 10% on your next dining experience</div>
-                            <button class="redeem-btn" disabled>Need 50 more points</button>
-                        </div>
-                        
-                        <div class="reward-item">
-                            <div class="reward-header">
-                                <div class="reward-name">Free Dessert</div>
-                                <div class="reward-points">150 pts</div>
-                            </div>
-                            <div style="color: #666; font-size: 0.9rem; margin-bottom: 10px;">Complimentary dessert with any main course</div>
-                            <button class="redeem-btn" onclick="redeemReward(this, 150)">Redeem Now</button>
-                        </div>
-                    </div>
-                    
-                    <!-- Reserve Tab -->
-                    <div id="reserve" class="tab-content">
-                        <div class="success-message" id="reservation-success">Reservation confirmed! You'll receive a confirmation email shortly.</div>
-                        
-                        <div class="reservation-form">
-                            <div class="form-group">
-                                <label class="form-label">Date</label>
-                                <input type="date" class="form-input" id="reservation-date" value="2025-06-15">
-                            </div>
-                            
-                            <div class="form-group">
-                                <label class="form-label">Time</label>
-                                <select class="form-input" id="reservation-time">
-                                    <option>6:00 PM</option>
-                                    <option>6:30 PM</option>
-                                    <option>7:00 PM</option>
-                                    <option>7:30 PM</option>
-                                    <option>8:00 PM</option>
-                                    <option>8:30 PM</option>
-                                </select>
-                            </div>
-                            
-                            <div class="form-group">
-                                <label class="form-label">Party Size</label>
-                                <select class="form-input" id="party-size">
-                                    <option>1 person</option>
-                                    <option>2 people</option>
-                                    <option>3 people</option>
-                                    <option>4 people</option>
-                                    <option>5 people</option>
-                                    <option>6+ people</option>
-                                </select>
-                            </div>
-                            
-                            <div class="form-group">
-                                <label class="form-label">Special Requests</label>
-                                <input type="text" class="form-input" placeholder="Anniversary dinner, high chair needed, etc." id="special-requests">
-                            </div>
-                            
-                            <button class="reserve-btn" onclick="makeReservation()">Make Reservation</button>
-                        </div>
-                    </div>
-                    
-                    <!-- Queue Tab -->
                     <div id="queue" class="tab-content">
-                        <div class="success-message" id="queue-success">Joined queue successfully! We'll text you when your table is ready.</div>
-                        
-                        <div id="queue-join">
-                            <p style="margin-bottom: 20px; text-align: center; color: #666;">Restaurant is currently busy. Join our virtual queue to save your spot!</p>
-                            
-                            <div style="margin-bottom: 20px;">
-                                <label class="form-label">Party Size</label>
-                                <select class="form-input" id="queue-party-size">
-                                    <option>1 person</option>
-                                    <option>2 people</option>
-                                    <option>3 people</option>
-                                    <option>4 people</option>
-                                    <option>5 people</option>
-                                    <option>6+ people</option>
-                                </select>
-                            </div>
-                            
-                            <button class="join-queue-btn" onclick="joinQueue()">Join Queue</button>
+                        <div class="queue-status">
+                            <div class="queue-time">⏱️ 12 minutes</div>
+                            <div>Estimated wait time</div>
                         </div>
                         
-                        <div id="queue-status" style="display: none;">
-                            <div class="queue-status">
-                                <div class="queue-position">#2</div>
-                                <div>Position in Queue</div>
-                                <div style="margin-top: 10px;">Estimated wait: 15 minutes</div>
+                        <div class="feature-showcase">
+                            <div class="feature-title">
+                                <span class="feature-icon">🎯</span>
+                                Smart Queue Management
                             </div>
-                            
-                            <p style="text-align: center; color: #666;">We'll send you a text when your table is ready. Feel free to explore the area!</p>
+                            <div class="feature-description">
+                                AI-powered wait time predictions based on party size, kitchen capacity, and historical data. Get SMS notifications when your table is ready!
+                            </div>
+                        </div>
+                        
+                        <div class="feature-showcase">
+                            <div class="feature-title">
+                                <span class="feature-icon">📱</span>
+                                Real-time Updates
+                            </div>
+                            <div class="feature-description">
+                                <strong>Position in queue:</strong> #3<br>
+                                <strong>Party size:</strong> 2 people<br>
+                                <strong>Joined:</strong> 8:30 PM<br>
+                                <strong>Status:</strong> Active waiting
+                            </div>
+                        </div>
+                        
+                        <div class="notification">
+                            <span>📳</span>
+                            We'll text you when your table is ready!
                         </div>
                     </div>
                     
-                    <!-- Account Tab -->
-                    <div id="account" class="tab-content">
-                        <div id="login-form">
-                            <div class="login-form">
-                                <h3 style="margin-bottom: 20px;">Sign In</h3>
-                                <div class="form-group">
-                                    <input type="text" class="form-input" placeholder="Username" value="john_customer">
-                                </div>
-                                <div class="form-group">
-                                    <input type="password" class="form-input" placeholder="Password" value="password123">
-                                </div>
-                                <button class="login-btn" onclick="login()">Sign In</button>
+                    <div id="ai" class="tab-content">
+                        <div class="feature-showcase">
+                            <div class="feature-title">
+                                <span class="feature-icon">🤖</span>
+                                AI Assistant
+                            </div>
+                            <div class="feature-description">
+                                "Hi! I'm your personal dining assistant. I can help with menu recommendations, dietary questions, and more!"
                             </div>
                         </div>
                         
-                        <div id="user-profile" style="display: none;">
-                            <div class="user-info">
-                                <div style="font-size: 1.2rem; font-weight: bold; margin-bottom: 5px;">John Customer</div>
-                                <div style="opacity: 0.9;">john@example.com</div>
-                                <div style="margin-top: 10px;">150 Loyalty Points</div>
+                        <div class="feature-showcase">
+                            <div class="feature-title">
+                                <span class="feature-icon">🎯</span>
+                                Personalized Recommendations
                             </div>
-                            
-                            <div style="background: #f8f9fa; padding: 15px; border-radius: 10px; margin-bottom: 15px;">
-                                <h4 style="margin-bottom: 10px;">Dietary Preferences</h4>
-                                <div class="item-tags">
-                                    <span class="item-tag tag-vegetarian">Vegetarian</span>
-                                    <span class="item-tag">Gluten-Free</span>
-                                </div>
+                            <div class="feature-description">
+                                Based on your order history and preferences:<br>
+                                • 95% match: Truffle Arancini<br>
+                                • 89% match: Herb-Crusted Lamb<br>
+                                • 87% match: Mushroom Wellington
                             </div>
-                            
-                            <div style="background: #f8f9fa; padding: 15px; border-radius: 10px;">
-                                <h4 style="margin-bottom: 10px;">Recent Orders</h4>
-                                <div style="color: #666; font-size: 0.9rem;">No recent orders</div>
+                        </div>
+                        
+                        <div class="feature-showcase">
+                            <div class="feature-title">
+                                <span class="feature-icon">🧠</span>
+                                Smart Learning
+                            </div>
+                            <div class="feature-description">
+                                The AI learns from your interactions to provide better suggestions over time. It remembers your dietary preferences, favorite flavors, and dining patterns.
+                            </div>
+                        </div>
+                        
+                        <div class="notification">
+                            <span>💡</span>
+                            Based on the weather, try our seasonal soup special!
+                        </div>
+                    </div>
+                    
+                    <div id="features" class="tab-content">
+                        <div class="feature-showcase">
+                            <div class="feature-title">
+                                <span class="feature-icon">📱</span>
+                                Progressive Web App
+                            </div>
+                            <div class="feature-description">
+                                Works like a native app without app store downloads. Works offline and sends push notifications.
+                            </div>
+                        </div>
+                        
+                        <div class="feature-showcase">
+                            <div class="feature-title">
+                                <span class="feature-icon">⚡</span>
+                                Real-time Everything
+                            </div>
+                            <div class="feature-description">
+                                Live menu updates, instant order tracking, real-time queue positions, and immediate notifications via WebSocket technology.
+                            </div>
+                        </div>
+                        
+                        <div class="feature-showcase">
+                            <div class="feature-title">
+                                <span class="feature-icon">🎁</span>
+                                Smart Loyalty Program
+                            </div>
+                            <div class="feature-description">
+                                Earn points automatically, get personalized rewards, and receive targeted offers based on your dining behavior.
+                            </div>
+                        </div>
+                        
+                        <div class="feature-showcase">
+                            <div class="feature-title">
+                                <span class="feature-icon">🔔</span>
+                                Multi-channel Notifications
+                            </div>
+                            <div class="feature-description">
+                                SMS, push notifications, and in-app alerts for order updates, table readiness, and special offers.
+                            </div>
+                        </div>
+                        
+                        <div class="feature-showcase">
+                            <div class="feature-title">
+                                <span class="feature-icon">🏆</span>
+                                PostgreSQL Powered
+                            </div>
+                            <div class="feature-description">
+                                Enterprise-grade database with real-time analytics, comprehensive reporting, and unlimited scalability.
                             </div>
                         </div>
                     </div>
-                </div>
-                
-                <div class="cart-summary" id="cart-summary">
-                    <span id="cart-count">0 items</span> - <span id="cart-total">$0.00</span>
                 </div>
             </div>
         </div>
-    </div>
-
-    <script>
-        let cartItems = [];
-        let cartTotal = 0;
-        let userPoints = 150;
         
+        <div class="demo-footer">
+            <div>🚀 Restaurant Revolution v3 - Where AI Meets Hospitality</div>
+            <button class="pwa-install" onclick="showInstallPrompt()">📱 Install as App</button>
+        </div>
+    </div>
+    
+    <script>
         function showTab(tabName) {
             // Hide all tab contents
-            const tabs = document.querySelectorAll('.tab-content');
+            const tabContents = document.querySelectorAll('.tab-content');
+            tabContents.forEach(content => content.classList.remove('active'));
+            
+            // Remove active class from all tabs
+            const tabs = document.querySelectorAll('.nav-tab');
             tabs.forEach(tab => tab.classList.remove('active'));
             
-            // Remove active class from all nav tabs
-            const navTabs = document.querySelectorAll('.nav-tab');
-            navTabs.forEach(tab => tab.classList.remove('active'));
-            
-            // Show selected tab
+            // Show selected tab content
             document.getElementById(tabName).classList.add('active');
             
-            // Add active class to clicked nav tab
+            // Add active class to clicked tab
             event.target.classList.add('active');
         }
         
-        function addToCart(itemName, price) {
-            cartItems.push({name: itemName, price: price});
-            cartTotal += price;
-            updateCartDisplay();
-            
-            // Show success animation
-            event.target.textContent = 'Added!';
-            event.target.style.background = '#27ae60';
-            setTimeout(() => {
-                event.target.textContent = 'Add to Cart';
-                event.target.style.background = '#3498db';
-            }, 1000);
+        function showInstallPrompt() {
+            alert('In a real PWA, this would show the browser\'s install prompt to add the app to your home screen!');
         }
         
-        function updateCartDisplay() {
-            const cartSummary = document.getElementById('cart-summary');
-            const cartCount = document.getElementById('cart-count');
-            const cartTotalElement = document.getElementById('cart-total');
-            
-            cartCount.textContent = `${cartItems.length} item${cartItems.length !== 1 ? 's' : ''}`;
-            cartTotalElement.textContent = `$${cartTotal.toFixed(2)}`;
-            
-            if (cartItems.length > 0) {
-                cartSummary.style.display = 'block';
-            } else {
-                cartSummary.style.display = 'none';
-            }
-        }
-        
-        function redeemReward(button, pointsRequired) {
-            if (userPoints >= pointsRequired) {
-                userPoints -= pointsRequired;
-                button.textContent = 'Redeemed!';
-                button.style.background = '#27ae60';
-                button.disabled = true;
+        // Simulate real-time updates
+        let queueTime = 12;
+        setInterval(() => {
+            if (Math.random() > 0.7) {
+                queueTime = Math.max(1, queueTime - 1);
+                document.querySelector('.queue-time').innerHTML = `⏱️ ${queueTime} minutes`;
                 
-                // Update points display
-                document.querySelector('.points-balance').textContent = `${userPoints} Points`;
+                if (queueTime <= 3) {
+                    document.querySelector('.queue-status').style.background = 
+                        'linear-gradient(135deg, #ff9800 0%, #f57c00 100%)';
+                }
                 
-                // Check if other rewards can still be redeemed
-                const redeemButtons = document.querySelectorAll('.redeem-btn:not(:disabled)');
-                redeemButtons.forEach(btn => {
-                    const rewardPoints = parseInt(btn.parentElement.querySelector('.reward-points').textContent);
-                    if (userPoints < rewardPoints) {
-                        btn.disabled = true;
-                        btn.textContent = `Need ${rewardPoints - userPoints} more points`;
-                    }
-                });
+                if (queueTime <= 1) {
+                    document.querySelector('.queue-status').style.background = 
+                        'linear-gradient(135deg, #4caf50 0%, #388e3c 100%)';
+                    document.querySelector('.queue-time').innerHTML = '🎉 Ready!';
+                }
             }
-        }
+        }, 3000);
         
-        function makeReservation() {
-            const date = document.getElementById('reservation-date').value;
-            const time = document.getElementById('reservation-time').value;
-            const partySize = document.getElementById('party-size').value;
-            const specialRequests = document.getElementById('special-requests').value;
-            
-            document.getElementById('reservation-success').style.display = 'block';
-            
-            setTimeout(() => {
-                document.getElementById('reservation-success').style.display = 'none';
-            }, 5000);
-        }
+        // Simulate notifications
+        const notifications = [
+            "🍽️ Your appetizer is being prepared!",
+            "⭐ New seasonal menu items available!",
+            "🎁 You're 50 points away from a free dessert!",
+            "📱 Rate your experience and earn bonus points!"
+        ];
         
-        function joinQueue() {
-            document.getElementById('queue-join').style.display = 'none';
-            document.getElementById('queue-status').style.display = 'block';
-            document.getElementById('queue-success').style.display = 'block';
-            
-            setTimeout(() => {
-                document.getElementById('queue-success').style.display = 'none';
-            }, 5000);
-            
-            // Simulate queue updates
-            setTimeout(() => {
-                document.querySelector('.queue-position').textContent = '#1';
-                document.querySelector('.queue-status div:last-child').textContent = 'Estimated wait: 5 minutes';
-            }, 10000);
-        }
-        
-        function login() {
-            document.getElementById('login-form').style.display = 'none';
-            document.getElementById('user-profile').style.display = 'block';
-        }
-        
-        // Initialize the demo
-        document.addEventListener('DOMContentLoaded', function() {
-            // Auto-login for demo purposes
-            setTimeout(() => {
-                login();
-            }, 1000);
-        });
+        let notificationIndex = 0;
+        setInterval(() => {
+            if (Math.random() > 0.8) {
+                const notificationElement = document.querySelector('.notification');
+                notificationElement.innerHTML = `<span>🔔</span> ${notifications[notificationIndex]}`;
+                notificationIndex = (notificationIndex + 1) % notifications.length;
+            }
+        }, 8000);
     </script>
 </body>
 </html>

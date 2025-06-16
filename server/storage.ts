@@ -17,6 +17,11 @@ export interface IStorage {
   getUserByEmail(email: string): Promise<User | undefined>;
   createUser(user: InsertUser): Promise<User>;
   updateUserLoyaltyPoints(userId: number, points: number): Promise<User | undefined>;
+  updateUserLastLogin(userId: number): Promise<User | undefined>;
+  updateUserPassword(userId: number, password: string): Promise<User | undefined>;
+  updateUserEmailVerification(userId: number, verified: boolean): Promise<User | undefined>;
+  updateUserProfile(userId: number, updates: Partial<User>): Promise<User | undefined>;
+  getAllUsers(page: number, limit: number, filters?: any): Promise<{ users: User[]; total: number }>;
   
   // Restaurant methods
   getRestaurant(id: number): Promise<Restaurant | undefined>;
@@ -27,15 +32,20 @@ export interface IStorage {
   getCategories(restaurantId: number): Promise<Category[]>;
   getCategory(id: number): Promise<Category | undefined>;
   createCategory(category: InsertCategory): Promise<Category>;
+  updateCategory(id: number, updates: Partial<Category>): Promise<Category | undefined>;
+  deleteCategory(id: number): Promise<boolean>;
   
   // MenuItem methods
   getMenuItems(restaurantId: number, categoryId?: number): Promise<MenuItem[]>;
   getMenuItem(id: number): Promise<MenuItem | undefined>;
   getFeaturedMenuItems(restaurantId: number): Promise<MenuItem[]>;
   createMenuItem(menuItem: InsertMenuItem): Promise<MenuItem>;
+  updateMenuItem(id: number, updates: Partial<MenuItem>): Promise<MenuItem | undefined>;
+  deleteMenuItem(id: number): Promise<boolean>;
   
   // Modifier methods
   getModifiers(menuItemId: number): Promise<Modifier[]>;
+  getModifier(id: number): Promise<Modifier | undefined>;
   createModifier(modifier: InsertModifier): Promise<Modifier>;
   
   // Reservation methods
@@ -47,10 +57,12 @@ export interface IStorage {
   
   // Order methods
   getOrders(restaurantId: number): Promise<Order[]>;
+  getRestaurantOrders(restaurantId: number): Promise<Order[]>;
   getUserOrders(userId: number): Promise<Order[]>;
   getOrder(id: number): Promise<Order | undefined>;
   createOrder(order: InsertOrder): Promise<Order>;
-  updateOrderStatus(id: number, status: string): Promise<Order | undefined>;
+  updateOrder(id: number, order: Partial<Order>): Promise<Order | undefined>;
+  updateOrderStatus(id: number, status: string, estimatedReadyTime?: string, notes?: string): Promise<Order | undefined>;
   
   // OrderItem methods
   getOrderItems(orderId: number): Promise<OrderItem[]>;
@@ -686,6 +698,69 @@ export class MemStorage implements IStorage {
     }
     return undefined;
   }
+
+  async updateUserLastLogin(userId: number): Promise<User | undefined> {
+    const user = await this.getUser(userId);
+    if (user) {
+      const updatedUser = { ...user, lastLoginAt: new Date() };
+      this.users.set(userId, updatedUser);
+      return updatedUser;
+    }
+    return undefined;
+  }
+
+  async updateUserPassword(userId: number, password: string): Promise<User | undefined> {
+    const user = await this.getUser(userId);
+    if (user) {
+      const updatedUser = { ...user, password };
+      this.users.set(userId, updatedUser);
+      return updatedUser;
+    }
+    return undefined;
+  }
+
+  async updateUserEmailVerification(userId: number, verified: boolean): Promise<User | undefined> {
+    const user = await this.getUser(userId);
+    if (user) {
+      const updatedUser = { ...user, emailVerified: verified };
+      this.users.set(userId, updatedUser);
+      return updatedUser;
+    }
+    return undefined;
+  }
+
+  async updateUserProfile(userId: number, updates: Partial<User>): Promise<User | undefined> {
+    const user = await this.getUser(userId);
+    if (user) {
+      const updatedUser = { ...user, ...updates, id: userId }; // Preserve ID
+      this.users.set(userId, updatedUser);
+      return updatedUser;
+    }
+    return undefined;
+  }
+
+  async getAllUsers(page: number = 1, limit: number = 20, filters?: any): Promise<{ users: User[]; total: number }> {
+    let users = Array.from(this.users.values());
+    
+    // Apply filters
+    if (filters) {
+      if (filters.role) {
+        users = users.filter(user => user.role === filters.role);
+      }
+      if (filters.emailVerified !== undefined) {
+        users = users.filter(user => user.emailVerified === filters.emailVerified);
+      }
+      if (filters.restaurantId) {
+        users = users.filter(user => user.restaurantId === filters.restaurantId);
+      }
+    }
+    
+    const total = users.length;
+    const startIndex = (page - 1) * limit;
+    const paginatedUsers = users.slice(startIndex, startIndex + limit);
+    
+    return { users: paginatedUsers, total };
+  }
   
   // Restaurant methods
   async getRestaurant(id: number): Promise<Restaurant | undefined> {
@@ -744,6 +819,24 @@ export class MemStorage implements IStorage {
     this.categories.set(id, newCategory);
     return newCategory;
   }
+
+  async updateCategory(id: number, updates: Partial<Category>): Promise<Category | undefined> {
+    const category = await this.getCategory(id);
+    if (category) {
+      const updatedCategory = { ...category, ...updates, id };
+      this.categories.set(id, updatedCategory);
+      return updatedCategory;
+    }
+    return undefined;
+  }
+
+  async deleteCategory(id: number): Promise<boolean> {
+    const exists = this.categories.has(id);
+    if (exists) {
+      this.categories.delete(id);
+    }
+    return exists;
+  }
   
   // MenuItem methods
   async getMenuItems(restaurantId: number, categoryId?: number): Promise<MenuItem[]> {
@@ -783,11 +876,33 @@ export class MemStorage implements IStorage {
     this.menuItems.set(id, newMenuItem);
     return newMenuItem;
   }
+
+  async updateMenuItem(id: number, updates: Partial<MenuItem>): Promise<MenuItem | undefined> {
+    const menuItem = await this.getMenuItem(id);
+    if (menuItem) {
+      const updatedMenuItem = { ...menuItem, ...updates, id };
+      this.menuItems.set(id, updatedMenuItem);
+      return updatedMenuItem;
+    }
+    return undefined;
+  }
+
+  async deleteMenuItem(id: number): Promise<boolean> {
+    const exists = this.menuItems.has(id);
+    if (exists) {
+      this.menuItems.delete(id);
+    }
+    return exists;
+  }
   
   // Modifier methods
   async getModifiers(menuItemId: number): Promise<Modifier[]> {
     return Array.from(this.modifiers.values())
       .filter(modifier => modifier.menuItemId === menuItemId);
+  }
+
+  async getModifier(id: number): Promise<Modifier | undefined> {
+    return this.modifiers.get(id);
   }
   
   async createModifier(modifier: InsertModifier): Promise<Modifier> {
@@ -847,6 +962,11 @@ export class MemStorage implements IStorage {
     return Array.from(this.orders.values())
       .filter(order => order.restaurantId === restaurantId);
   }
+
+  async getRestaurantOrders(restaurantId: number): Promise<Order[]> {
+    return Array.from(this.orders.values())
+      .filter(order => order.restaurantId === restaurantId);
+  }
   
   async getUserOrders(userId: number): Promise<Order[]> {
     return Array.from(this.orders.values())
@@ -871,10 +991,25 @@ export class MemStorage implements IStorage {
     return newOrder;
   }
   
-  async updateOrderStatus(id: number, status: string): Promise<Order | undefined> {
+  async updateOrder(id: number, updates: Partial<Order>): Promise<Order | undefined> {
     const order = await this.getOrder(id);
     if (order) {
-      const updatedOrder = { ...order, status };
+      const updatedOrder = { ...order, ...updates, id };
+      this.orders.set(id, updatedOrder);
+      return updatedOrder;
+    }
+    return undefined;
+  }
+
+  async updateOrderStatus(id: number, status: string, estimatedReadyTime?: string, notes?: string): Promise<Order | undefined> {
+    const order = await this.getOrder(id);
+    if (order) {
+      const updatedOrder = { 
+        ...order, 
+        status,
+        estimatedReadyTime: estimatedReadyTime ? new Date(estimatedReadyTime) : order.estimatedReadyTime,
+        notes: notes || order.notes
+      };
       this.orders.set(id, updatedOrder);
       return updatedOrder;
     }
@@ -1271,5 +1406,5 @@ export class MemStorage implements IStorage {
 
 import { PgStorage } from './pgStorage';
 
-// Use in-memory storage for development when PostgreSQL is not available
-export const storage = process.env.DATABASE_URL ? new PgStorage() : new MemStorage();
+// Use PostgreSQL by default, fallback to in-memory storage only if explicitly disabled
+export const storage = process.env.USE_MEMORY_STORAGE === 'true' ? new MemStorage() : new PgStorage();

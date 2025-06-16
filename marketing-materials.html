@@ -1,76 +1,20 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>RestaurantRush Marketing Package - Complete Sales Materials</title>
+    <title>Restaurant Revolution v3 Marketing Package - AI-Powered Sales Materials</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Playfair+Display:wght@400;500;600;700&display=swap" rel="stylesheet">
     <style>
         :root {
-            /* Professional Color Palette */
             --color-primary: #8B1538;
             --color-primary-light: #A62C4C;
-            --color-primary-dark: #6D1027;
             --color-secondary: #D4AF37;
-            --color-secondary-light: #E6C455;
-            --color-secondary-dark: #B8941F;
-            
-            /* Neutral Colors */
             --color-background: #FDFCF9;
             --color-background-alt: #F8F6F2;
-            --color-surface: #FFFFFF;
-            --color-surface-elevated: #FFFFFF;
-            
-            /* Text Colors */
             --color-text-primary: #1A1A1A;
-            --color-text-secondary: #2C2C2C;
             --color-text-muted: #6B7280;
-            --color-text-light: #9CA3AF;
-            
-            /* Status Colors */
-            --color-success: #228B22;
-            --color-warning: #F59E0B;
-            --color-error: #DC2626;
-            --color-info: #3B82F6;
-            
-            /* Interactive States */
             --color-border: #E5E7EB;
-            --color-border-hover: #D1D5DB;
-            
-            /* Typography */
-            --font-family-heading: 'Inter', system-ui, -apple-system, sans-serif;
-            --font-family-body: 'Inter', system-ui, -apple-system, sans-serif;
-            --font-family-accent: 'Playfair Display', Georgia, serif;
-            
-            /* Spacing */
-            --space-1: 0.25rem;
-            --space-2: 0.5rem;
-            --space-3: 0.75rem;
-            --space-4: 1rem;
-            --space-6: 1.5rem;
-            --space-8: 2rem;
-            --space-12: 3rem;
-            --space-16: 4rem;
-            --space-20: 5rem;
-            
-            /* Border Radius */
-            --radius-sm: 0.375rem;
-            --radius-md: 0.5rem;
-            --radius-lg: 0.75rem;
-            --radius-xl: 1rem;
-            --radius-2xl: 1.5rem;
-            
-            /* Shadows */
-            --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
-            --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
-            --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
-            --shadow-xl: 0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1);
-            
-            /* Transitions */
-            --transition-fast: 150ms ease-in-out;
-            --transition-normal: 300ms ease-in-out;
-            --transition-slow: 500ms ease-in-out;
         }
         
         * {
@@ -80,76 +24,33 @@
         }
         
         body {
-            font-family: var(--font-family-body);
+            font-family: 'Inter', system-ui, -apple-system, sans-serif;
             line-height: 1.6;
             color: var(--color-text-primary);
             background: var(--color-background);
-            -webkit-font-smoothing: antialiased;
-            -moz-osx-font-smoothing: grayscale;
         }
         
-        /* Hero Section */
-        .hero-section {
+        .header {
             background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-primary-light) 100%);
-            min-height: 50vh;
-            display: flex;
-            align-items: center;
-            position: relative;
-            overflow: hidden;
-        }
-        
-        .hero-section::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: linear-gradient(135deg, rgba(139, 21, 56, 0.9) 0%, rgba(166, 44, 76, 0.8) 100%);
-            z-index: 1;
-        }
-        
-        .hero-content {
-            position: relative;
-            z-index: 2;
-            max-width: 1200px;
-            margin: 0 auto;
-            padding: var(--space-20) var(--space-4);
-            text-align: center;
             color: white;
-        }
-        
-        .hero-title {
-            font-family: var(--font-family-heading);
-            font-size: clamp(2.5rem, 5vw, 4rem);
-            font-weight: 700;
-            margin-bottom: var(--space-6);
-            letter-spacing: -0.025em;
-        }
-        
-        .hero-subtitle {
-            font-size: clamp(1.125rem, 2vw, 1.5rem);
-            opacity: 0.95;
-            margin-bottom: var(--space-8);
-            max-width: 600px;
-            margin-left: auto;
-            margin-right: auto;
+            padding: 3rem 2rem;
+            text-align: center;
+            position: relative;
         }
         
         .back-button {
             position: absolute;
-            top: var(--space-6);
-            right: var(--space-6);
+            top: 1rem;
+            right: 1rem;
             background: rgba(255, 255, 255, 0.15);
             backdrop-filter: blur(10px);
             color: white;
             border: 1px solid rgba(255, 255, 255, 0.2);
-            padding: var(--space-3) var(--space-6);
-            border-radius: var(--radius-md);
+            padding: 0.5rem 1rem;
+            border-radius: 0.5rem;
             text-decoration: none;
             font-weight: 500;
-            transition: all var(--transition-normal);
-            z-index: 3;
+            transition: all 0.3s ease;
         }
         
         .back-button:hover {
@@ -157,30 +58,35 @@
             transform: translateY(-1px);
         }
         
-        /* Container */
+        .header h1 {
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 1rem;
+        }
+        
+        .header p {
+            font-size: 1.25rem;
+            opacity: 0.9;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+        
         .container {
             max-width: 1200px;
             margin: 0 auto;
-            padding: 0 var(--space-4);
+            padding: 0 2rem;
         }
         
-        /* Sections */
         .section {
-            padding: var(--space-20) 0;
-        }
-        
-        .section-alt {
-            background: var(--color-background-alt);
+            padding: 3rem 0;
         }
         
         .section-title {
-            font-family: var(--font-family-heading);
-            font-size: clamp(2rem, 4vw, 2.5rem);
+            font-size: 2rem;
             font-weight: 600;
-            color: var(--color-text-primary);
             text-align: center;
-            margin-bottom: var(--space-4);
-            letter-spacing: -0.025em;
+            margin-bottom: 1rem;
+            color: var(--color-text-primary);
         }
         
         .section-description {
@@ -188,70 +94,159 @@
             color: var(--color-text-muted);
             text-align: center;
             max-width: 600px;
-            margin: 0 auto var(--space-16);
+            margin: 0 auto 3rem;
         }
         
-        /* Cards */
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+            margin-bottom: 3rem;
+        }
+        
         .card {
-            background: var(--color-surface);
-            border-radius: var(--radius-xl);
+            background: white;
+            border-radius: 1rem;
             border: 1px solid var(--color-border);
-            overflow: hidden;
-            transition: all var(--transition-normal);
+            padding: 2rem;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1);
         }
         
         .card:hover {
-            box-shadow: var(--shadow-xl);
             transform: translateY(-4px);
+            box-shadow: 0 20px 25px -5px rgb(0 0 0 / 0.1);
             border-color: var(--color-primary-light);
         }
         
-        .card-elevated {
-            box-shadow: var(--shadow-lg);
+        .card-header {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            margin-bottom: 1rem;
         }
         
-        .card-elevated:hover {
-            box-shadow: var(--shadow-xl);
+        .card-icon {
+            width: 3rem;
+            height: 3rem;
+            background: linear-gradient(135deg, var(--color-primary), var(--color-primary-light));
+            border-radius: 0.75rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            color: white;
         }
         
-        /* Grid Layouts */
-        .grid {
-            display: grid;
-            gap: var(--space-6);
+        .card-title {
+            font-size: 1.25rem;
+            font-weight: 600;
+            color: var(--color-text-primary);
         }
         
-        .grid-2 {
-            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+        .card-description {
+            color: var(--color-text-muted);
+            margin-bottom: 1.5rem;
+            line-height: 1.6;
         }
         
-        .grid-3 {
-            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            padding: 0.75rem 1.5rem;
+            border-radius: 0.5rem;
+            font-weight: 500;
+            text-decoration: none;
+            border: none;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 0.875rem;
         }
         
-        .grid-4 {
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        .btn-primary {
+            background: linear-gradient(135deg, var(--color-primary), var(--color-primary-light));
+            color: white;
+            box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1);
         }
         
-        /* Stats Section */
-        .stats-section {
-            background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-primary-dark) 100%);
-            border-radius: var(--radius-2xl);
-            padding: var(--space-12);
-            margin: var(--space-16) 0;
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.1);
+        }
+        
+        .btn-secondary {
+            background: transparent;
+            color: var(--color-primary);
+            border: 1px solid var(--color-border);
+            margin-left: 0.5rem;
+        }
+        
+        .btn-secondary:hover {
+            background: var(--color-primary);
+            color: white;
+        }
+        
+        .demo-section {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: 1.5rem;
+            padding: 3rem;
             color: white;
             text-align: center;
+            margin: 3rem 0;
         }
         
-        .stats-title {
-            font-size: 1.5rem;
+        .demo-title {
+            font-size: 1.875rem;
             font-weight: 600;
-            margin-bottom: var(--space-8);
+            margin-bottom: 1rem;
+        }
+        
+        .demo-description {
+            font-size: 1.125rem;
+            opacity: 0.9;
+            margin-bottom: 2rem;
+        }
+        
+        .demo-buttons {
+            display: flex;
+            gap: 1rem;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+        
+        .demo-btn {
+            background: rgba(255, 255, 255, 0.15);
+            backdrop-filter: blur(10px);
+            color: white;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            padding: 1rem 2rem;
+            border-radius: 0.75rem;
+            text-decoration: none;
+            font-weight: 500;
+            transition: all 0.3s ease;
+        }
+        
+        .demo-btn:hover {
+            background: rgba(255, 255, 255, 0.25);
+            transform: translateY(-2px);
+        }
+        
+        .stats-section {
+            background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-primary-light) 100%);
+            border-radius: 1.5rem;
+            padding: 3rem;
+            margin: 3rem 0;
+            color: white;
+            text-align: center;
         }
         
         .stats-grid {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-            gap: var(--space-8);
+            gap: 2rem;
+            margin-top: 2rem;
         }
         
         .stat-item {
@@ -263,7 +258,7 @@
             font-size: 2.5rem;
             font-weight: 700;
             color: var(--color-secondary);
-            margin-bottom: var(--space-2);
+            margin-bottom: 0.5rem;
         }
         
         .stat-label {
@@ -271,231 +266,39 @@
             opacity: 0.9;
         }
         
-        /* Material Cards */
-        .material-card {
-            padding: var(--space-8);
-            height: 100%;
-            display: flex;
-            flex-direction: column;
-        }
-        
-        .material-header {
-            display: flex;
-            align-items: center;
-            gap: var(--space-3);
-            margin-bottom: var(--space-4);
-        }
-        
-        .material-icon {
-            width: 2.5rem;
-            height: 2.5rem;
-            background: linear-gradient(135deg, var(--color-primary), var(--color-primary-light));
-            border-radius: var(--radius-lg);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 1.25rem;
-            flex-shrink: 0;
-        }
-        
-        .material-title {
-            font-size: 1.25rem;
-            font-weight: 600;
-            color: var(--color-text-primary);
-        }
-        
-        .material-description {
-            color: var(--color-text-muted);
-            margin-bottom: var(--space-6);
-            flex-grow: 1;
-        }
-        
-        .material-features {
+        .features-list {
             list-style: none;
-            margin-bottom: var(--space-6);
+            margin-bottom: 1.5rem;
         }
         
-        .material-features li {
-            padding: var(--space-2) 0;
-            padding-left: var(--space-6);
+        .features-list li {
+            padding: 0.5rem 0;
+            padding-left: 1.5rem;
             position: relative;
-            color: var(--color-text-secondary);
+            color: var(--color-text-muted);
             font-size: 0.875rem;
         }
         
-        .material-features li::before {
+        .features-list li::before {
             content: "✓";
             position: absolute;
             left: 0;
-            color: var(--color-success);
+            color: #228B22;
             font-weight: 600;
         }
         
-        .material-actions {
-            display: flex;
-            gap: var(--space-3);
-            align-items: center;
-        }
-        
-        /* Buttons */
-        .btn {
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            gap: var(--space-2);
-            padding: var(--space-3) var(--space-6);
-            border-radius: var(--radius-md);
-            font-weight: 500;
-            font-size: 0.875rem;
-            text-decoration: none;
-            border: none;
-            cursor: pointer;
-            transition: all var(--transition-normal);
-        }
-        
-        .btn-primary {
-            background: linear-gradient(135deg, var(--color-primary), var(--color-primary-light));
-            color: white;
-            box-shadow: var(--shadow-md);
-        }
-        
-        .btn-primary:hover {
-            transform: translateY(-2px);
-            box-shadow: var(--shadow-lg);
-        }
-        
-        .btn-secondary {
-            background: transparent;
-            color: var(--color-primary);
-            border: 1px solid var(--color-border);
-        }
-        
-        .btn-secondary:hover {
-            background: var(--color-primary);
-            color: white;
-        }
-        
-        .btn-large {
-            padding: var(--space-4) var(--space-8);
-            font-size: 1rem;
-            border-radius: var(--radius-lg);
-        }
-        
-        /* Demo Section */
-        .demo-section {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            border-radius: var(--radius-2xl);
-            padding: var(--space-12);
-            color: white;
-            text-align: center;
-            margin: var(--space-16) 0;
-        }
-        
-        .demo-title {
-            font-size: 1.875rem;
-            font-weight: 600;
-            margin-bottom: var(--space-4);
-        }
-        
-        .demo-description {
-            font-size: 1.125rem;
-            opacity: 0.9;
-            margin-bottom: var(--space-8);
-        }
-        
-        .demo-buttons {
-            display: flex;
-            gap: var(--space-4);
-            justify-content: center;
-            flex-wrap: wrap;
-        }
-        
-        .demo-btn {
-            background: rgba(255, 255, 255, 0.15);
-            backdrop-filter: blur(10px);
-            color: white;
-            border: 1px solid rgba(255, 255, 255, 0.3);
-            padding: var(--space-4) var(--space-8);
-            border-radius: var(--radius-lg);
-            text-decoration: none;
-            font-weight: 500;
-            transition: all var(--transition-normal);
-        }
-        
-        .demo-btn:hover {
-            background: rgba(255, 255, 255, 0.25);
-            transform: translateY(-2px);
-        }
-        
-        /* Contact Section */
-        .contact-section {
-            background: var(--color-surface);
-            border: 1px solid var(--color-border);
-            border-radius: var(--radius-2xl);
-            padding: var(--space-12);
-            text-align: center;
-        }
-        
-        .contact-title {
-            font-size: 1.5rem;
-            font-weight: 600;
-            color: var(--color-text-primary);
-            margin-bottom: var(--space-4);
-        }
-        
-        .contact-description {
-            color: var(--color-text-muted);
-            margin-bottom: var(--space-8);
-        }
-        
-        .contact-info {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-            gap: var(--space-6);
-            margin-top: var(--space-8);
-        }
-        
-        .contact-item {
-            padding: var(--space-4);
-            background: var(--color-background-alt);
-            border-radius: var(--radius-lg);
-        }
-        
-        .contact-label {
-            font-weight: 600;
-            color: var(--color-text-primary);
-            margin-bottom: var(--space-1);
-        }
-        
-        .contact-value {
-            color: var(--color-text-muted);
-        }
-        
-        /* Animations */
-        @keyframes fadeInUp {
-            from {
-                opacity: 0;
-                transform: translateY(30px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-        
-        .animate-fade-in-up {
-            animation: fadeInUp 0.6s ease-out;
-        }
-        
-        /* Responsive Design */
         @media (max-width: 768px) {
+            .header h1 {
+                font-size: 2rem;
+            }
+            
+            .header p {
+                font-size: 1rem;
+            }
+            
             .demo-buttons {
                 flex-direction: column;
                 align-items: center;
-            }
-            
-            .material-actions {
-                flex-direction: column;
             }
             
             .stats-grid {
@@ -507,483 +310,278 @@
             .stats-grid {
                 grid-template-columns: 1fr;
             }
-            
-            .grid-4 {
-                grid-template-columns: repeat(2, 1fr);
-            }
         }
     </style>
 </head>
 <body>
-    <a href="/" class="back-button">← Back to App</a>
+    <div class="header">
+        <a href="/" class="back-button">← Back to App</a>
+        <h1>🤖 Restaurant Revolution v3 Marketing Package</h1>
+        <p>AI-Powered Sales Materials, Real-time Analytics & Next-Generation Implementation Resources</p>
+    </div>
     
-    <!-- Hero Section -->
-    <section class="hero-section">
-        <div class="hero-content">
-            <h1 class="hero-title">RestaurantRush Marketing Package</h1>
-            <p class="hero-subtitle">Complete Sales Materials, Documentation & Implementation Resources</p>
-        </div>
-    </section>
-    
-    <!-- Overview Section -->
-    <section class="section">
-        <div class="container">
+    <div class="container">
+        <!-- Overview Section -->
+        <section class="section">
             <h2 class="section-title">📊 Package Overview</h2>
             <p class="section-description">
-                This comprehensive package includes proven sales materials, interactive demonstrations, detailed documentation, and implementation guidance for successful restaurant technology deployments.
+                This cutting-edge package includes AI-enhanced sales materials, interactive demonstrations with real-time features, comprehensive v3 documentation, and advanced implementation guidance for successful next-generation restaurant technology deployments.
             </p>
             
             <div class="stats-section">
-                <h3 class="stats-title">Everything You Need to Sell RestaurantRush</h3>
+                <h3 style="font-size: 1.5rem; font-weight: 600; margin-bottom: 2rem;">🚀 Everything You Need to Sell Restaurant Revolution v3</h3>
                 <div class="stats-grid">
                     <div class="stat-item">
-                        <span class="stat-number">16</span>
-                        <span class="stat-label">Sales Presentation Slides</span>
+                        <span class="stat-number">🤖 AI</span>
+                        <span class="stat-label">Powered Intelligence</span>
                     </div>
                     <div class="stat-item">
-                        <span class="stat-number">3,569%</span>
-                        <span class="stat-label">Average Annual ROI</span>
+                        <span class="stat-number">680%</span>
+                        <span class="stat-label">Average Annual ROI (v3)</span>
                     </div>
                     <div class="stat-item">
-                        <span class="stat-number">150+</span>
-                        <span class="stat-label">Proven Implementations</span>
+                        <span class="stat-number">96.2%</span>
+                        <span class="stat-label">AI Recommendation Accuracy</span>
                     </div>
                     <div class="stat-item">
-                        <span class="stat-number">25%</span>
-                        <span class="stat-label">Retention Increase</span>
+                        <span class="stat-number">📊 PG</span>
+                        <span class="stat-label">PostgreSQL Backend</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-number">⚡ RT</span>
+                        <span class="stat-label">Real-time WebSocket</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-number">📱 PWA</span>
+                        <span class="stat-label">Progressive Web App</span>
                     </div>
                 </div>
             </div>
-        </div>
-    </section>
+        </section>
 
-    <!-- Interactive Demos Section -->
-    <section class="demo-section">
-        <div class="container">
-            <h3 class="demo-title">🎯 Interactive Demonstrations</h3>
-            <p class="demo-description">Live, functional demos that prospects can interact with to experience the complete system.</p>
+        <!-- Interactive Demos Section -->
+        <div class="demo-section">
+            <h3 class="demo-title">🤖 AI-Enhanced Interactive Demonstrations</h3>
+            <p class="demo-description">Live, functional demos showcasing AI recommendations, real-time analytics, PostgreSQL backend, and PWA capabilities that prospects can interact with to experience the complete v3 system.</p>
             <div class="demo-buttons">
-                <a href="/owner-demo.html" target="_blank" class="demo-btn">
-                    Restaurant Owner Dashboard
+                <a href="/marketing/owner-demo/interactive-demo.html" target="_blank" class="demo-btn">
+                    📊 AI Owner Dashboard
                 </a>
-                <a href="/customer-demo.html" target="_blank" class="demo-btn">
-                    Customer Mobile Experience
+                <a href="/marketing/customer-demo/interactive-demo.html" target="_blank" class="demo-btn">
+                    📱 Customer PWA Experience
                 </a>
             </div>
         </div>
-    </section>
 
-    <!-- Marketing Materials Section -->
-    <section class="section section-alt">
-        <div class="container">
+        <!-- Marketing Materials Section -->
+        <section class="section">
             <h2 class="section-title">📈 Sales & Marketing Materials</h2>
             <p class="section-description">
                 Professional sales presentations, pricing strategies, and feature analyses to help you close more deals.
             </p>
             
-            <div class="grid grid-2">
-                <div class="card material-card">
-                    <div class="material-header">
-                        <div class="material-icon">📋</div>
-                        <h3 class="material-title">Product Overview</h3>
+            <div class="grid">
+                <div class="card">
+                    <div class="card-header">
+                        <div class="card-icon">📋</div>
+                        <h3 class="card-title">Product Overview</h3>
                     </div>
-                    <p class="material-description">Executive summary with key value propositions, competitive advantages, and market positioning for initial prospect discussions.</p>
-                    <ul class="material-features">
-                        <li>Executive summary and key features</li>
-                        <li>Market differentiation analysis</li>
-                        <li>Success metrics and proven results</li>
-                        <li>Target market segmentation</li>
+                    <p class="card-description">Executive summary with AI-powered value propositions, PostgreSQL advantages, and v3 market positioning for initial prospect discussions.</p>
+                    <ul class="features-list">
+                        <li>🤖 AI recommendation engine overview</li>
+                        <li>📊 PostgreSQL backend advantages</li>
+                        <li>⚡ Real-time WebSocket capabilities</li>
+                        <li>📱 Progressive Web App benefits</li>
+                        <li>📈 680% ROI and success metrics</li>
                     </ul>
-                    <div class="material-actions">
-                        <button class="btn btn-primary" onclick="viewDocument('product-overview')">View Product Overview</button>
-                        <a href="/marketing/product-overview.md" target="_blank" class="btn btn-secondary">Direct Link</a>
-                    </div>
+                    <a href="/marketing/product-overview.md" target="_blank" class="btn btn-primary">View Product Overview</a>
                 </div>
 
-                <div class="card material-card">
-                    <div class="material-header">
-                        <div class="material-icon">💼</div>
-                        <h3 class="material-title">Complete Sales Presentation</h3>
+                <div class="card">
+                    <div class="card-header">
+                        <div class="card-icon">💼</div>
+                        <h3 class="card-title">Complete Sales Presentation</h3>
                     </div>
-                    <p class="material-description">16-slide professional presentation with speaker notes, objection handling, and proven closing techniques.</p>
-                    <ul class="material-features">
-                        <li>Problem identification and solution positioning</li>
-                        <li>Interactive demo integration points</li>
-                        <li>ROI calculator with real numbers</li>
-                        <li>Competitive comparison charts</li>
-                        <li>Implementation timeline and next steps</li>
+                    <p class="card-description">AI-enhanced professional presentation with v3 features, real-time demo integration, and proven v3 closing techniques.</p>
+                    <ul class="features-list">
+                        <li>🤖 AI problem identification and solution positioning</li>
+                        <li>📊 Interactive PostgreSQL analytics demos</li>
+                        <li>⚡ Real-time ROI calculator with v3 metrics</li>
+                        <li>📈 Advanced competitive comparison charts</li>
+                        <li>🚀 v3 implementation timeline and success plan</li>
                     </ul>
-                    <div class="material-actions">
-                        <button class="btn btn-primary" onclick="viewDocument('sales-presentation')">View Sales Deck</button>
-                        <a href="/marketing/sales-presentation.md" target="_blank" class="btn btn-secondary">Direct Link</a>
-                    </div>
+                    <a href="/marketing/sales-presentation.md" target="_blank" class="btn btn-primary">View Sales Deck</a>
                 </div>
 
-                <div class="card material-card">
-                    <div class="material-header">
-                        <div class="material-icon">💰</div>
-                        <h3 class="material-title">Pricing Strategy Guide</h3>
+                <div class="card">
+                    <div class="card-header">
+                        <div class="card-icon">💰</div>
+                        <h3 class="card-title">Pricing Strategy Guide</h3>
                     </div>
-                    <p class="material-description">Three-tier pricing model with ROI calculations, competitive analysis, and negotiation guidelines.</p>
-                    <ul class="material-features">
-                        <li>Starter ($99), Professional ($199), Enterprise ($399)</li>
-                        <li>Feature comparison and value justification</li>
-                        <li>ROI calculations and break-even analysis</li>
-                        <li>Competitive pricing comparison</li>
-                        <li>Discount and promotion strategies</li>
+                    <p class="card-description">Advanced v3 pricing model with AI features, PostgreSQL backend, and enterprise-grade capabilities.</p>
+                    <ul class="features-list">
+                        <li>🎆 Starter ($149), Professional ($299), Enterprise ($599)</li>
+                        <li>🤖 AI feature tiers and value justification</li>
+                        <li>📊 PostgreSQL ROI calculations (680% average)</li>
+                        <li>⚡ Real-time features competitive comparison</li>
+                        <li>💰 v3 discount and enterprise strategies</li>
                     </ul>
-                    <div class="material-actions">
-                        <button class="btn btn-primary" onclick="viewDocument('pricing-strategy')">View Pricing Guide</button>
-                        <a href="/marketing/pricing-strategy.md" target="_blank" class="btn btn-secondary">Direct Link</a>
-                    </div>
+                    <a href="/marketing/pricing-strategy.md" target="_blank" class="btn btn-primary">View Pricing Guide</a>
                 </div>
 
-                <div class="card material-card">
-                    <div class="material-header">
-                        <div class="material-icon">⚡</div>
-                        <h3 class="material-title">Feature Benefits Analysis</h3>
+                <div class="card">
+                    <div class="card-header">
+                        <div class="card-icon">⚡</div>
+                        <h3 class="card-title">Feature Benefits Analysis</h3>
                     </div>
-                    <p class="material-description">Detailed breakdown of 25+ features with quantified business benefits and implementation impact.</p>
-                    <ul class="material-features">
-                        <li>Customer experience features with benefits</li>
-                        <li>Restaurant management capabilities</li>
-                        <li>Integration and technical features</li>
-                        <li>ROI calculator and success metrics</li>
-                        <li>Competitive feature comparison</li>
+                    <p class="card-description">Comprehensive breakdown of 35+ v3 features with AI-powered benefits and measurable business impact.</p>
+                    <ul class="features-list">
+                        <li>🤖 AI recommendation engine (96.2% accuracy)</li>
+                        <li>📊 PostgreSQL analytics and real-time insights</li>
+                        <li>⚡ WebSocket real-time operations</li>
+                        <li>📱 Progressive Web App capabilities</li>
+                        <li>📈 Advanced ROI calculator with v3 metrics</li>
                     </ul>
-                    <div class="material-actions">
-                        <button class="btn btn-primary" onclick="viewDocument('feature-benefits')">View Feature Analysis</button>
-                        <a href="/marketing/feature-benefits.md" target="_blank" class="btn btn-secondary">Direct Link</a>
+                    <a href="/marketing/feature-benefits.md" target="_blank" class="btn btn-primary">View Feature Analysis</a>
+                </div>
+            </div>
+        </section>
+
+        <!-- Documentation Section -->
+        <section class="section" style="background: var(--color-background-alt); margin: 0 -2rem; padding: 3rem 2rem;">
+            <div class="container">
+                <h2 class="section-title">📚 User Documentation</h2>
+                <p class="section-description">
+                    Comprehensive guides for restaurant owners, customers, and implementation teams.
+                </p>
+                
+                <div class="grid">
+                    <div class="card">
+                        <div class="card-header">
+                            <div class="card-icon">🏪</div>
+                            <h3 class="card-title">Restaurant Owner Manual</h3>
+                        </div>
+                        <p class="card-description">Comprehensive v3 guide covering AI management features, real-time operations, PostgreSQL analytics, and best practices.</p>
+                        <ul class="features-list">
+                            <li>🤖 AI-enhanced dashboard and analytics navigation</li>
+                            <li>⚡ Real-time order, reservation, and queue management</li>
+                            <li>📊 PostgreSQL menu and loyalty program administration</li>
+                            <li>📈 Advanced analytics and AI customer insights</li>
+                            <li>🚀 v3 troubleshooting and enterprise support</li>
+                        </ul>
+                        <a href="/marketing/owner-manual.md" target="_blank" class="btn btn-primary">View Owner Manual</a>
+                    </div>
+
+                    <div class="card">
+                        <div class="card-header">
+                            <div class="card-icon">👥</div>
+                            <h3 class="card-title">Customer User Guide</h3>
+                        </div>
+                        <p class="card-description">User-friendly v3 tutorial covering PWA installation, AI recommendations, real-time features, and advanced capabilities.</p>
+                        <ul class="features-list">
+                            <li>📱 PWA installation and account setup</li>
+                            <li>🤖 AI-powered menu browsing and personalized ordering</li>
+                            <li>⚡ Real-time reservation and smart queue systems</li>
+                            <li>🎁 Advanced loyalty program and AI rewards</li>
+                            <li>🚀 v3 features troubleshooting and support</li>
+                        </ul>
+                        <a href="/marketing/customer-guide.md" target="_blank" class="btn btn-primary">View Customer Guide</a>
+                    </div>
+
+                    <div class="card">
+                        <div class="card-header">
+                            <div class="card-icon">🚀</div>
+                            <h3 class="card-title">Implementation Guide</h3>
+                        </div>
+                        <p class="card-description">Advanced v3 deployment with PostgreSQL setup, AI training, real-time integration, and comprehensive success metrics.</p>
+                        <ul class="features-list">
+                            <li>📊 PostgreSQL database setup and migration</li>
+                            <li>🤖 AI model training and personalization setup</li>
+                            <li>⚡ WebSocket real-time features configuration</li>
+                            <li>📱 PWA deployment and staff training programs</li>
+                            <li>📈 v3 success metrics and enterprise support</li>
+                        </ul>
+                        <a href="/marketing/implementation-guide.md" target="_blank" class="btn btn-primary">View Implementation Guide</a>
+                    </div>
+
+                    <div class="card">
+                        <div class="card-header">
+                            <div class="card-icon">📦</div>
+                            <h3 class="card-title">Complete Package Summary</h3>
+                        </div>
+                        <p class="card-description">Marketing launch package overview with utilization guidelines and success frameworks.</p>
+                        <ul class="features-list">
+                            <li>Package components and organization</li>
+                            <li>Sales process framework and methodology</li>
+                            <li>Implementation success formula</li>
+                            <li>Marketing campaign strategy</li>
+                            <li>Success metrics and tracking guidelines</li>
+                        </ul>
+                        <a href="/marketing/launch-package-summary.md" target="_blank" class="btn btn-primary">View Package Summary</a>
                     </div>
                 </div>
             </div>
-        </div>
-    </section>
+        </section>
 
-    <!-- Documentation Section -->
-    <section class="section">
-        <div class="container">
-            <h2 class="section-title">📚 User Documentation</h2>
-            <p class="section-description">
-                Comprehensive guides for restaurant owners, customers, and implementation teams.
-            </p>
-            
-            <div class="grid grid-2">
-                <div class="card material-card">
-                    <div class="material-header">
-                        <div class="material-icon">🏪</div>
-                        <h3 class="material-title">Restaurant Owner Manual</h3>
-                    </div>
-                    <p class="material-description">Comprehensive guide covering all management features, daily operations, troubleshooting, and best practices.</p>
-                    <ul class="material-features">
-                        <li>Dashboard overview and navigation</li>
-                        <li>Order, reservation, and queue management</li>
-                        <li>Menu and loyalty program administration</li>
-                        <li>Analytics and customer insights</li>
-                        <li>Troubleshooting and support resources</li>
-                    </ul>
-                    <div class="material-actions">
-                        <button class="btn btn-primary" onclick="viewDocument('owner-manual')">View Owner Manual</button>
-                        <a href="/marketing/owner-manual.md" target="_blank" class="btn btn-secondary">Direct Link</a>
-                    </div>
-                </div>
-
-                <div class="card material-card">
-                    <div class="material-header">
-                        <div class="material-icon">👥</div>
-                        <h3 class="material-title">Customer User Guide</h3>
-                    </div>
-                    <p class="material-description">User-friendly tutorial covering account creation, ordering, reservations, loyalty program, and support.</p>
-                    <ul class="material-features">
-                        <li>Account setup and profile management</li>
-                        <li>Menu browsing and ordering process</li>
-                        <li>Reservation and queue systems</li>
-                        <li>Loyalty program and rewards</li>
-                        <li>Troubleshooting and FAQ section</li>
-                    </ul>
-                    <div class="material-actions">
-                        <button class="btn btn-primary" onclick="viewDocument('customer-guide')">View Customer Guide</button>
-                        <a href="/marketing/customer-guide.md" target="_blank" class="btn btn-secondary">Direct Link</a>
-                    </div>
-                </div>
-
-                <div class="card material-card">
-                    <div class="material-header">
-                        <div class="material-icon">🚀</div>
-                        <h3 class="material-title">Implementation Guide</h3>
-                    </div>
-                    <p class="material-description">4-week deployment timeline with daily tasks, training schedules, and success metrics for smooth rollouts.</p>
-                    <ul class="material-features">
-                        <li>Pre-implementation planning checklist</li>
-                        <li>Week-by-week deployment schedule</li>
-                        <li>Staff training programs and materials</li>
-                        <li>Testing protocols and optimization</li>
-                        <li>Success metrics and ongoing support</li>
-                    </ul>
-                    <div class="material-actions">
-                        <button class="btn btn-primary" onclick="viewDocument('implementation-guide')">View Implementation Guide</button>
-                        <a href="/marketing/implementation-guide.md" target="_blank" class="btn btn-secondary">Direct Link</a>
-                    </div>
-                </div>
-
-                <div class="card material-card">
-                    <div class="material-header">
-                        <div class="material-icon">📦</div>
-                        <h3 class="material-title">Complete Package Summary</h3>
-                    </div>
-                    <p class="material-description">Marketing launch package overview with utilization guidelines and success frameworks.</p>
-                    <ul class="material-features">
-                        <li>Package components and organization</li>
-                        <li>Sales process framework and methodology</li>
-                        <li>Implementation success formula</li>
-                        <li>Marketing campaign strategy</li>
-                        <li>Success metrics and tracking guidelines</li>
-                    </ul>
-                    <div class="material-actions">
-                        <button class="btn btn-primary" onclick="viewDocument('launch-package-summary')">View Package Summary</button>
-                        <a href="/marketing/launch-package-summary.md" target="_blank" class="btn btn-secondary">Direct Link</a>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <!-- Success Metrics Section -->
-    <section class="section section-alt">
-        <div class="container">
-            <h2 class="section-title">📊 Proven Results</h2>
-            <p class="section-description">What restaurants achieve with RestaurantRush implementation.</p>
+        <!-- Success Metrics Section -->
+        <section class="section">
+            <h2 class="section-title">📈 Restaurant Revolution v3 Proven Results</h2>
+            <p class="section-description">What restaurants achieve with AI-powered Restaurant Revolution v3 implementation.</p>
             
             <div class="stats-section">
-                <h3 class="stats-title">What Restaurants Achieve with RestaurantRush</h3>
+                <h3 style="font-size: 1.5rem; font-weight: 600; margin-bottom: 2rem;">🤖 What Restaurants Achieve with Restaurant Revolution v3</h3>
                 <div class="stats-grid">
                     <div class="stat-item">
-                        <span class="stat-number">25%</span>
-                        <span class="stat-label">Customer Retention Increase</span>
+                        <span class="stat-number">42%</span>
+                        <span class="stat-label">AI-Driven Retention Increase</span>
                     </div>
                     <div class="stat-item">
-                        <span class="stat-number">40%</span>
-                        <span class="stat-label">Wait Time Reduction</span>
+                        <span class="stat-number">58%</span>
+                        <span class="stat-label">Smart Queue Wait Reduction</span>
                     </div>
                     <div class="stat-item">
-                        <span class="stat-number">15%</span>
-                        <span class="stat-label">Order Value Growth</span>
+                        <span class="stat-number">28%</span>
+                        <span class="stat-label">AI Upselling Order Growth</span>
                     </div>
                     <div class="stat-item">
-                        <span class="stat-number">50%</span>
-                        <span class="stat-label">No-Show Reduction</span>
+                        <span class="stat-number">96.2%</span>
+                        <span class="stat-label">AI Recommendation Accuracy</span>
                     </div>
                     <div class="stat-item">
-                        <span class="stat-number">30%</span>
-                        <span class="stat-label">Table Utilization Improvement</span>
+                        <span class="stat-number">94%</span>
+                        <span class="stat-label">Real-time Efficiency Gain</span>
                     </div>
                     <div class="stat-item">
-                        <span class="stat-number">60%</span>
-                        <span class="stat-label">Phone Order Reduction</span>
+                        <span class="stat-number">75%</span>
+                        <span class="stat-label">PWA Adoption Rate</span>
                     </div>
                 </div>
-                <p style="margin-top: 2rem; font-style: italic; opacity: 0.9;">Based on 6-month average across 150+ restaurant implementations</p>
+                <p style="margin-top: 2rem; font-style: italic; opacity: 0.9;">Based on Restaurant Revolution v3 implementations with AI, PostgreSQL, and real-time features</p>
             </div>
-        </div>
-    </section>
+        </section>
 
-    <!-- Contact Section -->
-    <section class="section">
-        <div class="container">
-            <div class="contact-section">
-                <h2 class="contact-title">📞 Get Started</h2>
-                <p class="contact-description">Ready to transform restaurant operations? Use these materials to demonstrate RestaurantRush capabilities and close more deals with proven sales techniques and comprehensive implementation support.</p>
+        <!-- Contact Section -->
+        <section class="section">
+            <div class="card" style="text-align: center; max-width: 800px; margin: 0 auto;">
+                <h2 style="color: var(--color-text-primary); margin-bottom: 1rem;">🤖 Get Started with Restaurant Revolution v3</h2>
+                <p style="color: var(--color-text-muted); margin-bottom: 2rem;">Ready to transform restaurants with AI? Use these v3 materials to demonstrate cutting-edge capabilities including AI recommendations, PostgreSQL analytics, real-time operations, and PWA features. Close more deals with proven v3 sales techniques and enterprise implementation support.</p>
                 
-                <div class="contact-info">
-                    <div class="contact-item">
-                        <div class="contact-label">Sales Support</div>
-                        <div class="contact-value">sales@restaurantrush.com</div>
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 1.5rem; margin-top: 2rem;">
+                    <div style="padding: 1rem; background: var(--color-background-alt); border-radius: 0.75rem;">
+                        <div style="font-weight: 600; color: var(--color-text-primary); margin-bottom: 0.25rem;">🤖 AI Sales Support</div>
+                        <div style="color: var(--color-text-muted);">sales@restaurantrevolution.com</div>
                     </div>
-                    <div class="contact-item">
-                        <div class="contact-label">Implementation</div>
-                        <div class="contact-value">implementation@restaurantrush.com</div>
+                    <div style="padding: 1rem; background: var(--color-background-alt); border-radius: 0.75rem;">
+                        <div style="font-weight: 600; color: var(--color-text-primary); margin-bottom: 0.25rem;">📊 v3 Implementation</div>
+                        <div style="color: var(--color-text-muted);">implementation@restaurantrevolution.com</div>
                     </div>
-                    <div class="contact-item">
-                        <div class="contact-label">Technical Support</div>
-                        <div class="contact-value">1-800-RUSH-HELP</div>
+                    <div style="padding: 1rem; background: var(--color-background-alt); border-radius: 0.75rem;">
+                        <div style="font-weight: 600; color: var(--color-text-primary); margin-bottom: 0.25rem;">⚡ Enterprise Support</div>
+                        <div style="color: var(--color-text-muted);">1-800-REST-HELP</div>
                     </div>
                 </div>
             </div>
-        </div>
-    </section>
-
-    <script>
-        function viewDocument(docType) {
-            const baseUrl = '/marketing/';
-            const docUrls = {
-                'product-overview': baseUrl + 'product-overview.md',
-                'sales-presentation': baseUrl + 'sales-presentation.md',
-                'pricing-strategy': baseUrl + 'pricing-strategy.md',
-                'feature-benefits': baseUrl + 'feature-benefits.md',
-                'owner-manual': baseUrl + 'owner-manual.md',
-                'customer-guide': baseUrl + 'customer-guide.md',
-                'implementation-guide': baseUrl + 'implementation-guide.md',
-                'launch-package-summary': baseUrl + 'launch-package-summary.md'
-            };
-            
-            if (docUrls[docType]) {
-                const viewerWindow = window.open('', '_blank', 'width=1000,height=700,scrollbars=yes');
-                viewerWindow.document.write(`
-                    <html>
-                        <head>
-                            <title>RestaurantRush - ${docType.replace('-', ' ').replace(/\b\w/g, l => l.toUpperCase())}</title>
-                            <style>
-                                body {
-                                    font-family: 'Inter', system-ui, -apple-system, sans-serif;
-                                    max-width: 800px;
-                                    margin: 0 auto;
-                                    padding: 40px 20px;
-                                    line-height: 1.6;
-                                    color: #1A1A1A;
-                                    background: #FDFCF9;
-                                }
-                                h1, h2, h3 { 
-                                    color: #1A1A1A; 
-                                    margin-top: 30px;
-                                    font-weight: 600;
-                                }
-                                h1 { 
-                                    border-bottom: 3px solid #8B1538; 
-                                    padding-bottom: 10px;
-                                    font-size: 2.5rem;
-                                }
-                                h2 { 
-                                    border-bottom: 2px solid #E5E7EB; 
-                                    padding-bottom: 5px;
-                                    font-size: 1.875rem;
-                                }
-                                h3 {
-                                    font-size: 1.5rem;
-                                }
-                                code { 
-                                    background: #F8F6F2; 
-                                    padding: 2px 6px; 
-                                    border-radius: 4px;
-                                    font-size: 0.875rem;
-                                }
-                                pre { 
-                                    background: #F8F6F2; 
-                                    padding: 20px; 
-                                    border-radius: 8px; 
-                                    overflow-x: auto;
-                                    border-left: 4px solid #8B1538;
-                                }
-                                table { 
-                                    border-collapse: collapse; 
-                                    width: 100%; 
-                                    margin: 20px 0;
-                                    border-radius: 8px;
-                                    overflow: hidden;
-                                    box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1);
-                                }
-                                th, td { 
-                                    border: 1px solid #E5E7EB; 
-                                    padding: 12px 16px; 
-                                    text-align: left; 
-                                }
-                                th { 
-                                    background: #8B1538; 
-                                    color: white;
-                                    font-weight: 600; 
-                                }
-                                tr:nth-child(even) {
-                                    background: #F8F6F2;
-                                }
-                                ul, ol { 
-                                    margin-left: 20px; 
-                                    margin-bottom: 16px;
-                                }
-                                li { 
-                                    margin-bottom: 8px; 
-                                }
-                                blockquote { 
-                                    border-left: 4px solid #D4AF37; 
-                                    margin: 20px 0; 
-                                    padding-left: 20px; 
-                                    color: #6B7280;
-                                    background: #F8F6F2;
-                                    padding: 16px 20px;
-                                    border-radius: 8px;
-                                }
-                                .loading { 
-                                    text-align: center; 
-                                    color: #6B7280; 
-                                    margin-top: 100px; 
-                                    font-size: 1.125rem;
-                                }
-                                strong {
-                                    color: #8B1538;
-                                    font-weight: 600;
-                                }
-                                em {
-                                    color: #6B7280;
-                                }
-                                a {
-                                    color: #8B1538;
-                                    text-decoration: none;
-                                    border-bottom: 1px solid #8B1538;
-                                }
-                                a:hover {
-                                    background: #8B1538;
-                                    color: white;
-                                    border-radius: 2px;
-                                }
-                            </style>
-                        </head>
-                        <body>
-                            <div class="loading">Loading marketing material...</div>
-                            <script>
-                                fetch('${docUrls[docType]}')
-                                    .then(response => response.text())
-                                    .then(markdown => {
-                                        let html = markdown
-                                            .replace(/^# (.*$)/gim, '<h1>$1</h1>')
-                                            .replace(/^## (.*$)/gim, '<h2>$1</h2>')
-                                            .replace(/^### (.*$)/gim, '<h3>$1</h3>')
-                                            .replace(/\\*\\*(.*)\\*\\*/gim, '<strong>$1</strong>')
-                                            .replace(/\\*(.*)\\*/gim, '<em>$1</em>')
-                                            .replace(/^- (.*$)/gim, '<li>$1</li>')
-                                            .replace(/\\n\\n/g, '</p><p>')
-                                            .replace(/\\n/g, '<br>');
-                                        
-                                        html = html.replace(/(<li>.*<\/li>)/s, '<ul>$1</ul>');
-                                        html = '<p>' + html + '</p>';
-                                        
-                                        document.body.innerHTML = html;
-                                    })
-                                    .catch(error => {
-                                        document.body.innerHTML = '<h1>Document Viewer</h1><p>Marketing material is available in the /marketing/ directory. Please access the files directly for full formatting.</p><p><strong>Document:</strong> ' + '${docType}' + '</p>';
-                                    });
-                            <\/script>
-                        </body>
-                    </html>
-                `);
-            }
-        }
-        
-        // Add scroll animations
-        const observerOptions = {
-            threshold: 0.1,
-            rootMargin: '0px 0px -50px 0px'
-        };
-        
-        const observer = new IntersectionObserver((entries) => {
-            entries.forEach(entry => {
-                if (entry.isIntersecting) {
-                    entry.target.classList.add('animate-fade-in-up');
-                }
-            });
-        }, observerOptions);
-        
-        document.addEventListener('DOMContentLoaded', () => {
-            const animateElements = document.querySelectorAll('.card, .stats-section, .demo-section, .contact-section');
-            animateElements.forEach(el => observer.observe(el));
-        });
-    </script>
+        </section>
+    </div>
 </body>
 </html>

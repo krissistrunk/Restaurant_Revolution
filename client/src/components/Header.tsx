@@ -3,6 +3,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { useRestaurant } from "@/hooks/useRestaurant";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import WebSocketStatus from "@/components/websocket/WebSocketStatus";
 import { User, LogOut, Star, Crown } from "lucide-react";
 
 export default function Header() {
@@ -25,7 +26,7 @@ export default function Header() {
             </div>
             <div className="hidden sm:block">
               <h1 className="text-2xl font-bold text-gradient leading-tight">
-                {restaurant?.name || "RestaurantRush"}
+                {restaurant?.name || "Restaurant Revolution"}
               </h1>
               <p className="text-sm text-text-muted font-medium">
                 {restaurant?.description || "Premium Dining Experience"}
@@ -40,13 +41,15 @@ export default function Header() {
                 <Crown className="h-5 w-5 text-white" />
               </div>
               <span className="text-lg font-bold text-gradient">
-                {restaurant?.name || "RestaurantRush"}
+                {restaurant?.name || "Restaurant Revolution"}
               </span>
             </div>
           </Link>
 
           {/* User Actions */}
           <div className="flex items-center space-x-3">
+            {/* WebSocket Status */}
+            <WebSocketStatus className="hidden lg:block" />
             {user ? (
               <div className="flex items-center space-x-4">
                 {/* Loyalty Points Display */}

@@ -23,6 +23,21 @@ const MenuPage = () => {
 
   return (
     <main className="flex-grow">
+      {/* Platform Demo Banner */}
+      <div className="bg-gradient-to-r from-primary to-secondary text-white py-3">
+        <div className="section-container">
+          <div className="flex items-center justify-center gap-2 text-sm font-medium">
+            <Crown className="h-4 w-4" />
+            <span>Restaurant Revolution Platform Demo</span>
+            <span className="hidden sm:inline">•</span>
+            <span className="hidden sm:inline">Experience the full restaurant management system</span>
+            <a href="/" className="ml-4 underline hover:no-underline">
+              View Live Storefront →
+            </a>
+          </div>
+        </div>
+      </div>
+
       {/* Hero Section */}
       <section className="relative section-padding bg-gradient-to-br from-background via-background-alt to-white overflow-hidden">
         <div className="absolute inset-0 opacity-30" style={{

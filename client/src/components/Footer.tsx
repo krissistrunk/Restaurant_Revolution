@@ -24,7 +24,7 @@ export default function Footer() {
       {/* Main Footer Content */}
       <div className="section-padding">
         <div className="section-container">
-          <div className="grid lg:grid-cols-4 md:grid-cols-2 gap-8">
+          <div className="grid lg:grid-cols-5 md:grid-cols-2 gap-8">
             {/* Brand Section */}
             <div className="lg:col-span-1">
               <div className="flex items-center space-x-3 mb-6">
@@ -33,7 +33,7 @@ export default function Footer() {
                 </div>
                 <div>
                   <h3 className="text-xl font-bold text-white">
-                    {restaurant?.name || "RestaurantRush"}
+                    {restaurant?.name || "Restaurant Revolution"}
                   </h3>
                   <div className="flex items-center gap-1">
                     {[1, 2, 3, 4, 5].map((star) => (
@@ -47,10 +47,10 @@ export default function Footer() {
               </p>
               <div className="flex space-x-4">
                 {[
-                  { icon: Facebook, href: "#", label: "Facebook" },
-                  { icon: Twitter, href: "#", label: "Twitter" },
-                  { icon: Instagram, href: "#", label: "Instagram" },
-                  { icon: Linkedin, href: "#", label: "LinkedIn" }
+                  { icon: Facebook, href: "https://facebook.com/restaurantrevolution", label: "Facebook" },
+                  { icon: Twitter, href: "https://twitter.com/restaurantrev", label: "Twitter" },
+                  { icon: Instagram, href: "https://instagram.com/restaurantrevolution", label: "Instagram" },
+                  { icon: Linkedin, href: "https://linkedin.com/company/restaurant-revolution", label: "LinkedIn" }
                 ].map((social, index) => (
                   <a
                     key={index}
@@ -64,17 +64,62 @@ export default function Footer() {
               </div>
             </div>
 
-            {/* Quick Links */}
+            {/* Restaurant Links */}
             <div>
-              <h4 className="text-lg font-semibold mb-6 text-white">Platform</h4>
+              <h4 className="text-lg font-semibold mb-6 text-white">Restaurant</h4>
               <div className="space-y-3">
                 {[
-                  { label: "Owner Dashboard", href: "/owner-demo.html", external: true },
-                  { label: "Customer Portal", href: "/customer-demo.html", external: true },
-                  { label: "Menu Management", href: "/" },
+                  { label: "Our Menu", href: "/menu" },
                   { label: "Reservations", href: "/reserve" },
+                  { label: "Order Online", href: "/order" },
                   { label: "Loyalty Rewards", href: "/rewards" },
-                  { label: "AI Assistant", href: "/ai-assistant" }
+                  { label: "AI Assistant", href: "/ai-assistant" },
+                  { label: "About Us", href: "/info" }
+                ].map((link, index) => (
+                  <div key={index}>
+                    <Link href={link.href}>
+                      <a className="text-gray-300 hover:text-secondary transition-colors duration-300">
+                        {link.label}
+                      </a>
+                    </Link>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* Services */}
+            <div>
+              <h4 className="text-lg font-semibold mb-6 text-white">Services</h4>
+              <div className="space-y-3">
+                {[
+                  { label: "Gift Cards", href: "/gift-cards" },
+                  { label: "Catering", href: "/catering" },
+                  { label: "Events", href: "/events" },
+                  { label: "Nutrition Info", href: "/nutrition" },
+                  { label: "Careers", href: "/careers" },
+                  { label: "Press Kit", href: "/press" }
+                ].map((link, index) => (
+                  <div key={index}>
+                    <a
+                      href={link.href}
+                      className="text-gray-300 hover:text-secondary transition-colors duration-300"
+                    >
+                      {link.label}
+                    </a>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* Platform Demo */}
+            <div>
+              <h4 className="text-lg font-semibold mb-6 text-white">Platform Demo</h4>
+              <div className="space-y-3">
+                {[
+                  { label: "Sales Overview", href: "/sales" },
+                  { label: "Live Demo Files", href: "/demo", external: true },
+                  { label: "Marketing Materials", href: "/marketing", external: true },
+                  { label: "Documentation", href: "/docs", external: true }
                 ].map((link, index) => (
                   <div key={index}>
                     {link.external ? (
@@ -93,42 +138,6 @@ export default function Footer() {
                           {link.label}
                         </a>
                       </Link>
-                    )}
-                  </div>
-                ))}
-              </div>
-            </div>
-
-            {/* Resources */}
-            <div>
-              <h4 className="text-lg font-semibold mb-6 text-white">Resources</h4>
-              <div className="space-y-3">
-                {[
-                  { label: "Marketing Materials", href: "/marketing-materials.html", external: true },
-                  { label: "Implementation Guide", href: "/marketing-materials.html", external: true },
-                  { label: "User Documentation", href: "/marketing-materials.html", external: true },
-                  { label: "Sales Presentations", href: "/marketing-materials.html", external: true },
-                  { label: "Support Center", href: "#" },
-                  { label: "API Documentation", href: "#" }
-                ].map((link, index) => (
-                  <div key={index}>
-                    {link.external ? (
-                      <a
-                        href={link.href}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="text-gray-300 hover:text-secondary transition-colors duration-300 flex items-center gap-2 group"
-                      >
-                        {link.label}
-                        <ExternalLink className="h-3 w-3 opacity-0 group-hover:opacity-100 transition-opacity" />
-                      </a>
-                    ) : (
-                      <a
-                        href={link.href}
-                        className="text-gray-300 hover:text-secondary transition-colors duration-300"
-                      >
-                        {link.label}
-                      </a>
                     )}
                   </div>
                 ))}
@@ -199,15 +208,21 @@ export default function Footer() {
               © {currentYear} {restaurant?.name || "RestaurantRush"}. All rights reserved.
             </div>
             <div className="flex items-center space-x-6">
-              <a href="#" className="text-gray-400 hover:text-secondary text-sm transition-colors">
-                Privacy Policy
-              </a>
-              <a href="#" className="text-gray-400 hover:text-secondary text-sm transition-colors">
-                Terms of Service
-              </a>
-              <a href="#" className="text-gray-400 hover:text-secondary text-sm transition-colors">
-                Support
-              </a>
+              <Link href="/privacy">
+                <a className="text-gray-400 hover:text-secondary text-sm transition-colors">
+                  Privacy Policy
+                </a>
+              </Link>
+              <Link href="/terms">
+                <a className="text-gray-400 hover:text-secondary text-sm transition-colors">
+                  Terms of Service
+                </a>
+              </Link>
+              <Link href="/support">
+                <a className="text-gray-400 hover:text-secondary text-sm transition-colors">
+                  Support
+                </a>
+              </Link>
             </div>
           </div>
         </div>

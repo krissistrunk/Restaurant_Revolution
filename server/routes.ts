@@ -10,33 +10,25 @@ import { z } from "zod";
 import { sendTableReadySMS, sendQueueConfirmationSMS } from "./services/notificationService";
 import AiService from "./aiService";
 import { cmsMiddleware } from "./middleware/cmsMiddleware";
-import { requireAuth, requireOwner, requireAdmin, requireCMSAccess, requireRestaurantAccess } from "./middleware/authMiddleware";
+import { requireAuth, requireOwner, requireAdmin, requireCMSAccess, requireRestaurantAccess, authenticateToken, attachUser } from "./middleware/authMiddleware";
+import { getWebSocketManager } from "./websocket";
+import { authRoutes } from "./routes/authRoutes";
+import { menuRoutes } from "./routes/menuRoutes";
+import { orderRoutes } from "./routes/orderRoutes";
+import { analyticsRoutes } from "./routes/analyticsRoutes";
+import { aiRoutes } from "./routes/aiRoutes";
 import path from 'path';
 import fs from 'fs';
+import cookieParser from 'cookie-parser';
 
 export async function registerRoutes(app: Express): Promise<Server> {
-  // API routes
-  const apiRouter = app.route("/api");
+  // Enable cookie parsing for JWT cookies
+  app.use(cookieParser());
 
-  // Simple session middleware to attach user to request
-  const attachUser = async (req: Request, res: Response, next: NextFunction) => {
-    const userId = req.headers['x-user-id'];
-    const userRole = req.headers['x-user-role'];
-
-    if (userId && userRole) {
-      const user = await storage.getUser(parseInt(userId as string));
-      if (user) {
-        req.user = user;
-      }
-    }
-    next();
-  };
-
-  // CMS Health check and cache management (restricted to owners/admins)
-  app.get("/api/cms/health", attachUser, requireCMSAccess, cmsMiddleware.healthCheck);
-  app.post("/api/cms/clear-cache", attachUser, requireCMSAccess, cmsMiddleware.clearCache);
-
-  // Get restaurant info
+  // Enhanced Authentication Routes (no auth required)
+  app.use("/api/auth", authRoutes);
+  
+  // Public routes that don't require authentication
   app.get("/api/restaurant", 
     cmsMiddleware.withRestaurantCMS(),
     cmsMiddleware.withCMSFallback(),
@@ -53,6 +45,66 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
     }
   );
+  
+  app.get("/api/categories", 
+    cmsMiddleware.withMenuCategoriesCMS(),
+    cmsMiddleware.withCMSFallback(),
+    async (req: Request, res: Response) => {
+      try {
+        const restaurantId = parseInt(req.query.restaurantId as string) || 1;
+        const categories = await storage.getCategories(restaurantId);
+        return res.json(categories);
+      } catch (error) {
+        console.error("Error fetching categories:", error);
+        return res.status(500).json({ message: "Internal server error" });
+      }
+    }
+  );
+  
+  app.get("/api/menu-items", 
+    cmsMiddleware.withMenuItemsCMS(),
+    cmsMiddleware.withCMSFallback(),
+    async (req: Request, res: Response) => {
+      try {
+        const restaurantId = parseInt(req.query.restaurantId as string) || 1;
+        const categoryId = req.query.categoryId ? parseInt(req.query.categoryId as string) : undefined;
+
+        const menuItems = await storage.getMenuItems(restaurantId, categoryId);
+        return res.json(menuItems);
+      } catch (error) {
+        console.error("Error fetching menu items:", error);
+        return res.status(500).json({ message: "Internal server error" });
+      }
+    }
+  );
+  
+  app.get("/api/featured-items", 
+    cmsMiddleware.withMenuItemsCMS(),
+    cmsMiddleware.withCMSFallback(),
+    async (req: Request, res: Response) => {
+      try {
+        const restaurantId = parseInt(req.query.restaurantId as string) || 1;
+        const featuredItems = await storage.getFeaturedMenuItems(restaurantId);
+        return res.json(featuredItems);
+    } catch (error) {
+      console.error("Error fetching featured items:", error);
+      return res.status(500).json({ message: "Internal server error" });
+    }
+  });
+  
+  // Global authentication middleware for all other protected routes
+  app.use("/api", authenticateToken);
+
+  // Enhanced API Routes
+  app.use("/api/menu", menuRoutes);
+  app.use("/api/orders", orderRoutes);
+  app.use("/api/analytics", analyticsRoutes);
+  app.use("/api/ai", aiRoutes);
+
+  // CMS Health check and cache management (restricted to owners/admins)
+  app.get("/api/cms/health", attachUser, requireCMSAccess, cmsMiddleware.healthCheck);
+  app.post("/api/cms/clear-cache", attachUser, requireCMSAccess, cmsMiddleware.clearCache);
+
 
   // Get restaurant info by ID (alternative endpoint)
   app.get("/api/restaurants/:id", 
@@ -73,138 +125,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   );
 
-  // Authentication routes
-  app.post("/api/auth/register", async (req: Request, res: Response) => {
-    try {
-      const userInput = insertUserSchema.parse(req.body);
-
-      // Check if username or email already exists
-      const existingUsername = await storage.getUserByUsername(userInput.username);
-      if (existingUsername) {
-        return res.status(400).json({ message: "Username already exists" });
-      }
-
-      const existingEmail = await storage.getUserByEmail(userInput.email);
-      if (existingEmail) {
-        return res.status(400).json({ message: "Email already exists" });
-      }
-
-      const user = await storage.createUser(userInput);
-      // Remove password from response
-      const { password, ...userResponse } = user;
-
-      return res.status(201).json(userResponse);
-    } catch (error) {
-      if (error instanceof z.ZodError) {
-        return res.status(400).json({ message: error.errors });
-      }
-      console.error("Error registering user:", error);
-      return res.status(500).json({ message: "Internal server error" });
-    }
-  });
-
-  app.post("/api/auth/login", async (req: Request, res: Response) => {
-    try {
-      const { username, password } = req.body;
-
-      if (!username || !password) {
-        return res.status(400).json({ message: "Username and password are required" });
-      }
-
-      const user = await storage.getUserByUsername(username);
-      if (!user || user.password !== password) {
-        return res.status(401).json({ message: "Invalid username or password" });
-      }
-
-      // Remove password from response
-      const { password: _, ...userResponse } = user;
-
-      return res.json(userResponse);
-    } catch (error) {
-      console.error("Error logging in:", error);
-      return res.status(500).json({ message: "Internal server error" });
-    }
-  });
-
-  app.get("/api/auth/user", async (req: Request, res: Response) => {
-    try {
-      // In a real app, this would use session/JWT to get the current user
-      const userId = parseInt(req.query.userId as string);
-
-      if (!userId) {
-        return res.status(401).json({ message: "Unauthorized" });
-      }
-
-      const user = await storage.getUser(userId);
-      if (!user) {
-        return res.status(404).json({ message: "User not found" });
-      }
-
-      // Get user's order statistics
-      const orders = await storage.getUserOrders(userId);
-      const totalOrders = orders.length;
-      const totalSpent = orders.reduce((sum, order) => sum + order.totalPrice, 0);
-
-      // Remove password from response and add calculated stats
-      const { password, ...userResponse } = user;
-
-      return res.json({
-        ...userResponse,
-        totalOrders,
-        totalSpent: parseFloat(totalSpent.toFixed(2))
-      });
-    } catch (error) {
-      console.error("Error fetching user:", error);
-      return res.status(500).json({ message: "Internal server error" });
-    }
-  });
-
-  // Menu routes with CMS integration
-  app.get("/api/categories", 
-    cmsMiddleware.withMenuCategoriesCMS(),
-    cmsMiddleware.withCMSFallback(),
-    async (req: Request, res: Response) => {
-      try {
-        const restaurantId = parseInt(req.query.restaurantId as string) || 1;
-        const categories = await storage.getCategories(restaurantId);
-        return res.json(categories);
-      } catch (error) {
-        console.error("Error fetching categories:", error);
-        return res.status(500).json({ message: "Internal server error" });
-      }
-    }
-  );
-
-  app.get("/api/menu-items", 
-    cmsMiddleware.withMenuItemsCMS(),
-    cmsMiddleware.withCMSFallback(),
-    async (req: Request, res: Response) => {
-      try {
-        const restaurantId = parseInt(req.query.restaurantId as string) || 1;
-        const categoryId = req.query.categoryId ? parseInt(req.query.categoryId as string) : undefined;
-
-        const menuItems = await storage.getMenuItems(restaurantId, categoryId);
-        return res.json(menuItems);
-      } catch (error) {
-        console.error("Error fetching menu items:", error);
-        return res.status(500).json({ message: "Internal server error" });
-      }
-    }
-  );
-
-  app.get("/api/featured-items", 
-    cmsMiddleware.withMenuItemsCMS(),
-    cmsMiddleware.withCMSFallback(),
-    async (req: Request, res: Response) => {
-      try {
-        const restaurantId = parseInt(req.query.restaurantId as string) || 1;
-        const featuredItems = await storage.getFeaturedMenuItems(restaurantId);
-        return res.json(featuredItems);
-    } catch (error) {
-      console.error("Error fetching featured items:", error);
-      return res.status(500).json({ message: "Internal server error" });
-    }
-  });
 
   app.get("/api/menu-items/:id", async (req: Request, res: Response) => {
     try {
@@ -260,6 +180,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const reservationInput = insertReservationSchema.parse(req.body);
 
       const reservation = await storage.createReservation(reservationInput);
+      
+      // Broadcast reservation update via WebSocket
+      const wsManager = getWebSocketManager();
+      if (wsManager) {
+        wsManager.notifyReservationUpdate(reservation, reservation.restaurantId);
+      }
+      
       return res.status(201).json(reservation);
     } catch (error) {
       if (error instanceof z.ZodError) {
@@ -319,6 +246,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Update user loyalty points (1 point per dollar spent)
       const pointsToAdd = Math.floor(newOrder.totalPrice);
       await storage.updateUserLoyaltyPoints(newOrder.userId, pointsToAdd);
+
+      // Broadcast order update via WebSocket
+      const wsManager = getWebSocketManager();
+      if (wsManager) {
+        wsManager.notifyOrderUpdate(newOrder.id, { ...newOrder, items: orderItems }, newOrder.restaurantId);
+      }
 
       return res.status(201).json({ ...newOrder, items: orderItems, pointsEarned: pointsToAdd });
     } catch (error) {
@@ -453,6 +386,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
           });
       }
 
+      // Broadcast queue update via WebSocket
+      const wsManager = getWebSocketManager();
+      if (wsManager) {
+        wsManager.notifyQueueUpdate(queueEntry, queueEntry.restaurantId);
+      }
+
       return res.status(201).json(queueEntry);
     } catch (error) {
       if (error instanceof z.ZodError) {
@@ -492,6 +431,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
             await storage.updateQueueEntry(id, { notificationSent: true });
           }
         }
+      }
+
+      // Broadcast queue update via WebSocket
+      const wsManager = getWebSocketManager();
+      if (wsManager) {
+        wsManager.notifyQueueUpdate(updatedEntry, queueEntry.restaurantId);
       }
 
       return res.json(updatedEntry);
@@ -755,6 +700,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // WebSocket status endpoint
+  app.get("/api/ws/status", (req: Request, res: Response) => {
+    const wsManager = getWebSocketManager();
+    if (!wsManager) {
+      return res.status(503).json({ message: "WebSocket server not available" });
+    }
+    
+    res.json(wsManager.getStats());
+  });
+
   // Add fallback route for demo access (bypasses Vite host restrictions)
   app.get("/demo", (req: Request, res: Response) => {
     const html = `
@@ -858,22 +813,186 @@ export async function registerRoutes(app: Express): Promise<Server> {
     res.sendFile('marketing-materials.html', { root: process.cwd() });
   });
 
-  // Serve marketing directory files
+  // Serve marketing directory files with HTML formatting
   app.get('/marketing/:filename', (req: Request, res: Response) => {
     const filename = req.params.filename;
     res.setHeader('Access-Control-Allow-Origin', '*');
     res.setHeader('Access-Control-Allow-Methods', 'GET');
     res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
 
-        const filePath = path.join(process.cwd(), 'marketing', filename);
+    const filePath = path.join(process.cwd(), 'marketing', filename);
     fs.readFile(filePath, 'utf8', (err, data) => {
       if (err) {
         return res.status(404).send('Marketing material not found');
       }
-      res.setHeader('Content-Type', 'text/plain');
-      res.send(data);
+      
+      // If it's a markdown file, wrap it in HTML for better display
+      if (filename.endsWith('.md')) {
+        const title = filename.replace('.md', '').replace(/-/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
+        const htmlContent = `
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RestaurantRush - ${title}</title>
+    <style>
+        body {
+            font-family: 'Inter', system-ui, -apple-system, sans-serif;
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 40px 20px;
+            line-height: 1.6;
+            color: #1A1A1A;
+            background: #FDFCF9;
+        }
+        h1, h2, h3 { 
+            color: #1A1A1A; 
+            margin-top: 30px;
+            font-weight: 600;
+        }
+        h1 { 
+            border-bottom: 3px solid #8B1538; 
+            padding-bottom: 10px;
+            font-size: 2.5rem;
+            margin-top: 0;
+        }
+        h2 { 
+            border-bottom: 2px solid #E5E7EB; 
+            padding-bottom: 5px;
+            font-size: 1.875rem;
+        }
+        h3 {
+            font-size: 1.5rem;
+        }
+        code { 
+            background: #F8F6F2; 
+            padding: 2px 6px; 
+            border-radius: 4px;
+            font-size: 0.875rem;
+        }
+        pre { 
+            background: #F8F6F2; 
+            padding: 20px; 
+            border-radius: 8px; 
+            overflow-x: auto;
+            border-left: 4px solid #8B1538;
+        }
+        table { 
+            border-collapse: collapse; 
+            width: 100%; 
+            margin: 20px 0;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1);
+        }
+        th, td { 
+            border: 1px solid #E5E7EB; 
+            padding: 12px 16px; 
+            text-align: left; 
+        }
+        th { 
+            background: #8B1538; 
+            color: white;
+            font-weight: 600; 
+        }
+        tr:nth-child(even) {
+            background: #F8F6F2;
+        }
+        ul, ol { 
+            margin-left: 20px; 
+            margin-bottom: 16px;
+        }
+        li { 
+            margin-bottom: 8px; 
+        }
+        blockquote { 
+            border-left: 4px solid #D4AF37; 
+            margin: 20px 0; 
+            padding: 16px 20px; 
+            color: #6B7280;
+            background: #F8F6F2;
+            border-radius: 8px;
+        }
+        strong {
+            color: #8B1538;
+            font-weight: 600;
+        }
+        em {
+            color: #6B7280;
+        }
+        a {
+            color: #8B1538;
+            text-decoration: none;
+            border-bottom: 1px solid #8B1538;
+        }
+        a:hover {
+            background: #8B1538;
+            color: white;
+            border-radius: 2px;
+        }
+        .back-button {
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            background: #8B1538;
+            color: white;
+            padding: 10px 20px;
+            border-radius: 8px;
+            text-decoration: none;
+            font-weight: 500;
+            box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1);
+            z-index: 1000;
+        }
+        .back-button:hover {
+            background: #A62C4C;
+            transform: translateY(-1px);
+            box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.1);
+        }
+    </style>
+</head>
+<body>
+    <a href="/marketing-materials.html" class="back-button">← Back to Marketing</a>
+    <div id="content"></div>
+    <script>
+        const markdown = \`${data.replace(/`/g, '\\`').replace(/\\/g, '\\\\')}\`;
+        
+        // Simple markdown to HTML conversion
+        let html = markdown
+            .replace(/^# (.*$)/gim, '<h1>$1</h1>')
+            .replace(/^## (.*$)/gim, '<h2>$1</h2>')
+            .replace(/^### (.*$)/gim, '<h3>$1</h3>')
+            .replace(/\\*\\*(.*?)\\*\\*/gim, '<strong>$1</strong>')
+            .replace(/\\*(.*?)\\*/gim, '<em>$1</em>')
+            .replace(/\`(.*?)\`/gim, '<code>$1</code>')
+            .replace(/^- (.*$)/gim, '<li>$1</li>')
+            .replace(/^\\d+\\. (.*$)/gim, '<li>$1</li>')
+            .replace(/\\n\\n/g, '</p><p>')
+            .replace(/\\n/g, '<br>');
+        
+        // Wrap consecutive list items in ul/ol tags
+        html = html.replace(/(<li>.*?<\/li>)/gs, '<ul>$1</ul>');
+        html = html.replace(/<\/ul>\\s*<ul>/g, '');
+        
+        // Wrap in paragraphs
+        html = '<p>' + html + '</p>';
+        html = html.replace(/<p><\/p>/g, '');
+        html = html.replace(/<p>(<h[1-6]>)/g, '$1');
+        html = html.replace(/(<\/h[1-6]>)<\/p>/g, '$1');
+        html = html.replace(/<p>(<ul>)/g, '$1');
+        html = html.replace(/(<\/ul>)<\/p>/g, '$1');
+        
+        document.getElementById('content').innerHTML = html;
+    </script>
+</body>
+</html>`;
+        res.setHeader('Content-Type', 'text/html');
+        res.send(htmlContent);
+      } else {
+        res.setHeader('Content-Type', 'text/plain');
+        res.send(data);
+      }
     });
-
   });
 
   // Serve marketing subdirectory files

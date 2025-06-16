@@ -43,7 +43,7 @@ const RegisterPage = () => {
       await register(values);
       toast({
         title: "Registration successful",
-        description: "Welcome to Bistro 23!",
+        description: "Welcome to Restaurant Revolution!",
       });
       navigate("/menu");
     } catch (error) {

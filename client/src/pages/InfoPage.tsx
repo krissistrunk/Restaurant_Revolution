@@ -12,7 +12,9 @@ import {
   Calendar, 
   FileText, 
   Utensils, 
-  MessageCircle 
+  MessageCircle,
+  Palette,
+  Settings
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
@@ -23,10 +25,13 @@ import {
   TabsTrigger,
 } from "@/components/ui/tabs";
 import { useLocation } from "wouter";
+import { useAuth } from "@/hooks/useAuth";
+import { Link } from "wouter";
 
 const InfoPage = () => {
   const [location, navigate] = useLocation();
   const [isWalkthroughOpen, setIsWalkthroughOpen] = useState(false);
+  const { user } = useAuth();
   const { data: restaurant, isLoading } = useQuery<Restaurant>({
     queryKey: ["/api/restaurant"],
   });
@@ -253,6 +258,60 @@ const InfoPage = () => {
             </div>
           </CardContent>
         </Card>
+
+        {/* Owner Dashboard - Only visible to owners */}
+        {user?.role === 'owner' && (
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Settings className="h-5 w-5" />
+                Owner Dashboard
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-4">
+                <p className="text-gray-600 mb-4">
+                  Manage your restaurant's storefront appearance and settings.
+                </p>
+                <div className="grid md:grid-cols-2 gap-4">
+                  <div className="flex items-center justify-between p-4 bg-primary/5 rounded-lg border border-primary/10">
+                    <div className="flex items-center gap-3">
+                      <div className="w-10 h-10 gradient-primary rounded-lg flex items-center justify-center">
+                        <Palette className="h-5 w-5 text-white" />
+                      </div>
+                      <div>
+                        <h4 className="font-semibold text-text-primary">Theme Settings</h4>
+                        <p className="text-sm text-gray-600">Choose from 4 professional storefront designs</p>
+                      </div>
+                    </div>
+                    <Link href="/themes">
+                      <Button size="sm">
+                        Customize
+                      </Button>
+                    </Link>
+                  </div>
+                  
+                  <div className="flex items-center justify-between p-4 bg-secondary/5 rounded-lg border border-secondary/10">
+                    <div className="flex items-center gap-3">
+                      <div className="w-10 h-10 gradient-secondary rounded-lg flex items-center justify-center">
+                        <MessageCircle className="h-5 w-5 text-white" />
+                      </div>
+                      <div>
+                        <h4 className="font-semibold text-text-primary">Marketing Materials</h4>
+                        <p className="text-sm text-gray-600">Access promotional materials and brand assets</p>
+                      </div>
+                    </div>
+                    <a href="/marketing" target="_blank" rel="noopener noreferrer">
+                      <Button size="sm" variant="outline">
+                        View Materials
+                      </Button>
+                    </a>
+                  </div>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        )}
       </div>
     </main>
   );

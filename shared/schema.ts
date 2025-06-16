@@ -15,6 +15,7 @@ export const users = pgTable("users", {
   restaurantId: integer("restaurant_id"), // only for owners
   loyaltyPoints: integer("loyalty_points").default(0).notNull(),
   dietaryPreferences: jsonb("dietary_preferences"),
+  role: text("role").notNull(),
 });
 
 export const insertUserSchema = createInsertSchema(users).omit({

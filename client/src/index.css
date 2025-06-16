@@ -318,3 +318,117 @@
   opacity: 1;
   transition: all 0.3s ease;
 }
+
+/* Theme-Specific Styles */
+
+/* Classic Elegance Theme */
+.theme-classic .btn-primary {
+  @apply rounded-lg;
+}
+
+.theme-classic .card-elevated,
+.theme-classic .card-interactive {
+  @apply rounded-lg border-2 border-gray-100 shadow-md hover:shadow-lg;
+}
+
+.theme-classic h1, .theme-classic h2, .theme-classic h3 {
+  font-family: var(--font-family-primary);
+}
+
+/* Modern Minimalist Theme */
+.theme-modern .btn-primary {
+  @apply rounded-none border-0;
+  box-shadow: none;
+}
+
+.theme-modern .card-elevated,
+.theme-modern .card-interactive {
+  @apply rounded-none border-0 shadow-sm hover:shadow-md;
+  border-left: 4px solid var(--color-primary);
+}
+
+.theme-modern h1, .theme-modern h2, .theme-modern h3 {
+  font-family: 'Poppins, system-ui, sans-serif';
+  font-weight: 300;
+  letter-spacing: -0.05em;
+}
+
+/* Rustic Charm Theme */
+.theme-rustic .btn-primary {
+  @apply rounded-full;
+  border: 2px solid var(--color-primary-dark);
+}
+
+.theme-rustic .card-elevated,
+.theme-rustic .card-interactive {
+  @apply rounded-2xl border border-orange-100;
+  background: linear-gradient(145deg, #ffffff 0%, #fefcfb 100%);
+  box-shadow: 
+    inset 2px 2px 4px rgba(255, 255, 255, 0.8),
+    2px 2px 8px rgba(146, 64, 14, 0.1);
+}
+
+.theme-rustic h1, .theme-rustic h2, .theme-rustic h3 {
+  font-family: 'Merriweather, serif';
+  text-shadow: 1px 1px 2px rgba(146, 64, 14, 0.1);
+}
+
+/* Bold & Vibrant Theme */
+.theme-bold .btn-primary {
+  @apply rounded-none;
+  background: linear-gradient(45deg, var(--color-primary), var(--color-secondary));
+  border: none;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  font-weight: 700;
+}
+
+.theme-bold .card-elevated,
+.theme-bold .card-interactive {
+  @apply rounded-none border-2;
+  border-image: linear-gradient(45deg, var(--color-primary), var(--color-secondary)) 1;
+  background: linear-gradient(135deg, #000000 0%, #1a1a1a 100%);
+  color: white;
+}
+
+.theme-bold h1, .theme-bold h2, .theme-bold h3 {
+  font-family: 'Roboto, system-ui, sans-serif';
+  font-weight: 900;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+/* Theme-specific hero styles */
+.theme-classic .hero-section {
+  background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-primary-light) 50%, var(--color-secondary) 100%);
+}
+
+.theme-modern .hero-section {
+  background: var(--color-primary);
+}
+
+.theme-rustic .hero-section {
+  background-image: 
+    url("https://images.unsplash.com/photo-1504674900247-0877df9cc836?ixlib=rb-4.0.3&auto=format&fit=crop&w=2000&q=80"),
+    linear-gradient(rgba(146, 64, 14, 0.7), rgba(5, 150, 105, 0.3));
+  background-size: cover;
+  background-position: center;
+  background-blend-mode: overlay;
+}
+
+.theme-bold .hero-section {
+  background: repeating-linear-gradient(
+    45deg,
+    var(--color-primary),
+    var(--color-primary) 10px,
+    var(--color-secondary) 10px,
+    var(--color-secondary) 20px
+  );
+  background-size: 40px 40px;
+  animation: movePattern 20s linear infinite;
+}
+
+@keyframes movePattern {
+  0% { background-position: 0 0; }
+  100% { background-position: 40px 40px; }
+}

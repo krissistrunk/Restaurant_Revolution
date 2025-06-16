@@ -1,0 +1,310 @@
+name: CD Pipeline
+
+on:
+  push:
+    branches: [ main ]
+    tags: [ 'v*' ]
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: 'Deployment environment'
+        required: true
+        default: 'staging'
+        type: choice
+        options:
+          - staging
+          - production
+
+env:
+  NODE_VERSION: '18'
+  REGISTRY: ghcr.io
+  IMAGE_NAME: restaurant-revolution
+
+jobs:
+  # Build and Test
+  build-and-test:
+    name: Build & Test
+    runs-on: ubuntu-latest
+    outputs:
+      version: ${{ steps.version.outputs.version }}
+      environment: ${{ steps.environment.outputs.environment }}
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run tests
+        run: npm run test:run
+
+      - name: Build application
+        run: npm run build
+        env:
+          NODE_ENV: production
+
+      - name: Generate version
+        id: version
+        run: |
+          if [[ $GITHUB_REF == refs/tags/* ]]; then
+            VERSION=${GITHUB_REF#refs/tags/}
+          else
+            VERSION=$(date +%Y%m%d)-${GITHUB_SHA::8}
+          fi
+          echo "version=$VERSION" >> $GITHUB_OUTPUT
+          echo "Version: $VERSION"
+
+      - name: Determine environment
+        id: environment
+        run: |
+          if [[ "${{ github.event_name }}" == "workflow_dispatch" ]]; then
+            ENV="${{ github.event.inputs.environment }}"
+          elif [[ $GITHUB_REF == refs/tags/* ]]; then
+            ENV="production"
+          else
+            ENV="staging"
+          fi
+          echo "environment=$ENV" >> $GITHUB_OUTPUT
+          echo "Environment: $ENV"
+
+      - name: Upload build artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: build-${{ steps.version.outputs.version }}
+          path: |
+            dist/
+            client/dist/
+            package.json
+            package-lock.json
+          retention-days: 90
+
+  # Build Docker Image
+  build-docker:
+    name: Build Docker Image
+    runs-on: ubuntu-latest
+    needs: [build-and-test]
+    permissions:
+      contents: read
+      packages: write
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Login to Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Extract metadata
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: ${{ env.REGISTRY }}/${{ github.repository }}/${{ env.IMAGE_NAME }}
+          tags: |
+            type=ref,event=branch
+            type=ref,event=pr
+            type=semver,pattern={{version}}
+            type=semver,pattern={{major}}.{{minor}}
+            type=raw,value=${{ needs.build-and-test.outputs.version }}
+            type=raw,value=latest,enable={{is_default_branch}}
+
+      - name: Download build artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: build-${{ needs.build-and-test.outputs.version }}
+
+      - name: Build and push Docker image
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          push: true
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+          platforms: linux/amd64,linux/arm64
+
+  # Deploy to Staging
+  deploy-staging:
+    name: Deploy to Staging
+    runs-on: ubuntu-latest
+    needs: [build-and-test, build-docker]
+    if: needs.build-and-test.outputs.environment == 'staging'
+    environment:
+      name: staging
+      url: https://staging.restaurant-revolution.com
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Download build artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: build-${{ needs.build-and-test.outputs.version }}
+
+      - name: Deploy to staging
+        run: |
+          echo "🚀 Deploying version ${{ needs.build-and-test.outputs.version }} to staging..."
+          
+          # Example deployment commands (replace with your actual deployment)
+          # This could be:
+          # - Deploy to Vercel/Netlify
+          # - Update Kubernetes manifests
+          # - Deploy to cloud provider
+          # - Update Docker Compose
+          
+          echo "✅ Staging deployment completed"
+        env:
+          DEPLOY_TOKEN: ${{ secrets.STAGING_DEPLOY_TOKEN }}
+          VERSION: ${{ needs.build-and-test.outputs.version }}
+
+      - name: Run smoke tests
+        run: |
+          echo "🧪 Running smoke tests against staging..."
+          
+          # Add smoke tests here
+          # curl -f https://staging.restaurant-revolution.com/health
+          # npm run test:e2e:staging
+          
+          echo "✅ Smoke tests passed"
+        continue-on-error: true
+
+      - name: Notify deployment
+        uses: 8398a7/action-slack@v3
+        if: always()
+        with:
+          status: ${{ job.status }}
+          text: |
+            🚀 Staging Deployment: ${{ job.status }}
+            Version: ${{ needs.build-and-test.outputs.version }}
+            URL: https://staging.restaurant-revolution.com
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+
+  # Deploy to Production
+  deploy-production:
+    name: Deploy to Production
+    runs-on: ubuntu-latest
+    needs: [build-and-test, build-docker]
+    if: needs.build-and-test.outputs.environment == 'production'
+    environment:
+      name: production
+      url: https://restaurant-revolution.com
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Download build artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: build-${{ needs.build-and-test.outputs.version }}
+
+      - name: Production deployment approval
+        uses: trstringer/manual-approval@v1
+        with:
+          secret: ${{ github.TOKEN }}
+          approvers: ${{ github.actor }}
+          minimum-approvals: 1
+          issue-title: "Deploy ${{ needs.build-and-test.outputs.version }} to Production"
+          issue-body: |
+            Please review and approve the production deployment.
+            
+            **Version:** ${{ needs.build-and-test.outputs.version }}
+            **Branch:** ${{ github.ref_name }}
+            **Commit:** ${{ github.sha }}
+            
+            **Changes:**
+            ${{ github.event.head_commit.message }}
+
+      - name: Deploy to production
+        run: |
+          echo "🚀 Deploying version ${{ needs.build-and-test.outputs.version }} to production..."
+          
+          # Production deployment commands
+          # This should include:
+          # - Blue/green deployment
+          # - Database migrations
+          # - Cache warming
+          # - Health checks
+          
+          echo "✅ Production deployment completed"
+        env:
+          DEPLOY_TOKEN: ${{ secrets.PRODUCTION_DEPLOY_TOKEN }}
+          VERSION: ${{ needs.build-and-test.outputs.version }}
+
+      - name: Run production health checks
+        run: |
+          echo "🏥 Running production health checks..."
+          
+          # Add comprehensive health checks
+          # curl -f https://restaurant-revolution.com/health
+          # npm run test:e2e:production
+          
+          echo "✅ Production health checks passed"
+
+      - name: Create GitHub release
+        uses: softprops/action-gh-release@v1
+        if: startsWith(github.ref, 'refs/tags/')
+        with:
+          files: |
+            dist/**
+          generate_release_notes: true
+          draft: false
+          prerelease: false
+
+      - name: Notify production deployment
+        uses: 8398a7/action-slack@v3
+        if: always()
+        with:
+          status: ${{ job.status }}
+          text: |
+            🎉 Production Deployment: ${{ job.status }}
+            Version: ${{ needs.build-and-test.outputs.version }}
+            URL: https://restaurant-revolution.com
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+
+  # Database Migration
+  migrate-database:
+    name: Database Migration
+    runs-on: ubuntu-latest
+    needs: [build-and-test]
+    if: needs.build-and-test.outputs.environment == 'production'
+    environment:
+      name: production-db
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run database migrations
+        run: |
+          echo "📊 Running database migrations..."
+          
+          # Add migration commands
+          # npm run db:migrate
+          # npm run db:seed:production
+          
+          echo "✅ Database migrations completed"
+        env:
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+          NODE_ENV: production

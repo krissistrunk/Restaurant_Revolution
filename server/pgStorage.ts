@@ -1,6 +1,6 @@
 import { db } from './db';
 import { IStorage } from './storage';
-import { eq, and } from 'drizzle-orm';
+import { eq, and, desc, sql } from 'drizzle-orm';
 import {
   User, InsertUser,
   Restaurant, InsertRestaurant,
@@ -581,5 +581,154 @@ export class PgStorage implements IStorage {
   async createReview(review: InsertReview): Promise<Review> {
     const result = await this.db.insert(schema.reviews).values(review).returning();
     return result[0];
+  }
+
+  // Missing methods from IStorage interface
+  async updateCategory(id: number, updates: Partial<Category>): Promise<Category | undefined> {
+    const result = await this.db
+      .update(schema.categories)
+      .set(updates)
+      .where(eq(schema.categories.id, id))
+      .returning();
+    
+    return result[0];
+  }
+
+  async deleteCategory(id: number): Promise<boolean> {
+    const result = await this.db
+      .delete(schema.categories)
+      .where(eq(schema.categories.id, id));
+    
+    return result.rowCount > 0;
+  }
+
+  async updateMenuItem(id: number, updates: Partial<MenuItem>): Promise<MenuItem | undefined> {
+    const result = await this.db
+      .update(schema.menuItems)
+      .set(updates)
+      .where(eq(schema.menuItems.id, id))
+      .returning();
+    
+    return result[0];
+  }
+
+  async deleteMenuItem(id: number): Promise<boolean> {
+    const result = await this.db
+      .delete(schema.menuItems)
+      .where(eq(schema.menuItems.id, id));
+    
+    return result.rowCount > 0;
+  }
+
+  async getModifier(id: number): Promise<Modifier | undefined> {
+    const modifiers = await this.db.select().from(schema.modifiers).where(eq(schema.modifiers.id, id));
+    return modifiers[0];
+  }
+
+  async getRestaurantOrders(restaurantId: number): Promise<Order[]> {
+    return this.getOrders(restaurantId);
+  }
+
+  async updateOrder(id: number, updates: Partial<Order>): Promise<Order | undefined> {
+    const result = await this.db
+      .update(schema.orders)
+      .set(updates)
+      .where(eq(schema.orders.id, id))
+      .returning();
+    
+    return result[0];
+  }
+
+  async updateOrderStatus(id: number, status: string, estimatedReadyTime?: string, notes?: string): Promise<Order | undefined> {
+    const updates: any = { status };
+    if (estimatedReadyTime) updates.estimatedReadyTime = new Date(estimatedReadyTime);
+    if (notes) updates.notes = notes;
+    
+    return this.updateOrder(id, updates);
+  }
+
+  async updateUserLastLogin(userId: number): Promise<User | undefined> {
+    const result = await this.db
+      .update(schema.users)
+      .set({ lastLoginAt: new Date() })
+      .where(eq(schema.users.id, userId))
+      .returning();
+    
+    return result[0];
+  }
+
+  async updateUserPassword(userId: number, password: string): Promise<User | undefined> {
+    const result = await this.db
+      .update(schema.users)
+      .set({ password })
+      .where(eq(schema.users.id, userId))
+      .returning();
+    
+    return result[0];
+  }
+
+  async updateUserEmailVerification(userId: number, verified: boolean): Promise<User | undefined> {
+    const result = await this.db
+      .update(schema.users)
+      .set({ emailVerified: verified })
+      .where(eq(schema.users.id, userId))
+      .returning();
+    
+    return result[0];
+  }
+
+  async updateUserProfile(userId: number, updates: Partial<User>): Promise<User | undefined> {
+    const result = await this.db
+      .update(schema.users)
+      .set(updates)
+      .where(eq(schema.users.id, userId))
+      .returning();
+    
+    return result[0];
+  }
+
+  async getAllUsers(page: number = 1, limit: number = 20, filters?: any): Promise<{ users: User[]; total: number }> {
+    // Get total count
+    let totalQuery = this.db.select({ count: sql`count(*)` }).from(schema.users);
+    
+    // Apply filters to count query
+    if (filters) {
+      if (filters.role) {
+        totalQuery = totalQuery.where(eq(schema.users.role, filters.role));
+      }
+      if (filters.emailVerified !== undefined) {
+        totalQuery = totalQuery.where(eq(schema.users.emailVerified, filters.emailVerified));
+      }
+      if (filters.restaurantId) {
+        totalQuery = totalQuery.where(eq(schema.users.restaurantId, filters.restaurantId));
+      }
+    }
+    
+    const totalResult = await totalQuery;
+    const total = Number(totalResult[0]?.count || 0);
+
+    // Get paginated results
+    let usersQuery = this.db.select().from(schema.users);
+    
+    // Apply same filters to data query
+    if (filters) {
+      if (filters.role) {
+        usersQuery = usersQuery.where(eq(schema.users.role, filters.role));
+      }
+      if (filters.emailVerified !== undefined) {
+        usersQuery = usersQuery.where(eq(schema.users.emailVerified, filters.emailVerified));
+      }
+      if (filters.restaurantId) {
+        usersQuery = usersQuery.where(eq(schema.users.restaurantId, filters.restaurantId));
+      }
+    }
+    
+    const offset = (page - 1) * limit;
+    const users = await usersQuery
+      .orderBy(desc(schema.users.createdAt))
+      .limit(limit)
+      .offset(offset);
+
+    return { users, total };
   }
 }
