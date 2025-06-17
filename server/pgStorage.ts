@@ -238,15 +238,7 @@ export class PgStorage implements IStorage {
     return result[0];
   }
 
-  async updateOrderStatus(id: number, status: string): Promise<Order | undefined> {
-    const result = await db
-      .update(schema.orders)
-      .set({ status })
-      .where(eq(schema.orders.id, id))
-      .returning();
-    
-    return result[0];
-  }
+  // Removed duplicate method - enhanced version exists below
 
   // OrderItem methods
   async getOrderItems(orderId: number): Promise<OrderItem[]> {

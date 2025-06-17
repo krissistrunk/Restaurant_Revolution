@@ -15,7 +15,6 @@ export const users = pgTable("users", {
   restaurantId: integer("restaurant_id"), // only for owners
   loyaltyPoints: integer("loyalty_points").default(0).notNull(),
   dietaryPreferences: jsonb("dietary_preferences"),
-  role: text("role").notNull(),
 });
 
 export const insertUserSchema = createInsertSchema(users).omit({
@@ -97,6 +96,8 @@ export const reservations = pgTable("reservations", {
   partySize: integer("party_size").notNull(),
   status: text("status").default("confirmed"),
   notes: text("notes"),
+  specialOccasion: text("special_occasion"),
+  seatingPreference: text("seating_preference"),
   restaurantId: integer("restaurant_id").notNull(),
   createdAt: timestamp("created_at").defaultNow(),
 });
@@ -171,7 +172,7 @@ export const queueEntries = pgTable("queue_entries", {
   userId: integer("user_id").notNull(),
   restaurantId: integer("restaurant_id").notNull(),
   partySize: integer("party_size").notNull(),
-  status: text("status").default("waiting").notNull(), // waiting, seated, cancelled
+  status: text("status").default("waiting").notNull(), // waiting, seated, cancelled, called, no_show
   position: integer("position").notNull(),
   estimatedWaitTime: integer("estimated_wait_time").notNull(), // in minutes
   actualWaitTime: integer("actual_wait_time"), // in minutes
@@ -180,6 +181,10 @@ export const queueEntries = pgTable("queue_entries", {
   seatedAt: timestamp("seated_at"),
   phone: text("phone"),
   note: text("note"),
+  seatingPreference: text("seating_preference"), // booth, window, bar, outdoor
+  specialRequests: text("special_requests"),
+  smsNotifications: boolean("sms_notifications").default(true),
+  lastNotificationSent: timestamp("last_notification_sent"),
 });
 
 // Review Schema
@@ -221,6 +226,9 @@ export const userPreferences = pgTable("user_preferences", {
   dislikedItems: jsonb("disliked_items"),
   allergens: jsonb("allergens"),
   tastePreferences: jsonb("taste_preferences"), // spicy, sweet, savory, etc.
+  seatingPreferences: jsonb("seating_preferences"), // booth, window, quiet, outdoor
+  specialOccasions: jsonb("special_occasions"), // birthday, anniversary with dates
+  visitHistory: jsonb("visit_history"), // frequency, last visit, favorite times
   lastUpdated: timestamp("last_updated").defaultNow().notNull(),
 });
 
@@ -232,6 +240,22 @@ export const userItemInteractions = pgTable("user_item_interactions", {
   interaction: text("interaction").notNull(), // viewed, ordered, liked, favorited
   rating: integer("rating"), // 1-5 stars if provided
   timestamp: timestamp("timestamp").defaultNow().notNull(),
+});
+
+// Guest Visit History Tracking
+export const guestVisits = pgTable("guest_visits", {
+  id: serial("id").primaryKey(),
+  userId: integer("user_id").notNull(),
+  restaurantId: integer("restaurant_id").notNull(),
+  visitDate: timestamp("visit_date").defaultNow().notNull(),
+  partySize: integer("party_size").notNull(),
+  totalSpent: real("total_spent"),
+  tableSection: text("table_section"), // main dining, bar, patio, private
+  specialOccasion: text("special_occasion"), // birthday, anniversary, date night
+  satisfactionRating: integer("satisfaction_rating"), // 1-5 stars
+  waitTime: integer("wait_time"), // actual wait time in minutes
+  notes: text("notes"), // staff notes about the visit
+  orderId: integer("order_id"), // link to order if applicable
 });
 
 export const insertPromotionSchema = createInsertSchema(promotions).omit({
@@ -264,6 +288,36 @@ export const insertUserItemInteractionSchema = createInsertSchema(userItemIntera
   timestamp: true,
 });
 
+export const insertGuestVisitSchema = createInsertSchema(guestVisits).omit({
+  id: true,
+  visitDate: true,
+});
+
+// QR Redemption Tracking Schema
+export const qrRedemptions = pgTable("qr_redemptions", {
+  id: serial("id").primaryKey(),
+  qrCodeValue: text("qr_code_value").notNull().unique(),
+  qrType: text("qr_type").notNull(), // loyalty, discount, lightning, tier
+  userId: integer("user_id").notNull(),
+  rewardId: integer("reward_id"), // for loyalty rewards
+  promotionId: integer("promotion_id"), // for promotions/discounts
+  discountAmount: real("discount_amount"), // for discount coupons
+  discountType: text("discount_type"), // percentage, fixed
+  expiresAt: timestamp("expires_at").notNull(),
+  redeemedAt: timestamp("redeemed_at"),
+  redeemedBy: integer("redeemed_by"), // staff user ID who processed redemption
+  status: text("status").default("active").notNull(), // active, redeemed, expired
+  restaurantId: integer("restaurant_id").notNull(),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  metadata: jsonb("metadata"), // additional data for different QR types
+});
+
+export const insertQrRedemptionSchema = createInsertSchema(qrRedemptions).omit({
+  id: true,
+  createdAt: true,
+  redeemedAt: true,
+});
+
 // Relations
 export const usersRelations = relations(users, ({ many, one }) => ({
   restaurant: one(restaurants, {
@@ -276,7 +330,9 @@ export const usersRelations = relations(users, ({ many, one }) => ({
   queueEntries: many(queueEntries),
   aiConversations: many(aiConversations),
   preferences: one(userPreferences),
-  itemInteractions: many(userItemInteractions)
+  itemInteractions: many(userItemInteractions),
+  qrRedemptions: many(qrRedemptions),
+  visits: many(guestVisits)
 }));
 
 export const restaurantsRelations = relations(restaurants, ({ many }) => ({
@@ -288,7 +344,9 @@ export const restaurantsRelations = relations(restaurants, ({ many }) => ({
   loyaltyRewards: many(loyaltyRewards),
   promotions: many(promotions),
   queueEntries: many(queueEntries),
-  aiConversations: many(aiConversations)
+  aiConversations: many(aiConversations),
+  qrRedemptions: many(qrRedemptions),
+  guestVisits: many(guestVisits)
 }));
 
 export const categoriesRelations = relations(categories, ({ one, many }) => ({
@@ -354,18 +412,20 @@ export const orderItemsRelations = relations(orderItems, ({ one }) => ({
   })
 }));
 
-export const loyaltyRewardsRelations = relations(loyaltyRewards, ({ one }) => ({
+export const loyaltyRewardsRelations = relations(loyaltyRewards, ({ one, many }) => ({
   restaurant: one(restaurants, {
     fields: [loyaltyRewards.restaurantId],
     references: [restaurants.id]
-  })
+  }),
+  qrRedemptions: many(qrRedemptions)
 }));
 
-export const promotionsRelations = relations(promotions, ({ one }) => ({
+export const promotionsRelations = relations(promotions, ({ one, many }) => ({
   restaurant: one(restaurants, {
     fields: [promotions.restaurantId],
     references: [restaurants.id]
-  })
+  }),
+  qrRedemptions: many(qrRedemptions)
 }));
 
 export const queueEntriesRelations = relations(queueEntries, ({ one }) => ({
@@ -423,6 +483,44 @@ export const userItemInteractionsRelations = relations(userItemInteractions, ({ 
   })
 }));
 
+export const qrRedemptionsRelations = relations(qrRedemptions, ({ one }) => ({
+  user: one(users, {
+    fields: [qrRedemptions.userId],
+    references: [users.id]
+  }),
+  redeemedByUser: one(users, {
+    fields: [qrRedemptions.redeemedBy],
+    references: [users.id]
+  }),
+  restaurant: one(restaurants, {
+    fields: [qrRedemptions.restaurantId],
+    references: [restaurants.id]
+  }),
+  reward: one(loyaltyRewards, {
+    fields: [qrRedemptions.rewardId],
+    references: [loyaltyRewards.id]
+  }),
+  promotion: one(promotions, {
+    fields: [qrRedemptions.promotionId],
+    references: [promotions.id]
+  })
+}));
+
+export const guestVisitsRelations = relations(guestVisits, ({ one }) => ({
+  user: one(users, {
+    fields: [guestVisits.userId],
+    references: [users.id]
+  }),
+  restaurant: one(restaurants, {
+    fields: [guestVisits.restaurantId],
+    references: [restaurants.id]
+  }),
+  order: one(orders, {
+    fields: [guestVisits.orderId],
+    references: [orders.id]
+  })
+}));
+
 export type User = typeof users.$inferSelect;
 export type InsertUser = z.infer<typeof insertUserSchema>;
 
@@ -475,3 +573,9 @@ export type InsertUserPreference = z.infer<typeof insertUserPreferenceSchema>;
 
 export type UserItemInteraction = typeof userItemInteractions.$inferSelect;
 export type InsertUserItemInteraction = z.infer<typeof insertUserItemInteractionSchema>;
+
+export type QrRedemption = typeof qrRedemptions.$inferSelect;
+export type InsertQrRedemption = z.infer<typeof insertQrRedemptionSchema>;
+
+export type GuestVisit = typeof guestVisits.$inferSelect;
+export type InsertGuestVisit = z.infer<typeof insertGuestVisitSchema>;

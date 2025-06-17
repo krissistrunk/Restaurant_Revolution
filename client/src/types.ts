@@ -167,3 +167,99 @@ export interface QueueEntry {
   phone?: string | null;
   notificationSent?: boolean;
 }
+
+// Table Management Interfaces
+export interface Table {
+  id: number;
+  number: string;
+  seats: number;
+  status: 'available' | 'occupied' | 'reserved' | 'cleaning' | 'maintenance';
+  section: string;
+  serverId?: number;
+  x: number; // Position for floor plan
+  y: number; // Position for floor plan
+  width: number;
+  height: number;
+  shape: 'rectangle' | 'circle' | 'square';
+  reservationId?: number;
+  currentPartySize?: number;
+  seatedAt?: string;
+  estimatedTurnTime?: number;
+  notes?: string;
+  restaurantId: number;
+}
+
+export interface Server {
+  id: number;
+  name: string;
+  email: string;
+  phone?: string;
+  section: string;
+  status: 'active' | 'break' | 'offline';
+  maxTables: number;
+  currentTables: number;
+  avgRating?: number;
+  restaurantId: number;
+}
+
+export interface FloorPlan {
+  id: number;
+  name: string;
+  width: number;
+  height: number;
+  isActive: boolean;
+  restaurantId: number;
+  tables: Table[];
+  sections: Section[];
+}
+
+export interface Section {
+  id: number;
+  name: string;
+  color: string;
+  serverId?: number;
+  bounds: {
+    x: number;
+    y: number;
+    width: number;
+    height: number;
+  };
+  floorPlanId: number;
+}
+
+export interface TableAssignment {
+  id: number;
+  tableId: number;
+  queueEntryId?: number;
+  reservationId?: number;
+  partySize: number;
+  assignedAt: string;
+  seatedAt?: string;
+  completedAt?: string;
+  serverId?: number;
+  estimatedDuration: number;
+  actualDuration?: number;
+  totalBill?: number;
+  status: 'assigned' | 'seated' | 'completed' | 'cancelled';
+}
+
+export interface TableTurnTime {
+  tableId: number;
+  averageTurnTime: number;
+  recentTurnTimes: number[];
+  lastUpdated: string;
+  peakHourAverage: number;
+  offPeakAverage: number;
+}
+
+export interface OptimizationSuggestion {
+  id: string;
+  type: 'table_assignment' | 'server_balance' | 'cleaning_priority' | 'reservation_spacing';
+  priority: 'high' | 'medium' | 'low';
+  title: string;
+  description: string;
+  tableIds?: number[];
+  serverIds?: number[];
+  estimatedImpact: string;
+  createdAt: string;
+}

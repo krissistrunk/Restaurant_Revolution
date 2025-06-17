@@ -6,6 +6,7 @@ import {
   LoyaltyReward, InsertLoyaltyReward, Promotion, InsertPromotion,
   Review, InsertReview, QueueEntry, InsertQueueEntry, AiConversation, InsertAiConversation,
   UserPreference, InsertUserPreference, UserItemInteraction, InsertUserItemInteraction,
+  QrRedemption, InsertQrRedemption,
   users
 } from "@shared/schema";
 
@@ -109,6 +110,14 @@ export interface IStorage {
   getUserItemInteractions(userId: number): Promise<UserItemInteraction[]>;
   getMenuItemInteractions(menuItemId: number): Promise<UserItemInteraction[]>;
   getPersonalizedMenuRecommendations(userId: number, restaurantId: number, limit?: number): Promise<MenuItem[]>;
+  
+  // QR Redemption methods
+  createQrRedemption(qrRedemption: InsertQrRedemption): Promise<QrRedemption>;
+  getQrRedemptionByCode(qrCodeValue: string): Promise<QrRedemption | undefined>;
+  getUserQrRedemptions(userId: number): Promise<QrRedemption[]>;
+  markQrRedemptionAsRedeemed(id: number, staffUserId: number): Promise<QrRedemption | undefined>;
+  updateQrRedemptionStatus(id: number, status: string): Promise<QrRedemption | undefined>;
+  getPromotion(id: number): Promise<Promotion | undefined>;
 }
 
 export class MemStorage implements IStorage {
@@ -127,6 +136,7 @@ export class MemStorage implements IStorage {
   private aiConversations: Map<number, AiConversation>;
   private userPreferences: Map<number, UserPreference>;
   private userItemInteractions: Map<number, UserItemInteraction>;
+  private qrRedemptions: Map<number, QrRedemption>;
   
   private userId: number;
   private restaurantId: number;
@@ -143,6 +153,7 @@ export class MemStorage implements IStorage {
   private aiConversationId: number;
   private userPreferenceId: number;
   private userItemInteractionId: number;
+  private qrRedemptionId: number;
   
   constructor() {
     this.users = new Map();
@@ -160,6 +171,7 @@ export class MemStorage implements IStorage {
     this.aiConversations = new Map();
     this.userPreferences = new Map();
     this.userItemInteractions = new Map();
+    this.qrRedemptions = new Map();
     
     this.userId = 1;
     this.restaurantId = 1;
@@ -176,6 +188,7 @@ export class MemStorage implements IStorage {
     this.aiConversationId = 1;
     this.userPreferenceId = 1;
     this.userItemInteractionId = 1;
+    this.qrRedemptionId = 1;
     
     // Initialize with sample data
     this.initializeData();
@@ -1401,6 +1414,49 @@ export class MemStorage implements IStorage {
     // Sort by score and return top items
     scoredItems.sort((a, b) => b.score - a.score);
     return scoredItems.slice(0, limit).map(scored => scored.item);
+  }
+
+  // QR Redemption methods
+  async createQrRedemption(qrRedemption: InsertQrRedemption): Promise<QrRedemption> {
+    const id = this.qrRedemptionId++;
+    const newQrRedemption: QrRedemption = {
+      id,
+      ...qrRedemption,
+      createdAt: new Date(),
+      redeemedAt: null,
+    };
+    
+    this.qrRedemptions.set(id, newQrRedemption);
+    return newQrRedemption;
+  }
+
+  async getQrRedemptionByCode(qrCodeValue: string): Promise<QrRedemption | undefined> {
+    return Array.from(this.qrRedemptions.values()).find(qr => qr.qrCodeValue === qrCodeValue);
+  }
+
+  async getUserQrRedemptions(userId: number): Promise<QrRedemption[]> {
+    return Array.from(this.qrRedemptions.values()).filter(qr => qr.userId === userId);
+  }
+
+  async markQrRedemptionAsRedeemed(id: number, staffUserId: number): Promise<QrRedemption | undefined> {
+    const qrRedemption = this.qrRedemptions.get(id);
+    if (!qrRedemption) return undefined;
+
+    qrRedemption.status = "redeemed";
+    qrRedemption.redeemedAt = new Date();
+    qrRedemption.redeemedBy = staffUserId;
+    
+    this.qrRedemptions.set(id, qrRedemption);
+    return qrRedemption;
+  }
+
+  async updateQrRedemptionStatus(id: number, status: string): Promise<QrRedemption | undefined> {
+    const qrRedemption = this.qrRedemptions.get(id);
+    if (!qrRedemption) return undefined;
+
+    qrRedemption.status = status;
+    this.qrRedemptions.set(id, qrRedemption);
+    return qrRedemption;
   }
 }
 

@@ -397,3 +397,9 @@ export function initializeWebSocket(server: HTTPServer): WebSocketManager {
 export function getWebSocketManager(): WebSocketManager | null {
   return wsManager;
 }
+
+export function broadcastToRestaurant(restaurantId: number, message: any) {
+  if (wsManager) {
+    wsManager.broadcastToRestaurant(restaurantId, message);
+  }
+}

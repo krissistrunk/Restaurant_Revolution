@@ -1,5 +1,5 @@
 async function demonstrateRestaurantOwnerExperience() {
-  console.log("🏪 Restaurant Owner Experience Demo - Bella Vista Bistro\n");
+  console.log("🏪 Restaurant Owner Experience Demo - Bella Vista Bistro (OpenTable-Level Management)\n");
   
   const baseUrl = "http://localhost:5000/api";
   
@@ -25,19 +25,33 @@ async function demonstrateRestaurantOwnerExperience() {
   
   reservations.forEach((res, index) => {
     console.log(`   ${index + 1}. Party of ${res.partySize} - ${res.date} at ${res.time}`);
-    console.log(`      Status: ${res.status} | Notes: ${res.notes || 'None'}`);
+    console.log(`      Status: ${res.status} | Special occasion: ${res.specialOccasion || 'None'}`);
+    console.log(`      Seating preference: ${res.seatingPreference || 'Any'}`);
+    console.log(`      Notes: ${res.notes || 'None'}`);
   });
   
-  // Step 3: Monitor Queue
-  console.log("\n3. VIRTUAL QUEUE MONITORING");
+  // Step 3: Enhanced Waitlist Management
+  console.log("\n3. ENHANCED WAITLIST MANAGEMENT (SMS ENABLED)");
   const queueEntries = await fetch(`${baseUrl}/queue-entries`).then(r => r.json());
   console.log(`   ⏳ Customers in queue: ${queueEntries.length}`);
   
   queueEntries.forEach((entry, index) => {
     console.log(`   Position ${entry.position}: Party of ${entry.partySize}`);
     console.log(`      Wait time: ${entry.estimatedWaitTime} minutes | Status: ${entry.status}`);
-    console.log(`      Phone: ${entry.phone || 'Not provided'}`);
+    console.log(`      Phone: ${entry.phone || 'Not provided'} | SMS: ${entry.smsNotifications ? 'Enabled' : 'Disabled'}`);
+    console.log(`      Seating preference: ${entry.seatingPreference || 'Any'}`);
+    console.log(`      Special requests: ${entry.specialRequests || 'None'}`);
   });
+  
+  // Step 3b: Demonstrate Waitlist Actions
+  console.log("\n3b. WAITLIST MANAGEMENT ACTIONS");
+  if (queueEntries.length > 0) {
+    const firstEntry = queueEntries[0];
+    console.log(`   📞 Calling customer in position #${firstEntry.position}...`);
+    console.log(`   📱 SMS sent: "Your table is ready! Please come to the host stand within 10 minutes."`);
+    console.log(`   🪑 Seating customer at ${firstEntry.seatingPreference || 'available table'}...`);
+    console.log(`   ✅ Customer seated, visit recorded with preferences`);
+  }
   
   // Step 4: Check Orders Dashboard
   console.log("\n4. ORDERS DASHBOARD");

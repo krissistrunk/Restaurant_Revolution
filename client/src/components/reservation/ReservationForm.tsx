@@ -18,6 +18,8 @@ const reservationSchema = z.object({
   time: z.string().nonempty("Please select a time"),
   partySize: z.string().nonempty("Please select party size"),
   notes: z.string().optional(),
+  specialOccasion: z.string().optional(),
+  seatingPreference: z.string().optional(),
 });
 
 type ReservationFormValues = z.infer<typeof reservationSchema>;
@@ -36,6 +38,8 @@ const ReservationForm = () => {
       time: "",
       partySize: "2",
       notes: "",
+      specialOccasion: "",
+      seatingPreference: "",
     },
   });
 
@@ -155,13 +159,67 @@ const ReservationForm = () => {
 
           <FormField
             control={form.control}
+            name="specialOccasion"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Special Occasion (Optional)</FormLabel>
+                <Select onValueChange={field.onChange} value={field.value}>
+                  <FormControl>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Is this for a special occasion?" />
+                    </SelectTrigger>
+                  </FormControl>
+                  <SelectContent>
+                    <SelectItem value="birthday">Birthday</SelectItem>
+                    <SelectItem value="anniversary">Anniversary</SelectItem>
+                    <SelectItem value="date_night">Date Night</SelectItem>
+                    <SelectItem value="business">Business Meeting</SelectItem>
+                    <SelectItem value="celebration">Celebration</SelectItem>
+                    <SelectItem value="graduation">Graduation</SelectItem>
+                    <SelectItem value="proposal">Proposal</SelectItem>
+                    <SelectItem value="other">Other</SelectItem>
+                  </SelectContent>
+                </Select>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
+          <FormField
+            control={form.control}
+            name="seatingPreference"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Seating Preference (Optional)</FormLabel>
+                <Select onValueChange={field.onChange} value={field.value}>
+                  <FormControl>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Any seating preference?" />
+                    </SelectTrigger>
+                  </FormControl>
+                  <SelectContent>
+                    <SelectItem value="booth">Booth</SelectItem>
+                    <SelectItem value="window">Window Seat</SelectItem>
+                    <SelectItem value="bar">Bar Seating</SelectItem>
+                    <SelectItem value="outdoor">Outdoor/Patio</SelectItem>
+                    <SelectItem value="quiet">Quiet Area</SelectItem>
+                    <SelectItem value="main_dining">Main Dining Room</SelectItem>
+                  </SelectContent>
+                </Select>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
+          <FormField
+            control={form.control}
             name="notes"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Special Requests (Optional)</FormLabel>
+                <FormLabel>Additional Notes (Optional)</FormLabel>
                 <FormControl>
                   <Textarea
-                    placeholder="E.g., Window seat, high chair, etc."
+                    placeholder="E.g., High chair needed, food allergies, accessibility requirements..."
                     {...field}
                   />
                 </FormControl>

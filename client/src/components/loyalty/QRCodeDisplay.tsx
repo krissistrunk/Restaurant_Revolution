@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { useAuthStore } from '@/stores/authStore';
 import { usePromotionStore } from '@/stores/promotionStore';
+import { useLoyalty } from '@/hooks/useLoyalty';
 import { 
   QrCode, 
   Download, 
@@ -20,19 +21,31 @@ import {
 
 interface QRCodeDisplayProps {
   promotionId?: string;
-  rewardId?: string;
-  type: 'promotion' | 'loyalty' | 'points';
+  rewardId?: number;
+  type: 'promotion' | 'loyalty' | 'points' | 'discount' | 'lightning' | 'tier';
   className?: string;
+  // For discount coupons
+  discountAmount?: number;
+  discountType?: 'percentage' | 'fixed';
+  // For lightning deals
+  dealMetadata?: any;
+  // For tier-based rewards
+  tierBenefit?: any;
 }
 
 export const QRCodeDisplay: React.FC<QRCodeDisplayProps> = ({
   promotionId,
   rewardId,
   type,
-  className = ''
+  className = '',
+  discountAmount,
+  discountType,
+  dealMetadata,
+  tierBenefit
 }) => {
   const { user } = useAuthStore();
   const { generateQRCode, loyaltyPoints, currentTier } = usePromotionStore();
+  const { generateLoyaltyQR, generateDiscountQR, generateLightningDealQR, generateTierQR } = useLoyalty();
   const [qrValue, setQrValue] = useState('');
   const [isGenerating, setIsGenerating] = useState(false);
   const [copied, setCopied] = useState(false);
@@ -40,7 +53,7 @@ export const QRCodeDisplay: React.FC<QRCodeDisplayProps> = ({
 
   useEffect(() => {
     generateQRValue();
-  }, [promotionId, rewardId, type, user]);
+  }, [promotionId, rewardId, type, user, discountAmount, discountType, dealMetadata, tierBenefit]);
 
   const generateQRValue = async () => {
     if (!user) return;
@@ -49,23 +62,38 @@ export const QRCodeDisplay: React.FC<QRCodeDisplayProps> = ({
     
     try {
       let value = '';
+      let expiryHours = 24; // Default 24 hours
       
       if (type === 'promotion' && promotionId) {
         value = await generateQRCode(promotionId);
       } else if (type === 'loyalty' && rewardId) {
-        value = `REWARD-${rewardId}-${user.id}-${Date.now()}`;
+        value = await generateLoyaltyQR(rewardId);
+        expiryHours = 24;
+      } else if (type === 'discount' && discountAmount && discountType) {
+        value = await generateDiscountQR(discountAmount, discountType);
+        expiryHours = 48;
+      } else if (type === 'lightning' && dealMetadata) {
+        const promotionIdNum = promotionId ? parseInt(promotionId) : 1;
+        value = await generateLightningDealQR(promotionIdNum, dealMetadata);
+        expiryHours = 2;
+      } else if (type === 'tier' && tierBenefit) {
+        value = await generateTierQR(tierBenefit);
+        expiryHours = 168; // 1 week
       } else if (type === 'points') {
-        // Generate loyalty points QR code
+        // Generate loyalty points QR code for tracking
         value = `LOYALTY-${user.id}-${loyaltyPoints}-${currentTier}-${Date.now()}`;
       }
       
-      setQrValue(value);
-      
-      // Set expiry time (24 hours from now for demo)
-      setExpiryTime(new Date(Date.now() + 24 * 60 * 60 * 1000));
+      if (value) {
+        setQrValue(value);
+        setExpiryTime(new Date(Date.now() + expiryHours * 60 * 60 * 1000));
+      } else {
+        throw new Error('Failed to generate QR code value');
+      }
       
     } catch (error) {
       console.error('Failed to generate QR code:', error);
+      setQrValue(''); // Clear QR value on error
     } finally {
       setIsGenerating(false);
     }
@@ -128,6 +156,12 @@ export const QRCodeDisplay: React.FC<QRCodeDisplayProps> = ({
         return 'Loyalty Reward QR Code';
       case 'points':
         return 'Loyalty Points QR Code';
+      case 'discount':
+        return 'Discount Coupon QR Code';
+      case 'lightning':
+        return 'Lightning Deal QR Code';
+      case 'tier':
+        return `${currentTier?.toUpperCase() || 'TIER'} Member QR Code`;
       default:
         return 'QR Code';
     }
@@ -141,6 +175,12 @@ export const QRCodeDisplay: React.FC<QRCodeDisplayProps> = ({
         return 'Scan this QR code to redeem your loyalty reward';
       case 'points':
         return `Earn and track your ${loyaltyPoints} loyalty points`;
+      case 'discount':
+        return `Show this QR code for ${discountType === 'percentage' ? discountAmount + '%' : '$' + discountAmount} off your order`;
+      case 'lightning':
+        return 'Limited time offer! Show this QR code before it expires';
+      case 'tier':
+        return `Exclusive ${currentTier || 'member'} benefit - show to staff for special treatment`;
       default:
         return 'Scan this QR code for exclusive access';
     }

@@ -1,5 +1,5 @@
 async function demonstrateCustomerExperience() {
-  console.log("🍽️ Customer Experience Demo - Bella Vista Bistro\n");
+  console.log("🍽️ Customer Experience Demo - Bella Vista Bistro (OpenTable-Level Features)\n");
   
   const baseUrl = "http://localhost:5000/api";
   
@@ -68,7 +68,9 @@ async function demonstrateCustomerExperience() {
     date: new Date(Date.now() + 2 * 24 * 60 * 60 * 1000).toISOString().split('T')[0], // Day after tomorrow
     time: "18:30",
     partySize: 3,
-    notes: "Birthday celebration - need high chair",
+    notes: "Need high chair for toddler, food allergies: nuts",
+    specialOccasion: "birthday",
+    seatingPreference: "booth",
     status: "confirmed"
   };
   
@@ -80,18 +82,23 @@ async function demonstrateCustomerExperience() {
   
   console.log(`   📅 Reservation confirmed for ${reservation.partySize} people`);
   console.log(`   📍 Date: ${reservation.date} at ${reservation.time}`);
-  console.log(`   📝 Special notes: ${reservation.notes}`);
+  console.log(`   🎂 Special occasion: ${reservation.specialOccasion}`);
+  console.log(`   🪑 Seating preference: ${reservation.seatingPreference}`);
+  console.log(`   📝 Additional notes: ${reservation.notes}`);
   
-  // Step 8: Join Virtual Queue
-  console.log("\n8. JOINING VIRTUAL QUEUE");
+  // Step 8: Join Enhanced Waitlist (OpenTable-Level)
+  console.log("\n8. JOINING ENHANCED WAITLIST (SMS NOTIFICATIONS)");
   const queueData = {
     userId: customer.id,
     restaurantId: 1,
     partySize: 2,
     position: 2,
     estimatedWaitTime: 25,
-    phone: customer.phone,
-    note: "Prefer outdoor seating"
+    phone: customer.phone || "+1234567890",
+    note: "Birthday celebration",
+    seatingPreference: "outdoor",
+    specialRequests: "Window table preferred",
+    smsNotifications: true
   };
   
   const queueEntry = await fetch(`${baseUrl}/queue-entries`, {
@@ -102,7 +109,10 @@ async function demonstrateCustomerExperience() {
   
   console.log(`   ⏳ Queue position: #${queueEntry.position}`);
   console.log(`   ⏱️ Estimated wait: ${queueEntry.estimatedWaitTime} minutes`);
-  console.log(`   📱 Will notify: ${queueEntry.phone}`);
+  console.log(`   📱 SMS notifications enabled: ${queueEntry.phone}`);
+  console.log(`   🪑 Seating preference: ${queueEntry.seatingPreference}`);
+  console.log(`   🎉 Special occasion: Birthday celebration`);
+  console.log(`   📞 Will receive SMS for: position updates, table ready alert`);
   
   // Step 9: Check Order History (if any)
   console.log("\n9. CHECKING ORDER HISTORY");

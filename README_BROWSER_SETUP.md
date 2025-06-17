@@ -36,13 +36,26 @@ Once started, open your browser to:
 
 ## 📱 Features Available
 
+### 🤖 Core Features
 - **Restaurant Information** - View restaurant details, hours, location
 - **Menu Browsing** - Browse categories and menu items with photos
-- **Reservations** - Make table reservations
+- **Reservations** - Make table reservations with special occasion tracking
 - **Online Ordering** - Order food for pickup
-- **Loyalty Program** - Earn and redeem points
+- **Loyalty Program** - Earn and redeem points with QR codes
 - **AI Assistant** - Get help with orders and questions
-- **Virtual Queue** - Join virtual waiting lists
+
+### 🆕 OpenTable-Level Features (NEW!)
+- **📞 SMS Waitlist Notifications** - Professional SMS updates for position changes and table ready alerts
+- **👤 Enhanced Guest Profiles** - Visit history, seating preferences, and special occasions
+- **🎉 Special Occasion Tracking** - Automatic birthday/anniversary recognition with personalized messages
+- **⏱️ Real-time Waitlist Management** - Live position updates, wait time estimates, and staff interface
+- **🪑 Seating Preferences** - Booth, window, bar, outdoor preference tracking
+- **📊 Guest Analytics** - Visit frequency, spending patterns, and personalized recommendations
+
+### 🔧 Staff Management Tools
+- **Waitlist Manager** - Call customers, seat parties, update wait times
+- **Guest Profile Insights** - View customer history and preferences
+- **Real-time Dashboard** - Live queue status and analytics
 
 ## 🔧 API Endpoints (for testing)
 
@@ -57,6 +70,29 @@ Once started, open your browser to:
 - **Backend**: Node.js + Express + TypeScript
 - **Database**: In-memory storage (no PostgreSQL required)
 - **Build Tools**: Vite (frontend) + esbuild (backend)
+- **SMS Service**: Twilio integration for professional notifications
+
+## 📞 SMS Setup (Optional)
+
+To enable SMS notifications for the waitlist features:
+
+1. **Get Twilio Account** (Free trial available)
+   - Sign up at https://www.twilio.com
+   - Get your Account SID, Auth Token, and Phone Number
+
+2. **Add Environment Variables**
+   ```bash
+   export TWILIO_ACCOUNT_SID="your_account_sid"
+   export TWILIO_AUTH_TOKEN="your_auth_token" 
+   export TWILIO_FROM_NUMBER="+1234567890"
+   ```
+
+3. **Test SMS Features**
+   - Join waitlist with phone number
+   - SMS notifications will be sent for position updates and table ready alerts
+   - Special occasion messages sent automatically
+
+**Note**: SMS features work without Twilio - they'll just log messages instead of sending real SMS.
 
 ## ✅ What Was Fixed
 

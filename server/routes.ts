@@ -9,6 +9,8 @@ import {
 import { z } from "zod";
 import { sendTableReadySMS, sendQueueConfirmationSMS } from "./services/notificationService";
 import AiService from "./aiService";
+import { waitlistService } from "./services/waitlistService";
+import { guestProfileService } from "./services/guestProfileService";
 import { cmsMiddleware } from "./middleware/cmsMiddleware";
 import { requireAuth, requireOwner, requireAdmin, requireCMSAccess, requireRestaurantAccess, authenticateToken, attachUser } from "./middleware/authMiddleware";
 import { getWebSocketManager } from "./websocket";
@@ -20,6 +22,98 @@ import { aiRoutes } from "./routes/aiRoutes";
 import path from 'path';
 import fs from 'fs';
 import cookieParser from 'cookie-parser';
+
+// QR Code utility functions
+function generateQrCodeValue(userId: number, qrType: string): string {
+  const timestamp = Date.now();
+  const random = Math.random().toString(36).substring(2, 15);
+  return `RR-${qrType.toUpperCase()}-${userId}-${timestamp}-${random}`;
+}
+
+async function processLoyaltyRedemption(qrRedemption: any, staffUserId: number) {
+  if (!qrRedemption.rewardId) {
+    throw new Error("Reward ID is required for loyalty redemption");
+  }
+
+  const reward = await storage.getLoyaltyReward(qrRedemption.rewardId);
+  if (!reward) {
+    throw new Error("Reward not found");
+  }
+
+  const user = await storage.getUser(qrRedemption.userId);
+  if (!user || user.loyaltyPoints < reward.pointsRequired) {
+    throw new Error("Insufficient points for this reward");
+  }
+
+  // Deduct points and mark as redeemed
+  await storage.updateUserLoyaltyPoints(qrRedemption.userId, -reward.pointsRequired);
+  await storage.markQrRedemptionAsRedeemed(qrRedemption.id, staffUserId);
+
+  return {
+    type: "loyalty",
+    reward,
+    pointsDeducted: reward.pointsRequired,
+    remainingPoints: user.loyaltyPoints - reward.pointsRequired
+  };
+}
+
+async function processDiscountRedemption(qrRedemption: any, staffUserId: number) {
+  // Mark as redeemed
+  await storage.markQrRedemptionAsRedeemed(qrRedemption.id, staffUserId);
+
+  return {
+    type: "discount",
+    discountAmount: qrRedemption.discountAmount,
+    discountType: qrRedemption.discountType,
+    message: `${qrRedemption.discountType === 'percentage' ? qrRedemption.discountAmount + '%' : '$' + qrRedemption.discountAmount} discount applied`
+  };
+}
+
+async function processLightningDealRedemption(qrRedemption: any, staffUserId: number) {
+  if (qrRedemption.promotionId) {
+    const promotion = await storage.getPromotion(qrRedemption.promotionId);
+    if (!promotion || !promotion.isActive) {
+      throw new Error("Lightning deal is no longer active");
+    }
+    
+    // Check if deal is still within time window
+    const now = new Date();
+    if (now < new Date(promotion.startDate) || now > new Date(promotion.endDate)) {
+      throw new Error("Lightning deal has expired");
+    }
+  }
+
+  // Mark as redeemed
+  await storage.markQrRedemptionAsRedeemed(qrRedemption.id, staffUserId);
+
+  return {
+    type: "lightning",
+    deal: qrRedemption.metadata,
+    message: "Lightning deal redeemed successfully"
+  };
+}
+
+async function processTierBasedRedemption(qrRedemption: any, staffUserId: number) {
+  const user = await storage.getUser(qrRedemption.userId);
+  if (!user) {
+    throw new Error("User not found");
+  }
+
+  // Determine user tier based on loyalty points
+  let userTier = "regular";
+  if (user.loyaltyPoints >= 1000) userTier = "premium";
+  else if (user.loyaltyPoints >= 500) userTier = "vip";
+
+  // Mark as redeemed
+  await storage.markQrRedemptionAsRedeemed(qrRedemption.id, staffUserId);
+
+  return {
+    type: "tier",
+    userTier,
+    benefit: qrRedemption.metadata,
+    message: `${userTier.toUpperCase()} tier benefit redeemed`
+  };
+}
 
 export async function registerRoutes(app: Express): Promise<Server> {
   // Enable cookie parsing for JWT cookies
@@ -263,6 +357,129 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // QR Code scanning and redemption routes
+  app.post("/api/scan-qr", async (req: Request, res: Response) => {
+    try {
+      const { qrCodeValue, staffUserId } = req.body;
+
+      if (!qrCodeValue || !staffUserId) {
+        return res.status(400).json({ message: "QR code value and staff user ID are required" });
+      }
+
+      // Verify staff user exists and has proper role
+      const staffUser = await storage.getUser(staffUserId);
+      if (!staffUser || (staffUser.role !== "owner" && staffUser.role !== "admin")) {
+        return res.status(403).json({ message: "Unauthorized: Only staff members can scan QR codes" });
+      }
+
+      // Find the QR redemption record
+      const qrRedemption = await storage.getQrRedemptionByCode(qrCodeValue);
+      if (!qrRedemption) {
+        return res.status(404).json({ message: "Invalid QR code" });
+      }
+
+      // Check if already redeemed
+      if (qrRedemption.status === "redeemed") {
+        return res.status(400).json({ 
+          message: "QR code has already been redeemed",
+          redeemedAt: qrRedemption.redeemedAt 
+        });
+      }
+
+      // Check if expired
+      if (new Date() > new Date(qrRedemption.expiresAt)) {
+        await storage.updateQrRedemptionStatus(qrRedemption.id, "expired");
+        return res.status(400).json({ message: "QR code has expired" });
+      }
+
+      // Process redemption based on QR type
+      let redemptionResult;
+      switch (qrRedemption.qrType) {
+        case "loyalty":
+          redemptionResult = await processLoyaltyRedemption(qrRedemption, staffUserId);
+          break;
+        case "discount":
+          redemptionResult = await processDiscountRedemption(qrRedemption, staffUserId);
+          break;
+        case "lightning":
+          redemptionResult = await processLightningDealRedemption(qrRedemption, staffUserId);
+          break;
+        case "tier":
+          redemptionResult = await processTierBasedRedemption(qrRedemption, staffUserId);
+          break;
+        default:
+          return res.status(400).json({ message: "Invalid QR code type" });
+      }
+
+      return res.json({
+        message: "QR code redeemed successfully",
+        redemption: redemptionResult,
+        qrType: qrRedemption.qrType
+      });
+
+    } catch (error) {
+      console.error("Error scanning QR code:", error);
+      return res.status(500).json({ message: "Internal server error" });
+    }
+  });
+
+  app.post("/api/generate-qr", async (req: Request, res: Response) => {
+    try {
+      const { userId, qrType, rewardId, promotionId, discountAmount, discountType, expiresIn, metadata } = req.body;
+
+      if (!userId || !qrType) {
+        return res.status(400).json({ message: "User ID and QR type are required" });
+      }
+
+      const user = await storage.getUser(userId);
+      if (!user) {
+        return res.status(404).json({ message: "User not found" });
+      }
+
+      // Generate unique QR code value
+      const qrCodeValue = generateQrCodeValue(userId, qrType);
+      
+      // Set expiration (default 24 hours)
+      const expiresAt = new Date();
+      expiresAt.setHours(expiresAt.getHours() + (expiresIn || 24));
+
+      const qrRedemption = await storage.createQrRedemption({
+        qrCodeValue,
+        qrType,
+        userId,
+        rewardId,
+        promotionId,
+        discountAmount,
+        discountType,
+        expiresAt,
+        status: "active",
+        restaurantId: 1, // Default restaurant ID
+        metadata
+      });
+
+      return res.status(201).json(qrRedemption);
+    } catch (error) {
+      console.error("Error generating QR code:", error);
+      return res.status(500).json({ message: "Internal server error" });
+    }
+  });
+
+  app.get("/api/user-qr-codes", async (req: Request, res: Response) => {
+    try {
+      const userId = parseInt(req.query.userId as string);
+
+      if (!userId) {
+        return res.status(400).json({ message: "User ID is required" });
+      }
+
+      const qrCodes = await storage.getUserQrRedemptions(userId);
+      return res.json(qrCodes);
+    } catch (error) {
+      console.error("Error fetching user QR codes:", error);
+      return res.status(500).json({ message: "Internal server error" });
+    }
+  });
+
   // Loyalty routes
   app.get("/api/loyalty-rewards", async (req: Request, res: Response) => {
     try {
@@ -364,33 +581,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
         queueEntryInput.partySize
       );
 
-      // Create queue entry
-      const queueEntry = await storage.createQueueEntry({
+      // Use enhanced waitlist service
+      const queueEntry = await waitlistService.joinWaitlist({
         ...queueEntryInput,
         estimatedWaitTime
       });
-
-      // Send confirmation SMS if phone number is available
-      if (queueEntry.phone) {
-        // Get restaurant info for the notification
-        const restaurant = await storage.getRestaurant(queueEntry.restaurantId);
-        const restaurantName = restaurant ? restaurant.name : "the restaurant";
-
-        // Send SMS notification asynchronously (don't await)
-        sendQueueConfirmationSMS(queueEntry, restaurantName)
-          .then(success => {
-            console.log(`Confirmation SMS ${success ? 'sent' : 'failed'} for queue entry ${queueEntry.id}`);
-          })
-          .catch(error => {
-            console.error('Error sending confirmation SMS:', error);
-          });
-      }
-
-      // Broadcast queue update via WebSocket
-      const wsManager = getWebSocketManager();
-      if (wsManager) {
-        wsManager.notifyQueueUpdate(queueEntry, queueEntry.restaurantId);
-      }
 
       return res.status(201).json(queueEntry);
     } catch (error) {
@@ -455,6 +650,122 @@ export async function registerRoutes(app: Express): Promise<Server> {
       return res.json({ estimatedWaitTime: waitTime });
     } catch (error) {
       console.error("Error calculating wait time:", error);
+      return res.status(500).json({ message: "Internal server error" });
+    }
+  });
+
+  // Guest Profile & Preferences Routes
+  app.get("/api/guest-profile/:userId", requireAuth, async (req: Request, res: Response) => {
+    try {
+      const userId = parseInt(req.params.userId);
+      const restaurantId = parseInt(req.query.restaurantId as string) || 1;
+
+      const preferences = await guestProfileService.getUserPreferences(userId);
+      const analytics = await guestProfileService.getVisitAnalytics(userId, restaurantId);
+      const recommendations = await guestProfileService.getPersonalizedRecommendations(userId, restaurantId);
+
+      return res.json({
+        preferences,
+        analytics,
+        recommendations
+      });
+    } catch (error) {
+      console.error("Error fetching guest profile:", error);
+      return res.status(500).json({ message: "Internal server error" });
+    }
+  });
+
+  app.patch("/api/guest-profile/:userId", requireAuth, async (req: Request, res: Response) => {
+    try {
+      const userId = parseInt(req.params.userId);
+      const preferences = req.body;
+
+      const updated = await guestProfileService.updateUserPreferences(userId, preferences);
+      return res.json(updated);
+    } catch (error) {
+      console.error("Error updating guest profile:", error);
+      return res.status(500).json({ message: "Internal server error" });
+    }
+  });
+
+  app.get("/api/guest-visits/:userId", requireAuth, async (req: Request, res: Response) => {
+    try {
+      const userId = parseInt(req.params.userId);
+      const restaurantId = req.query.restaurantId ? parseInt(req.query.restaurantId as string) : undefined;
+
+      const visits = await guestProfileService.getGuestVisitHistory(userId, restaurantId);
+      return res.json(visits);
+    } catch (error) {
+      console.error("Error fetching visit history:", error);
+      return res.status(500).json({ message: "Internal server error" });
+    }
+  });
+
+  // Enhanced Waitlist Management Routes
+  app.post("/api/waitlist/:id/call", requireAuth, async (req: Request, res: Response) => {
+    try {
+      const entryId = parseInt(req.params.id);
+      await waitlistService.callCustomer(entryId);
+      return res.json({ message: "Customer called successfully" });
+    } catch (error) {
+      console.error("Error calling customer:", error);
+      return res.status(500).json({ message: "Internal server error" });
+    }
+  });
+
+  app.post("/api/waitlist/:id/seat", requireAuth, async (req: Request, res: Response) => {
+    try {
+      const entryId = parseInt(req.params.id);
+      const { tableSection } = req.body;
+      await waitlistService.seatCustomer(entryId, tableSection);
+      return res.json({ message: "Customer seated successfully" });
+    } catch (error) {
+      console.error("Error seating customer:", error);
+      return res.status(500).json({ message: "Internal server error" });
+    }
+  });
+
+  app.post("/api/waitlist/:id/cancel", requireAuth, async (req: Request, res: Response) => {
+    try {
+      const entryId = parseInt(req.params.id);
+      await waitlistService.cancelWaitlistEntry(entryId);
+      return res.json({ message: "Waitlist entry cancelled successfully" });
+    } catch (error) {
+      console.error("Error cancelling waitlist entry:", error);
+      return res.status(500).json({ message: "Internal server error" });
+    }
+  });
+
+  app.post("/api/waitlist/:restaurantId/update-times", requireAuth, async (req: Request, res: Response) => {
+    try {
+      const restaurantId = parseInt(req.params.restaurantId);
+      const { averageTableTurnover } = req.body;
+      
+      if (!averageTableTurnover || averageTableTurnover < 5) {
+        return res.status(400).json({ message: "Average table turnover must be at least 5 minutes" });
+      }
+
+      await waitlistService.updateEstimatedWaitTime(restaurantId, averageTableTurnover);
+      return res.json({ message: "Wait times updated successfully" });
+    } catch (error) {
+      console.error("Error updating wait times:", error);
+      return res.status(500).json({ message: "Internal server error" });
+    }
+  });
+
+  app.patch("/api/waitlist/:id/position", requireAuth, async (req: Request, res: Response) => {
+    try {
+      const entryId = parseInt(req.params.id);
+      const { newPosition } = req.body;
+      
+      if (!newPosition || newPosition < 1) {
+        return res.status(400).json({ message: "New position must be at least 1" });
+      }
+
+      await waitlistService.updateWaitlistPosition(entryId, newPosition);
+      return res.json({ message: "Position updated successfully" });
+    } catch (error) {
+      console.error("Error updating position:", error);
       return res.status(500).json({ message: "Internal server error" });
     }
   });
