@@ -18,6 +18,14 @@ Next-generation AI-powered restaurant management platform that revolutionizes di
 
 ## ✨ Revolutionary Features (v3)
 
+### 🆕 OpenTable-Level Guest Management (NEW!)
+- **📞 Professional SMS Service** - Twilio-powered notifications rivaling OpenTable's communication system
+- **👤 Enhanced Guest Profiles** - Comprehensive visit history, seating preferences, and special occasion tracking
+- **🎉 Special Occasion Intelligence** - Automatic birthday/anniversary recognition with personalized celebrations
+- **⏱️ Real-time Waitlist Management** - Live position updates, accurate wait time predictions, and staff coordination tools
+- **🪑 Smart Seating Preferences** - Booth, window, bar, outdoor preference tracking with optimal table assignments
+- **📊 Guest Analytics** - Visit frequency analysis, spending patterns, and lifetime value calculations
+
 ### 🤖 AI-Powered Intelligence
 - **Smart Recommendations** - Machine learning algorithms analyze customer behavior for personalized menu suggestions (96.2% accuracy)
 - **Predictive Analytics** - AI forecasts demand, optimizes inventory, and predicts peak times
@@ -36,9 +44,10 @@ Next-generation AI-powered restaurant management platform that revolutionizes di
 
 ### ⚡ Real-time Operations
 - **WebSocket Integration** - Live updates across all devices every 2 seconds
-- **Dynamic Queue Management** - AI-powered wait time predictions with 94.7% accuracy
+- **Enhanced Waitlist Management** - Professional SMS notifications with real-time position updates
 - **Live Order Tracking** - Real-time status updates from kitchen to customer
-- **Instant Notifications** - Multi-channel SMS, push, and in-app alerts
+- **Staff Management Tools** - Waitlist interface for calling customers, seating parties, and managing flow
+- **Instant Notifications** - Multi-channel SMS, push, and in-app alerts with OpenTable-level professionalism
 - **Kitchen Display Sync** - Real-time synchronization with kitchen operations
 - **Multi-location Support** - Cross-location data synchronization
 
@@ -131,12 +140,44 @@ Before you begin, ensure you have the following installed:
 
 ## 🚀 Installation
 
-### Option 1: Quick Start with Full v3 Features (Recommended)
+### Option 1: Docker Deployment (Recommended for Production)
 
 1. **Clone the repository**
    ```bash
-   git clone https://github.com/krissistrunk/Restaurant_Rush.git
-   cd Restaurant_Rush
+   git clone https://github.com/krissistrunk/Restaurant_Revolution.git
+   cd Restaurant_Revolution
+   ```
+
+2. **Configure OpenTable-level SMS features**
+   ```bash
+   cp .env.example .env
+   # Edit .env with your Twilio credentials for SMS notifications
+   ```
+
+3. **Deploy with Docker**
+   ```bash
+   npm run docker:up
+   ```
+
+4. **Access the application**
+   ```
+   http://localhost:5001
+   ```
+   
+   🎉 **Full OpenTable-level features enabled:**
+   - 📞 Professional SMS waitlist notifications
+   - 👤 Enhanced guest profiles and analytics
+   - 🎂 Special occasion tracking and celebrations
+   - ⏱️ Real-time position updates and staff management
+
+📚 **See [DOCKER_DEPLOYMENT.md](DOCKER_DEPLOYMENT.md) for comprehensive Docker setup guide**
+
+### Option 2: Quick Start with Full v3 Features
+
+1. **Clone the repository**
+   ```bash
+   git clone https://github.com/krissistrunk/Restaurant_Revolution.git
+   cd Restaurant_Revolution
    ```
 
 2. **Install dependencies**
@@ -350,7 +391,7 @@ GET /orders?userId=1
 
 ### Reservation Endpoints
 
-#### Create Reservation
+#### Create Enhanced Reservation
 ```http
 POST /reservations
 Content-Type: application/json
@@ -361,7 +402,9 @@ Content-Type: application/json
   "date": "2024-12-25",
   "time": "19:00",
   "partySize": 4,
-  "specialRequests": "Window table please"
+  "specialOccasion": "anniversary",
+  "seatingPreference": "window",
+  "notes": "Food allergies: nuts"
 }
 ```
 
@@ -370,9 +413,9 @@ Content-Type: application/json
 GET /user-reservations?userId=1
 ```
 
-### Queue Endpoints
+### Enhanced Waitlist Endpoints (OpenTable-Level)
 
-#### Join Queue
+#### Join Enhanced Waitlist with SMS
 ```http
 POST /queue-entries
 Content-Type: application/json
@@ -381,7 +424,34 @@ Content-Type: application/json
   "userId": 1,
   "restaurantId": 1,
   "partySize": 2,
-  "phone": "555-123-4567"
+  "phone": "+1234567890",
+  "seatingPreference": "booth",
+  "specialRequests": "Birthday celebration",
+  "smsNotifications": true
+}
+```
+
+#### Staff Waitlist Management
+```http
+POST /waitlist/{id}/call
+Authorization: Bearer {staff_token}
+
+POST /waitlist/{id}/seat
+Content-Type: application/json
+{
+  "tableSection": "main_dining"
+}
+
+POST /waitlist/{id}/cancel
+Authorization: Bearer {staff_token}
+```
+
+#### Update Wait Times
+```http
+POST /waitlist/{restaurantId}/update-times
+Content-Type: application/json
+{
+  "averageTableTurnover": 25
 }
 ```
 
@@ -410,6 +480,48 @@ Content-Type: application/json
 ```http
 GET /reviews?restaurantId=1
 GET /user-reviews?userId=1
+```
+
+### Guest Profile & Analytics (NEW!)
+
+#### Get Guest Profile with Analytics
+```http
+GET /guest-profile/{userId}?restaurantId=1
+Authorization: Bearer {token}
+
+Response:
+{
+  "preferences": {
+    "seatingPreferences": ["booth", "window"],
+    "specialOccasions": {"birthday": "03-15"},
+    "visitHistory": {...}
+  },
+  "analytics": {
+    "totalVisits": 12,
+    "averageSpend": 45.50,
+    "favoriteSection": "booth",
+    "loyaltyStatus": "VIP"
+  },
+  "recommendations": {...}
+}
+```
+
+#### Update Guest Preferences
+```http
+PATCH /guest-profile/{userId}
+Content-Type: application/json
+
+{
+  "seatingPreferences": ["outdoor", "bar"],
+  "specialOccasions": {"anniversary": "06-20"},
+  "dietaryPreferences": ["vegetarian"]
+}
+```
+
+#### Get Visit History
+```http
+GET /guest-visits/{userId}?restaurantId=1
+Authorization: Bearer {token}
 ```
 
 ### Loyalty & Rewards
@@ -475,6 +587,13 @@ RestaurantRush/
 - `npm start` - Start production server
 - `npm run preview` - Preview production build locally
 
+**Docker Commands:**
+- `npm run docker:build` - Build Docker image
+- `npm run docker:up` - Start all services with Docker Compose
+- `npm run docker:down` - Stop all Docker services
+- `npm run docker:logs` - View application logs
+- `npm run docker:shell` - Access container shell
+
 **Testing & Quality:**
 - `npm test` - Run comprehensive test suite
 - `npm run test:watch` - Run tests in watch mode
@@ -536,7 +655,12 @@ Restaurant Revolution v3 requires PostgreSQL for full functionality:
    OPENAI_API_KEY="your_openai_api_key"
    TWILIO_ACCOUNT_SID="your_twilio_sid"
    TWILIO_AUTH_TOKEN="your_twilio_token"
-   TWILIO_PHONE_NUMBER="+1234567890"
+   TWILIO_FROM_NUMBER="+1234567890"
+   # OpenTable-Level Features
+   ENABLE_SMS_NOTIFICATIONS=true
+   ENABLE_GUEST_ANALYTICS=true
+   ENABLE_REAL_TIME_WAITLIST=true
+   ENABLE_SPECIAL_OCCASIONS=true
    NODE_ENV="development"
    EOF
    ```
@@ -823,7 +947,7 @@ CMS_CACHE_TIMEOUT=300000
 # External Services
 TWILIO_ACCOUNT_SID=your_twilio_sid
 TWILIO_AUTH_TOKEN=your_twilio_token
-TWILIO_PHONE_NUMBER=your_twilio_number
+TWILIO_FROM_NUMBER=your_twilio_number
 OPENAI_API_KEY=your_openai_key
 ```
 
