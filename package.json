@@ -20,7 +20,13 @@
     "test": "vitest",
     "test:run": "vitest run",
     "test:ui": "vitest --ui",
-    "test:coverage": "vitest run --coverage"
+    "test:coverage": "vitest run --coverage",
+    "docker:build": "docker build -t restaurant-revolution .",
+    "docker:run": "docker run -p 5001:5001 restaurant-revolution",
+    "docker:up": "docker-compose up -d",
+    "docker:down": "docker-compose down",
+    "docker:logs": "docker-compose logs -f app",
+    "docker:shell": "docker-compose exec app sh"
   },
   "dependencies": {
     "@headlessui/react": "^2.2.4",
