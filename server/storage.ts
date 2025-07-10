@@ -696,7 +696,13 @@ export class MemStorage implements IStorage {
       id, 
       loyaltyPoints: 0,
       phone: user.phone || null,
-      dietaryPreferences: user.dietaryPreferences || null
+      dietaryPreferences: user.dietaryPreferences || null,
+      role: user.role || 'customer',
+      restaurantId: user.restaurantId || null,
+      emailVerified: user.emailVerified || false,
+      lastLoginAt: user.lastLoginAt || null,
+      createdAt: user.createdAt || new Date(),
+      updatedAt: user.updatedAt || new Date()
     };
     this.users.set(id, newUser);
     return newUser;
@@ -954,6 +960,8 @@ export class MemStorage implements IStorage {
       id,
       status: reservation.status || 'pending',
       notes: reservation.notes || null,
+      specialOccasion: reservation.specialOccasion || null,
+      seatingPreference: reservation.seatingPreference || null,
       createdAt: new Date()
     };
     this.reservations.set(id, newReservation);
@@ -1019,9 +1027,7 @@ export class MemStorage implements IStorage {
     if (order) {
       const updatedOrder = { 
         ...order, 
-        status,
-        estimatedReadyTime: estimatedReadyTime ? new Date(estimatedReadyTime) : order.estimatedReadyTime,
-        notes: notes || order.notes
+        status
       };
       this.orders.set(id, updatedOrder);
       return updatedOrder;
@@ -1176,6 +1182,10 @@ export class MemStorage implements IStorage {
       seatedAt: null,
       phone: entry.phone ?? null,
       note: entry.note ?? null,
+      seatingPreference: entry.seatingPreference || null,
+      specialRequests: entry.specialRequests || null,
+      smsNotifications: entry.smsNotifications || false,
+      lastNotificationSent: null
     };
     
     this.queueEntries.set(id, newEntry);
@@ -1296,6 +1306,9 @@ export class MemStorage implements IStorage {
       dietaryPreferences: preference.dietaryPreferences || null,
       dislikedItems: preference.dislikedItems || null,
       tastePreferences: preference.tastePreferences || null,
+      seatingPreferences: preference.seatingPreferences || null,
+      specialOccasions: preference.specialOccasions || null,
+      visitHistory: preference.visitHistory || null,
       lastUpdated: new Date()
     };
     
@@ -1421,9 +1434,20 @@ export class MemStorage implements IStorage {
     const id = this.qrRedemptionId++;
     const newQrRedemption: QrRedemption = {
       id,
-      ...qrRedemption,
-      createdAt: new Date(),
+      qrCodeValue: qrRedemption.qrCodeValue,
+      qrType: qrRedemption.qrType,
+      userId: qrRedemption.userId,
+      rewardId: qrRedemption.rewardId || null,
+      promotionId: qrRedemption.promotionId || null,
+      discountAmount: qrRedemption.discountAmount || null,
+      discountType: qrRedemption.discountType || null,
+      expiresAt: qrRedemption.expiresAt,
       redeemedAt: null,
+      redeemedBy: qrRedemption.redeemedBy || null,
+      status: qrRedemption.status || 'active',
+      restaurantId: qrRedemption.restaurantId,
+      createdAt: new Date(),
+      metadata: qrRedemption.metadata || null,
     };
     
     this.qrRedemptions.set(id, newQrRedemption);
