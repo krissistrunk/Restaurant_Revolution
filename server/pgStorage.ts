@@ -135,12 +135,13 @@ export class PgStorage implements IStorage {
         isVegetarian: schema.menuItems.isVegetarian,
         isGlutenFree: schema.menuItems.isGlutenFree,
         isSeafood: schema.menuItems.isSeafood,
+        isPopular: schema.menuItems.isPopular,
         allergens: schema.menuItems.allergens,
+        nutritionInfo: schema.menuItems.nutritionInfo,
         // Modifier fields (nullable)
         modifierId: schema.modifiers.id,
         modifierName: schema.modifiers.name,
         modifierPrice: schema.modifiers.price,
-        modifierType: schema.modifiers.type,
       })
       .from(schema.menuItems)
       .leftJoin(schema.modifiers, eq(schema.menuItems.id, schema.modifiers.menuItemId))
@@ -168,7 +169,9 @@ export class PgStorage implements IStorage {
           isVegetarian: row.isVegetarian,
           isGlutenFree: row.isGlutenFree,
           isSeafood: row.isSeafood,
+          isPopular: row.isPopular,
           allergens: row.allergens,
+          nutritionInfo: row.nutritionInfo,
           modifiers: []
         });
       }
@@ -177,9 +180,8 @@ export class PgStorage implements IStorage {
       if (row.modifierId) {
         menuItemsMap.get(row.id)!.modifiers!.push({
           id: row.modifierId,
-          name: row.modifierName,
-          price: row.modifierPrice,
-          type: row.modifierType,
+          name: row.modifierName || '',
+          price: row.modifierPrice || 0,
           menuItemId: row.id
         });
       }
