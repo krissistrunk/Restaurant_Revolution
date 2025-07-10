@@ -121,22 +121,73 @@ export class PgStorage implements IStorage {
   }
 
   async getFeaturedMenuItems(restaurantId: number): Promise<MenuItem[]> {
-    const menuItems = await db.select().from(schema.menuItems).where(
-      and(
-        eq(schema.menuItems.restaurantId, restaurantId),
-        eq(schema.menuItems.isFeatured, true)
-      )
-    );
-
-    // Fetch modifiers for each menu item
-    const menuItemsWithModifiers = await Promise.all(
-      menuItems.map(async (menuItem) => {
-        const modifiers = await this.getModifiers(menuItem.id);
-        return { ...menuItem, modifiers };
+    const result = await db
+      .select({
+        id: schema.menuItems.id,
+        name: schema.menuItems.name,
+        description: schema.menuItems.description,
+        price: schema.menuItems.price,
+        categoryId: schema.menuItems.categoryId,
+        restaurantId: schema.menuItems.restaurantId,
+        imageUrl: schema.menuItems.imageUrl,
+        isAvailable: schema.menuItems.isAvailable,
+        isFeatured: schema.menuItems.isFeatured,
+        isVegetarian: schema.menuItems.isVegetarian,
+        isGlutenFree: schema.menuItems.isGlutenFree,
+        isSeafood: schema.menuItems.isSeafood,
+        isPopular: schema.menuItems.isPopular,
+        allergens: schema.menuItems.allergens,
+        nutritionInfo: schema.menuItems.nutritionInfo,
+        // Modifier fields (nullable)
+        modifierId: schema.modifiers.id,
+        modifierName: schema.modifiers.name,
+        modifierPrice: schema.modifiers.price,
       })
-    );
+      .from(schema.menuItems)
+      .leftJoin(schema.modifiers, eq(schema.menuItems.id, schema.modifiers.menuItemId))
+      .where(
+        and(
+          eq(schema.menuItems.restaurantId, restaurantId),
+          eq(schema.menuItems.isFeatured, true)
+        )
+      );
+
+    const menuItemsMap = new Map<number, MenuItem>();
     
-    return menuItemsWithModifiers;
+    for (const row of result) {
+      if (!menuItemsMap.has(row.id)) {
+        menuItemsMap.set(row.id, {
+          id: row.id,
+          name: row.name,
+          description: row.description,
+          price: row.price,
+          categoryId: row.categoryId,
+          restaurantId: row.restaurantId,
+          imageUrl: row.imageUrl,
+          isAvailable: row.isAvailable,
+          isFeatured: row.isFeatured,
+          isVegetarian: row.isVegetarian,
+          isGlutenFree: row.isGlutenFree,
+          isSeafood: row.isSeafood,
+          isPopular: row.isPopular,
+          allergens: row.allergens,
+          nutritionInfo: row.nutritionInfo,
+          modifiers: []
+        });
+      }
+      
+      // Add modifier if it exists
+      if (row.modifierId) {
+        menuItemsMap.get(row.id)!.modifiers!.push({
+          id: row.modifierId,
+          name: row.modifierName || '',
+          price: row.modifierPrice || 0,
+          menuItemId: row.id
+        });
+      }
+    }
+    
+    return Array.from(menuItemsMap.values());
   }
 
   async createMenuItem(menuItem: InsertMenuItem): Promise<MenuItem> {
