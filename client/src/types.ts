@@ -10,9 +10,9 @@ export interface MenuItem {
   name: string;
   description: string;
   price: number;
-  imageUrl: string;
-  categoryId: number;
-  isAvailable: boolean;
+  imageUrl?: string;
+  categoryId?: number;
+  isAvailable?: boolean;
   isPopular?: boolean;
   isFeatured?: boolean;
   isVegetarian?: boolean;
@@ -20,8 +20,10 @@ export interface MenuItem {
   isSeafood?: boolean;
   nutritionInfo?: Record<string, any>;
   allergens?: string[];
-  restaurantId: number;
+  restaurantId?: number;
   modifiers?: Modifier[];
+  ingredients?: string[];
+  nutrition?: Record<string, any>;
 }
 
 export interface Modifier {
