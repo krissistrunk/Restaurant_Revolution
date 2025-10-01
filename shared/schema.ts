@@ -22,7 +22,7 @@ export const insertUserSchema = createInsertSchema(users).omit({
   loyaltyPoints: true,
 });
 
-// Restaurant Schema
+// Restaurant Schema - Extended for Multi-Tenant SaaS
 export const restaurants = pgTable("restaurants", {
   id: serial("id").primaryKey(),
   name: text("name").notNull(),
@@ -34,6 +34,47 @@ export const restaurants = pgTable("restaurants", {
   openingHours: jsonb("opening_hours"),
   latitude: real("latitude"),
   longitude: real("longitude"),
+
+  // Multi-Tenant Fields
+  subdomain: text("subdomain").notNull().unique(), // e.g., "mikes_pizza"
+  customDomain: text("custom_domain").unique(), // e.g., "order.mikespizza.com"
+  domainVerified: boolean("domain_verified").default(false),
+  domainVerificationToken: text("domain_verification_token"),
+
+  // Subscription & Billing
+  subscriptionPlanId: integer("subscription_plan_id"), // Reference to subscription plan
+  subscriptionStatus: text("subscription_status").default("trial"), // trial, active, past_due, cancelled, expired
+  trialEndsAt: timestamp("trial_ends_at"),
+  subscriptionStartedAt: timestamp("subscription_started_at"),
+  billingCycleAnchor: timestamp("billing_cycle_anchor"),
+  stripeCustomerId: text("stripe_customer_id"),
+  stripeSubscriptionId: text("stripe_subscription_id"),
+
+  // International Support
+  currency: text("currency").default("USD").notNull(), // USD, EUR, GBP, JPY, etc.
+  locale: text("locale").default("en-US").notNull(), // Language and region
+  timezone: text("timezone").default("America/New_York").notNull(),
+  countryCode: text("country_code").default("US"), // ISO country code
+
+  // Business Information
+  businessType: text("business_type"), // cafe, restaurant, food_truck, bar, etc.
+  cuisineType: text("cuisine_type"), // Italian, Chinese, Mexican, etc.
+  businessRegistrationNumber: text("business_registration_number"),
+  taxId: text("tax_id"),
+
+  // Platform Settings
+  isActive: boolean("is_active").default(true),
+  setupCompleted: boolean("setup_completed").default(false),
+  onboardingStep: integer("onboarding_step").default(0), // Track onboarding progress
+
+  // Branding & Theme
+  primaryColor: text("primary_color").default("#FF6B35"),
+  secondaryColor: text("secondary_color").default("#FFD23F"),
+  themeSettings: jsonb("theme_settings"),
+
+  // Timestamps
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
 });
 
 export const insertRestaurantSchema = createInsertSchema(restaurants).omit({
@@ -579,3 +620,276 @@ export type InsertQrRedemption = z.infer<typeof insertQrRedemptionSchema>;
 
 export type GuestVisit = typeof guestVisits.$inferSelect;
 export type InsertGuestVisit = z.infer<typeof insertGuestVisitSchema>;
+
+// ========== MULTI-TENANT SAAS TABLES ==========
+
+// Subscription Plans Schema
+export const subscriptionPlans = pgTable("subscription_plans", {
+  id: serial("id").primaryKey(),
+  name: text("name").notNull(), // Starter, Professional, Growth, Enterprise
+  slug: text("slug").notNull().unique(), // starter, professional, growth, enterprise
+  description: text("description"),
+  price: real("price").notNull(), // Monthly price in USD
+  annualPrice: real("annual_price"), // Annual price if different
+  stripePriceId: text("stripe_price_id"),
+  stripeAnnualPriceId: text("stripe_annual_price_id"),
+
+  // Features & Limits
+  maxOrders: integer("max_orders"), // null = unlimited
+  maxLocations: integer("max_locations").default(1),
+  maxMenuItems: integer("max_menu_items"), // null = unlimited
+  maxStaffMembers: integer("max_staff_members"), // null = unlimited
+
+  // Feature Flags
+  features: jsonb("features").notNull(), // Array of enabled features
+
+  // Commission Rates
+  transactionFeePercent: real("transaction_fee_percent").default(0), // e.g., 1.9
+  transactionFeeFixed: real("transaction_fee_fixed").default(0), // e.g., 0.30
+
+  // Plan Status
+  isActive: boolean("is_active").default(true),
+  isPopular: boolean("is_popular").default(false),
+  displayOrder: integer("display_order").default(0),
+
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+export const insertSubscriptionPlanSchema = createInsertSchema(subscriptionPlans).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+// Tenant Settings Schema (Additional configuration per restaurant)
+export const tenantSettings = pgTable("tenant_settings", {
+  id: serial("id").primaryKey(),
+  restaurantId: integer("restaurant_id").notNull().unique(),
+
+  // Notification Settings
+  emailNotificationsEnabled: boolean("email_notifications_enabled").default(true),
+  smsNotificationsEnabled: boolean("sms_notifications_enabled").default(true),
+  orderNotificationEmail: text("order_notification_email"),
+
+  // Operational Settings
+  autoAcceptOrders: boolean("auto_accept_orders").default(false),
+  requireOrderConfirmation: boolean("require_order_confirmation").default(true),
+  minOrderAmount: real("min_order_amount").default(0),
+  estimatedPrepTime: integer("estimated_prep_time").default(30), // minutes
+
+  // Payment Settings
+  acceptCash: boolean("accept_cash").default(true),
+  acceptCards: boolean("accept_cards").default(true),
+  acceptDigitalWallets: boolean("accept_digital_wallets").default(false),
+
+  // Loyalty Settings
+  loyaltyEnabled: boolean("loyalty_enabled").default(true),
+  pointsPerDollar: real("points_per_dollar").default(1.0),
+
+  // Advanced Settings
+  customCss: text("custom_css"),
+  customJs: text("custom_js"),
+  analyticsCode: text("analytics_code"),
+
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+export const insertTenantSettingsSchema = createInsertSchema(tenantSettings).omit({
+  id: true,
+  updatedAt: true,
+});
+
+// Tenant Staff Schema (Staff members per restaurant)
+export const tenantStaff = pgTable("tenant_staff", {
+  id: serial("id").primaryKey(),
+  restaurantId: integer("restaurant_id").notNull(),
+  userId: integer("user_id").notNull(),
+  role: text("role").notNull(), // manager, server, kitchen, host
+  permissions: jsonb("permissions"), // Granular permissions
+  isActive: boolean("is_active").default(true),
+  invitedAt: timestamp("invited_at").defaultNow(),
+  joinedAt: timestamp("joined_at"),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+export const insertTenantStaffSchema = createInsertSchema(tenantStaff).omit({
+  id: true,
+  invitedAt: true,
+  createdAt: true,
+});
+
+// Usage Tracking Schema (Track usage for billing and limits)
+export const usageTracking = pgTable("usage_tracking", {
+  id: serial("id").primaryKey(),
+  restaurantId: integer("restaurant_id").notNull(),
+  month: text("month").notNull(), // YYYY-MM format
+
+  // Usage Metrics
+  orderCount: integer("order_count").default(0),
+  revenue: real("revenue").default(0),
+  transactionFees: real("transaction_fees").default(0),
+
+  // Feature Usage
+  smsMessagesSent: integer("sms_messages_sent").default(0),
+  emailsSent: integer("emails_sent").default(0),
+  apiCalls: integer("api_calls").default(0),
+  storageUsedMb: real("storage_used_mb").default(0),
+
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+export const insertUsageTrackingSchema = createInsertSchema(usageTracking).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+// Billing History Schema
+export const billingHistory = pgTable("billing_history", {
+  id: serial("id").primaryKey(),
+  restaurantId: integer("restaurant_id").notNull(),
+
+  // Invoice Information
+  invoiceNumber: text("invoice_number").notNull().unique(),
+  amount: real("amount").notNull(),
+  currency: text("currency").default("USD").notNull(),
+  status: text("status").notNull(), // pending, paid, failed, refunded
+
+  // Billing Details
+  billingPeriodStart: timestamp("billing_period_start").notNull(),
+  billingPeriodEnd: timestamp("billing_period_end").notNull(),
+  dueDate: timestamp("due_date"),
+  paidAt: timestamp("paid_at"),
+
+  // Stripe Information
+  stripeInvoiceId: text("stripe_invoice_id"),
+  stripePaymentIntentId: text("stripe_payment_intent_id"),
+
+  // Invoice Items
+  items: jsonb("items").notNull(), // Line items
+
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+export const insertBillingHistorySchema = createInsertSchema(billingHistory).omit({
+  id: true,
+  createdAt: true,
+});
+
+// Promotional Codes Schema
+export const promotionalCodes = pgTable("promotional_codes", {
+  id: serial("id").primaryKey(),
+  code: text("code").notNull().unique(),
+  description: text("description"),
+
+  // Discount Details
+  discountType: text("discount_type").notNull(), // percentage, fixed, trial_extension
+  discountValue: real("discount_value").notNull(),
+  durationMonths: integer("duration_months"), // null = forever
+
+  // Usage Limits
+  maxUses: integer("max_uses"), // null = unlimited
+  usesCount: integer("uses_count").default(0),
+
+  // Validity
+  validFrom: timestamp("valid_from").defaultNow(),
+  validUntil: timestamp("valid_until"),
+  isActive: boolean("is_active").default(true),
+
+  // Target Audience
+  applicablePlans: jsonb("applicable_plans"), // Array of plan slugs, null = all plans
+
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+export const insertPromotionalCodeSchema = createInsertSchema(promotionalCodes).omit({
+  id: true,
+  usesCount: true,
+  createdAt: true,
+});
+
+// Domain Verification Schema
+export const domainVerifications = pgTable("domain_verifications", {
+  id: serial("id").primaryKey(),
+  restaurantId: integer("restaurant_id").notNull(),
+  domain: text("domain").notNull(),
+  verificationToken: text("verification_token").notNull(),
+  verificationMethod: text("verification_method").notNull(), // dns_txt, dns_cname, file
+  isVerified: boolean("is_verified").default(false),
+  verifiedAt: timestamp("verified_at"),
+  lastCheckedAt: timestamp("last_checked_at"),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+export const insertDomainVerificationSchema = createInsertSchema(domainVerifications).omit({
+  id: true,
+  createdAt: true,
+});
+
+// Relations for new tables
+export const subscriptionPlansRelations = relations(subscriptionPlans, ({ many }) => ({
+  restaurants: many(restaurants)
+}));
+
+export const tenantSettingsRelations = relations(tenantSettings, ({ one }) => ({
+  restaurant: one(restaurants, {
+    fields: [tenantSettings.restaurantId],
+    references: [restaurants.id]
+  })
+}));
+
+export const tenantStaffRelations = relations(tenantStaff, ({ one }) => ({
+  restaurant: one(restaurants, {
+    fields: [tenantStaff.restaurantId],
+    references: [restaurants.id]
+  }),
+  user: one(users, {
+    fields: [tenantStaff.userId],
+    references: [users.id]
+  })
+}));
+
+export const usageTrackingRelations = relations(usageTracking, ({ one }) => ({
+  restaurant: one(restaurants, {
+    fields: [usageTracking.restaurantId],
+    references: [restaurants.id]
+  })
+}));
+
+export const billingHistoryRelations = relations(billingHistory, ({ one }) => ({
+  restaurant: one(restaurants, {
+    fields: [billingHistory.restaurantId],
+    references: [restaurants.id]
+  })
+}));
+
+export const domainVerificationsRelations = relations(domainVerifications, ({ one }) => ({
+  restaurant: one(restaurants, {
+    fields: [domainVerifications.restaurantId],
+    references: [restaurants.id]
+  })
+}));
+
+// Types for new tables
+export type SubscriptionPlan = typeof subscriptionPlans.$inferSelect;
+export type InsertSubscriptionPlan = z.infer<typeof insertSubscriptionPlanSchema>;
+
+export type TenantSettings = typeof tenantSettings.$inferSelect;
+export type InsertTenantSettings = z.infer<typeof insertTenantSettingsSchema>;
+
+export type TenantStaff = typeof tenantStaff.$inferSelect;
+export type InsertTenantStaff = z.infer<typeof insertTenantStaffSchema>;
+
+export type UsageTracking = typeof usageTracking.$inferSelect;
+export type InsertUsageTracking = z.infer<typeof insertUsageTrackingSchema>;
+
+export type BillingHistory = typeof billingHistory.$inferSelect;
+export type InsertBillingHistory = z.infer<typeof insertBillingHistorySchema>;
+
+export type PromotionalCode = typeof promotionalCodes.$inferSelect;
+export type InsertPromotionalCode = z.infer<typeof insertPromotionalCodeSchema>;
+
+export type DomainVerification = typeof domainVerifications.$inferSelect;
+export type InsertDomainVerification = z.infer<typeof insertDomainVerificationSchema>;
