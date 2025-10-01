@@ -1,7 +1,7 @@
 import express, { type Request, Response, NextFunction } from "express";
 import { registerRoutes } from "./routes";
 import { setupVite, serveStatic, log } from "./vite";
-// import { setupDatabase } from "./database/init";
+import { testSupabaseConnection } from "./lib/supabase";
 import { initializeWebSocket } from "./websocket";
 
 const app = express();
@@ -39,8 +39,11 @@ app.use((req, res, next) => {
 });
 
 (async () => {
-  // Initialize the database (using Drizzle for now)
-  log("Using Drizzle ORM with DATABASE_URL for testing");
+  // Test Supabase connection
+  const isConnected = await testSupabaseConnection();
+  if (!isConnected) {
+    log("⚠️  Warning: Supabase connection test failed. Some features may not work.");
+  }
 
   const server = await registerRoutes(app);
   

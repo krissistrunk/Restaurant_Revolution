@@ -96,7 +96,16 @@ export const mockMenuItems = [
     allergens: ['dairy', 'gluten'],
     isPersonalized: true,
     personalizedScore: 94,
-    inventory: 15
+    inventory: 15,
+    ingredients: ['pasta', 'truffle oil', 'parmesan cheese', 'black pepper', 'olive oil'],
+    nutrition: {
+      calories: 650,
+      protein: 18,
+      carbs: 75,
+      fat: 28,
+      fiber: 3,
+      sodium: 890
+    }
   },
   {
     id: 2,
@@ -117,7 +126,16 @@ export const mockMenuItems = [
     dietaryTags: ['gluten-free'],
     allergens: ['fish'],
     isPersonalized: false,
-    inventory: 8
+    inventory: 8,
+    ingredients: ['atlantic salmon', 'lemon', 'fresh herbs', 'olive oil', 'garlic'],
+    nutrition: {
+      calories: 420,
+      protein: 45,
+      carbs: 2,
+      fat: 24,
+      fiber: 0,
+      sodium: 580
+    }
   },
   {
     id: 3,
@@ -139,7 +157,16 @@ export const mockMenuItems = [
     allergens: ['dairy', 'gluten'],
     isPersonalized: true,
     personalizedScore: 87,
-    inventory: 3
+    inventory: 3,
+    ingredients: ['romaine lettuce', 'caesar dressing', 'parmesan', 'croutons', 'anchovy'],
+    nutrition: {
+      calories: 350,
+      protein: 8,
+      carbs: 22,
+      fat: 25,
+      fiber: 4,
+      sodium: 650
+    }
   }
 ]
 

@@ -22,6 +22,8 @@ import { aiRoutes } from "./routes/aiRoutes";
 import path from 'path';
 import fs from 'fs';
 import cookieParser from 'cookie-parser';
+import { sanitizeInput } from './middleware/sanitizeMiddleware';
+import { csrfProtection } from './middleware/csrfMiddleware';
 
 // QR Code utility functions
 function generateQrCodeValue(userId: number, qrType: string): string {
@@ -118,6 +120,13 @@ async function processTierBasedRedemption(qrRedemption: any, staffUserId: number
 export async function registerRoutes(app: Express): Promise<Server> {
   // Enable cookie parsing for JWT cookies
   app.use(cookieParser());
+
+  // Enable XSS protection through input sanitization
+  app.use(sanitizeInput);
+
+  // Note: CSRF protection is recommended but requires session management
+  // Uncomment when session middleware is properly configured:
+  // app.use(csrfProtection);
 
   // Enhanced Authentication Routes (no auth required)
   app.use("/api/auth", authRoutes);

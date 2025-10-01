@@ -1,36 +1,39 @@
 import { Switch, Route } from "wouter";
+import { lazy, Suspense } from "react";
 import { queryClient } from "./lib/queryClient";
 import { QueryClientProvider } from "@tanstack/react-query";
 import { Toaster } from "@/components/ui/toaster";
 import NotFound from "@/pages/not-found";
 
+// Eagerly load critical pages
 import HomePage from "@/pages/HomePage";
-import MenuPage from "@/pages/MenuPage";
-import MenuBrowsePage from "@/pages/MenuBrowsePage";
-import ReservePage from "@/pages/ReservePage";
-import OrderPage from "@/pages/OrderPage";
-import RewardsPage from "@/pages/RewardsPage";
-import InfoPage from "@/pages/InfoPage";
 import LoginPage from "@/pages/LoginPage";
 import RegisterPage from "@/pages/RegisterPage";
-import AiAssistantPage from "@/pages/AiAssistantPage";
-import ThemeSettingsPage from "@/pages/ThemeSettingsPage";
-import OwnerPage from "@/pages/OwnerPage";
-import CustomerExperiencePage from "@/pages/CustomerExperiencePage";
-import OwnerExperiencePage from "@/pages/OwnerExperiencePage";
-import PlatformDemosPage from "@/pages/PlatformDemosPage";
-import PricingPage from "@/pages/PricingPage";
-import ForgotPasswordPage from "@/pages/ForgotPasswordPage";
 
-import GiftCardsPage from "@/pages/GiftCardsPage";
-import CateringPage from "@/pages/CateringPage";
-import EventsPage from "@/pages/EventsPage";
-import NutritionPage from "@/pages/NutritionPage";
-import CareersPage from "@/pages/CareersPage";
-import PressPage from "@/pages/PressPage";
-import PrivacyPage from "@/pages/PrivacyPage";
-import TermsPage from "@/pages/TermsPage";
-import SupportPage from "@/pages/SupportPage";
+// Lazy load non-critical pages for better performance
+const MenuPage = lazy(() => import("@/pages/MenuPage"));
+const MenuBrowsePage = lazy(() => import("@/pages/MenuBrowsePage"));
+const ReservePage = lazy(() => import("@/pages/ReservePage"));
+const OrderPage = lazy(() => import("@/pages/OrderPage"));
+const RewardsPage = lazy(() => import("@/pages/RewardsPage"));
+const InfoPage = lazy(() => import("@/pages/InfoPage"));
+const AiAssistantPage = lazy(() => import("@/pages/AiAssistantPage"));
+const ThemeSettingsPage = lazy(() => import("@/pages/ThemeSettingsPage"));
+const OwnerPage = lazy(() => import("@/pages/OwnerPage"));
+const CustomerExperiencePage = lazy(() => import("@/pages/CustomerExperiencePage"));
+const OwnerExperiencePage = lazy(() => import("@/pages/OwnerExperiencePage"));
+const PlatformDemosPage = lazy(() => import("@/pages/PlatformDemosPage"));
+const PricingPage = lazy(() => import("@/pages/PricingPage"));
+const ForgotPasswordPage = lazy(() => import("@/pages/ForgotPasswordPage"));
+const GiftCardsPage = lazy(() => import("@/pages/GiftCardsPage"));
+const CateringPage = lazy(() => import("@/pages/CateringPage"));
+const EventsPage = lazy(() => import("@/pages/EventsPage"));
+const NutritionPage = lazy(() => import("@/pages/NutritionPage"));
+const CareersPage = lazy(() => import("@/pages/CareersPage"));
+const PressPage = lazy(() => import("@/pages/PressPage"));
+const PrivacyPage = lazy(() => import("@/pages/PrivacyPage"));
+const TermsPage = lazy(() => import("@/pages/TermsPage"));
+const SupportPage = lazy(() => import("@/pages/SupportPage"));
 
 import Header from "@/components/Header";
 import Navigation from "@/components/Navigation";
@@ -50,13 +53,24 @@ import { LoyaltyProvider } from "@/context/LoyaltyContext";
 import { AiAssistantProvider } from "@/context/AiAssistantContext";
 import { ThemeProvider } from "@/context/ThemeContext";
 
+// Loading fallback component
+const PageLoader = () => (
+  <div className="flex items-center justify-center min-h-screen">
+    <div className="text-center">
+      <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto mb-4"></div>
+      <p className="text-muted-foreground">Loading...</p>
+    </div>
+  </div>
+);
+
 function Router() {
   return (
     <div className="flex flex-col min-h-screen">
       <Header />
       <Navigation />
-      
-      <Switch>
+
+      <Suspense fallback={<PageLoader />}>
+        <Switch>
         <Route path="/" component={HomePage} />
         <Route path="/customer-experience" component={CustomerExperiencePage} />
         <Route path="/owner-experience" component={OwnerExperiencePage} />
@@ -87,7 +101,8 @@ function Router() {
         
         <Route component={NotFound} />
       </Switch>
-      
+      </Suspense>
+
       <Footer />
       
       <CartButton />
