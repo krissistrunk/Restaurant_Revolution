@@ -33,21 +33,33 @@ loadEnvVariables();
 const supabaseUrl = process.env.VITE_SUPABASE_URL;
 const supabaseKey = process.env.VITE_SUPABASE_ANON_KEY;
 
-if (!supabaseUrl || !supabaseKey) {
-  throw new Error('Missing Supabase environment variables. Please check VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY in .env file.');
+let supabaseClient: ReturnType<typeof createClient> | null = null;
+
+if (supabaseUrl && supabaseKey) {
+  try {
+    supabaseClient = createClient(supabaseUrl, supabaseKey, {
+      auth: {
+        autoRefreshToken: true,
+        persistSession: false,
+        detectSessionInUrl: false
+      }
+    });
+    log('✅ Supabase client initialized');
+  } catch (error) {
+    log(`⚠️  Supabase initialization failed: ${error}`);
+  }
+} else {
+  log('⚠️  Supabase not configured - running without Supabase integration');
 }
 
-export const supabase = createClient(supabaseUrl, supabaseKey, {
-  auth: {
-    autoRefreshToken: true,
-    persistSession: false,
-    detectSessionInUrl: false
-  }
-});
-
-log('✅ Supabase client initialized');
+export const supabase = supabaseClient!;
 
 export async function testSupabaseConnection() {
+  if (!supabaseClient) {
+    log('⚠️  Supabase not configured - skipping connection test');
+    return false;
+  }
+
   try {
     const { data, error } = await supabase.from('restaurants').select('count').limit(1);
 
