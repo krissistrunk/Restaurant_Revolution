@@ -3,10 +3,47 @@ import { registerRoutes } from "./routes";
 import { setupVite, serveStatic, log } from "./vite";
 import { testSupabaseConnection } from "./lib/supabase";
 import { initializeWebSocket } from "./websocket";
+import { AuthService } from "./auth/authService";
 
 const app = express();
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
+
+async function createDemoUsersIfNeeded() {
+  try {
+    // Try to create owner user
+    const ownerResult = await AuthService.register({
+      username: 'owner',
+      email: 'owner@demo.com',
+      password: 'owner123',
+      name: 'Demo Owner',
+      phone: '555-0001',
+      role: 'owner',
+      restaurantId: 1
+    });
+
+    if (ownerResult.success) {
+      log('✅ Demo owner user created (username: owner, password: owner123)');
+    }
+
+    // Try to create customer user
+    const customerResult = await AuthService.register({
+      username: 'customer',
+      email: 'customer@demo.com',
+      password: 'customer123',
+      name: 'Demo Customer',
+      phone: '555-0002',
+      role: 'customer'
+    });
+
+    if (customerResult.success) {
+      log('✅ Demo customer user created (username: customer, password: customer123)');
+    }
+  } catch (error) {
+    // Silently fail - users might already exist
+    log('Demo users already exist or database not ready');
+  }
+}
 
 app.use((req, res, next) => {
   const start = Date.now();
@@ -44,6 +81,9 @@ app.use((req, res, next) => {
   if (!isConnected) {
     log("⚠️  Warning: Supabase connection test failed. Some features may not work.");
   }
+
+  // Create demo users on startup
+  await createDemoUsersIfNeeded();
 
   const server = await registerRoutes(app);
   
